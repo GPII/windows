@@ -142,8 +142,6 @@ int main (int argc, char *argv[])
 	Json::Value root, optionsRoot, output;
 	parseJson(argv[1], root);
 	bool updateSuccessful = updateRegistry(root, output);
-	cout << root;
 	cout << output;
-	system("Pause");
 	return !updateSuccessful;
 }
