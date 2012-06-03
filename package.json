@@ -3,7 +3,7 @@
   "description": "Components of the GPII personalization infrastructure for use on Microsoft's \"Windows\" ™",
   "version": "0.1",
   "author": "GPII",
-  "bugs": "http://wiki.gpii.net/index.php/Main_Page",
+  "bugs": "http://wiki.gpii.net/",
   "homepage": "http://gpii.net/",
   "dependencies": {},
   "licenses": [
