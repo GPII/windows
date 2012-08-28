@@ -18,4 +18,7 @@ var fluid = require("universal"),
 fluid.require("./gpii/node_modules/registrySettingsHandler", require);
 fluid.require("./gpii/node_modules/registryResolver", require);
 
-gpii.flowManager();
+gpii.config.makeConfigLoader({
+    nodeEnv: gpii.config.getNodeEnv(),
+    configPath: gpii.config.getConfigPath() || "../node_modules/universal/gpii/node_modules/flowManager/configs"
+});
