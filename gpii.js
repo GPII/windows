@@ -16,6 +16,9 @@ var fluid = require("universal"),
 // TODO: it would be nice to not have to hardcode this path. A different module layout
 // for the platform packages, perhaps?
 fluid.require("./gpii/node_modules/registrySettingsHandler", require);
-fluid.require("./gpii/node_modules/spiSettingsHandler", require);
+fluid.require("./gpii/node_modules/registryResolver", require);
 
-gpii.flowManager();
+gpii.config.makeConfigLoader({
+    nodeEnv: gpii.config.getNodeEnv(),
+    configPath: gpii.config.getConfigPath() || "../node_modules/universal/gpii/node_modules/flowManager/configs"
+});
