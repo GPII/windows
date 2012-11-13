@@ -20,6 +20,6 @@ fluid.require("./gpii/node_modules/registryResolver", require);
 fluid.require("./gpii/node_modules/spiSettingsHandler", require);
 
 gpii.config.makeConfigLoader({
-    nodeEnv: gpii.config.getNodeEnv(),
-    configPath: gpii.config.getConfigPath() || "../node_modules/universal/gpii/node_modules/flowManager/configs"
+    nodeEnv: gpii.config.getNodeEnv("fm.ps.sr.dr.mm.os.development"),
+    configPath: gpii.config.getConfigPath() || "../node_modules/universal/gpii/configs"
 });
