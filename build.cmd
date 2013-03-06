@@ -11,6 +11,7 @@ if not exist ..\node_modules (
 if not exist ..\node_modules\universal (
     cd ..\node_modules
     git clone git://github.com/GPII/universal.git
+    cd universal
     npm install
-    cd ..\windows
+    cd ..\..\windows
 )
