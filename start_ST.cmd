@@ -1,4 +1,4 @@
-SET NODE_ENV=deployment.statistical.mm
+SET NODE_ENV=statistical.mm.production
 
 start node.exe gpii.js %1
 start UsbUserListener\bin\UsbUserListener.exe
