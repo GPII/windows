@@ -15,3 +15,7 @@ if not exist ..\node_modules\universal (
     npm install
     cd ..\..\windows
 )
+
+cd gpii\node_modules\WindowsUtilities\pkill
+start build.cmd
+cd ..\..\..\..
