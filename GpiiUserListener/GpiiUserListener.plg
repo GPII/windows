@@ -1,0 +1,36 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: GpiiUserListener - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\David\AppData\Local\Temp\RSP9F2E.tmp" with contents
+[
+/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Fo"Release/" /Fd"Release/" /FD /c 
+"X:\GURU\GpiiUserListener\GpiiUserListener\GpiiUserListener.cpp"
+"X:\GURU\GpiiUserListener\GpiiUserListener\WinSmartCard.cpp"
+]
+Creating command line "cl.exe @C:\Users\David\AppData\Local\Temp\RSP9F2E.tmp" 
+Creating temporary file "C:\Users\David\AppData\Local\Temp\RSP9F2F.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib shell32.lib ws2_32.lib libcurl.lib winscard.lib /nologo /subsystem:windows /incremental:no /pdb:"Release/GpiiUserListener.pdb" /machine:I386 /nodefaultlib:"LIBC.lib" /out:"Release/GpiiUserListener.exe" /IGNORE:4089 
+.\Release\GpiiUserListener.obj
+.\Release\WinSmartCard.obj
+]
+Creating command line "link.exe @C:\Users\David\AppData\Local\Temp\RSP9F2F.tmp"
+<h3>Output Window</h3>
+Compiling...
+GpiiUserListener.cpp
+WinSmartCard.cpp
+Generating Code...
+Linking...
+
+
+
+<h3>Results</h3>
+GpiiUserListener.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
