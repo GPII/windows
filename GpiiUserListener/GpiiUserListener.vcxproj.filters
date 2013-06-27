@@ -26,5 +26,39 @@
     <ClInclude Include="WinSmartCard.H">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="libcurl\curl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libcurl\curlbuild.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libcurl\curlrules.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libcurl\curlver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libcurl\easy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libcurl\multi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libcurl\stdcheaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libcurl\libcurl.dll" />
+    <None Include="libcurl\libcurld.dll" />
+    <None Include="libcurl\COPYING" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libcurl\libcurl_imp.lib" />
+    <Library Include="libcurl\libcurld_imp.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="libcurl\READMEt.txt" />
+    <Text Include="LICENSE.txt" />
   </ItemGroup>
 </Project>

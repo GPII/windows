@@ -9,7 +9,7 @@
 // Files needed for this project:
 //
 //		Project Files:
-//			NfcUserTest.cpp
+//			NfcUserTest.cpp		//FIXME appears to missing from the source
 //			WinSmartCard.cpp
 //			WinSmartCard.H
 //
@@ -19,16 +19,21 @@
 //			curlrules.h
 //			curlver.h
 //			easy.h
-//			libcurldll.lib
+//			libcurl_imp.lib
+//			libcurld_imp.lib
 //			multi.h
 //
 //		WINSCARD Libary Files:
 //			WINSCARD.H
 //			Winscard.lib
 //
-//		Optinal MSVC Files:
+//		Optional MSVC Files:
 //			GpiiUserListener.dsp
 //			GpiiUserListener.dsw
+//
+// Output files:
+//		GpiiUserListener.exe
+//		libcurl.dll
 //
 // Versions:
 //
@@ -60,6 +65,8 @@
 //           Changed authentication to key b
 //    2012.05.12 Version 1.06
 //           Changed so new card will automatically log out old user
+//    2013.06.27 version 1.12
+//			 Rebuilt from 7.25 curl source in VS2012 and reorganised curl files into own folder
 ///////////////////////////////////////////////////////////////////////////////
 #include <windows.h>
 #include <stdio.h>
@@ -71,7 +78,7 @@
 // Let the compiler know we are including the CURL library
 //---------------------------------------------------------
 #define BUILDING_LIBCURL
-#include "curl.h"
+#include "libcurl\curl.h"
 
 //---------------------------------------------------------
 // Flow Manager Constants
@@ -84,7 +91,7 @@ const char FLOW_LOGOUT[] = "logout";
 //---------------------------------------------------------
 // Global Constants
 //---------------------------------------------------------
-const char   MY_TITLE[]  = "GpiiUserListener 1.11";
+const char   MY_TITLE[]  = "GpiiUserListener 1.12";
 const char   MY_CLASS[]  = "gpiiWindowClass";
 const int    MY_SIZE_X   = 450;
 const int    MY_SIZE_Y   = 100;

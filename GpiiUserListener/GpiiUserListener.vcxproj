@@ -57,7 +57,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;libcurld_imp.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;libcurl\libcurld_imp.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -75,7 +75,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ws2_32.lib;libcurl.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;libcurl\libcurl_imp.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -83,7 +83,27 @@
     <ClCompile Include="WinSmartCard.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="libcurl\curl.h" />
+    <ClInclude Include="libcurl\curlbuild.h" />
+    <ClInclude Include="libcurl\curlrules.h" />
+    <ClInclude Include="libcurl\curlver.h" />
+    <ClInclude Include="libcurl\easy.h" />
+    <ClInclude Include="libcurl\multi.h" />
+    <ClInclude Include="libcurl\stdcheaders.h" />
     <ClInclude Include="WinSmartCard.H" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libcurl\COPYING" />
+    <None Include="libcurl\libcurl.dll" />
+    <None Include="libcurl\libcurld.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libcurl\libcurld_imp.lib" />
+    <Library Include="libcurl\libcurl_imp.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="libcurl\READMEt.txt" />
+    <Text Include="LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
