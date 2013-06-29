@@ -315,15 +315,13 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
 		char szRequest[MAX_BUFFER];
 		wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUser,szAction);
 
-		CURL *curl;
-		//CURLcode responseCode;
-		curl = curl_easy_init();
+		;
+		CURL *curl = curl_easy_init();
 		if (curl)
 		{
-			curl_easy_setopt(curl, CURLOPT_URL, szRequest);
-			curl_easy_perform(curl);
+			CURLcode responseCode = curl_easy_setopt(curl, CURLOPT_URL, szRequest);
 			// TODO Check the response code and handle errors.
-			//responseCode = curl_easy_perform(curl);
+			responseCode = curl_easy_perform(curl);
 			curl_easy_cleanup(curl);
 			return 1;
 		}
