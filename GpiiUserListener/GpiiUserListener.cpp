@@ -83,7 +83,7 @@
 // Flow Manager Constants
 //---------------------------------------------------------
 const char GPII_USER_FILE[]   = ".gpii-user-token.txt";
-const char FLOW_MANAGER_URL[] = "http://localhost:8081/user/";
+const char FLOW_MANAGER_URL[] = "http://localhost:8081/user";
 const char FLOW_LOGIN[] = "login";
 const char FLOW_LOGOUT[] = "logout";
 
@@ -313,7 +313,7 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
 	if (lstrlen(szUser) > 0)
 	{
 		char szRequest[MAX_BUFFER];
-		wsprintf(szRequest,"%s%s/%s",FLOW_MANAGER_URL,szUser,szAction);
+		wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUser,szAction);
 
 		CURL *curl;
 		//CURLcode responseCode;
