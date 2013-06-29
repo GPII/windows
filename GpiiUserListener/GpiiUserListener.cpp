@@ -274,7 +274,9 @@ BOOL InitInstance(HINSTANCE hInstance)
 	if (!hWnd) return FALSE;
 
 	MyTrayIcon(hWnd);
+#if !defined(_DEBUG)
 	RegisterHotKey(hWnd,MY_HOTKEY,0,VK_F11);
+#endif //_DEBUG
 
 	if (WinSmartCardInitialize(hWnd,m_szReader) == FALSE)
 	{
@@ -315,7 +317,6 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
 		char szRequest[MAX_BUFFER];
 		wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUser,szAction);
 
-		;
 		CURL *curl = curl_easy_init();
 		if (curl)
 		{
@@ -501,6 +502,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 
+#if !defined(_DEBUG)
+
 		//-----------------------------------------------------------
 		// Hotkey Logout
 		//-----------------------------------------------------------
@@ -514,6 +517,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				m_nLogin = 0;
 			}
 			break;
+#endif // _DEBUG
 
 		//-----------------------------------------------------------
 		// Button Click on Tray Icon
