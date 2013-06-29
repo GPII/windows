@@ -82,6 +82,8 @@
 //---------------------------------------------------------
 // Let the compiler know we are including the CURL library
 //---------------------------------------------------------
+
+#define CURL_STATICLIB TRUE		// use staic linked version of libcurl
 #include "libcurl\curl.h"
 
 //---------------------------------------------------------
@@ -325,7 +327,7 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
 		CURL *curl = curl_easy_init();
 		if (curl)
 		{
-#if defined(_DEBUG) && (USE_FIDDLER)
+#if defined(USE_FIDDLER)
 			(void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP
 #endif
 			(void) curl_easy_setopt(curl, CURLOPT_URL, szRequest);

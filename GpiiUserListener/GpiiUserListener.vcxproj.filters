@@ -49,16 +49,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="libcurl\libcurl.dll" />
-    <None Include="libcurl\libcurld.dll" />
     <None Include="libcurl\COPYING" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="libcurl\libcurl_imp.lib" />
-    <Library Include="libcurl\libcurld_imp.lib" />
+    <Library Include="libcurl\libcurl_a_debug.lib" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="libcurl\READMEt.txt" />
     <Text Include="LICENSE.txt" />
+    <Text Include="libcurl\README.txt" />
   </ItemGroup>
 </Project>
