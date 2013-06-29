@@ -74,6 +74,11 @@
 #include <shellapi.h>
 #include "WinSmartCard.h"
 
+// Set TRUE to use fiddler2.com tp dubug http
+#if defined(_DEBUG)
+  #define USE_FIDDLER	TRUE
+#endif
+
 //---------------------------------------------------------
 // Let the compiler know we are including the CURL library
 //---------------------------------------------------------
@@ -320,9 +325,12 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
 		CURL *curl = curl_easy_init();
 		if (curl)
 		{
-			CURLcode responseCode = curl_easy_setopt(curl, CURLOPT_URL, szRequest);
+#if defined(_DEBUG) && (USE_FIDDLER)
+			(void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP
+#endif
+			(void) curl_easy_setopt(curl, CURLOPT_URL, szRequest);
 			// TODO Check the response code and handle errors.
-			responseCode = curl_easy_perform(curl);
+			CURLcode responseCode = curl_easy_perform(curl); // expect CURLE_WRITE_ERROR as no buffer given for incoming data
 			curl_easy_cleanup(curl);
 			return 1;
 		}
