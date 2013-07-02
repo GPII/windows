@@ -8,9 +8,11 @@ Known to work with Advanced Card Systems RFID readers including ACR122.
 
 ## Use
 
-1. Plug in the USB card reader
+1. Plug in the USB NFC card reader if required
 2. Run the GpiiUserListener.exe. A tray icon is created and can be right clicked on to show a menu. Use the menu item "Show Window" to view status.
-3. Place a tag with the user id encoded onto the reader. Once the ne status has been recognised the tag can be removed.
+3. Either
+    1. Place a tag with the user id encoded onto the reader. Once the ne status has been recognised the tag can be removed.
+    2. or plug in/out a USB key with user id on.
 
 ## Build
 
