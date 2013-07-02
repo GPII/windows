@@ -1,0 +1,15 @@
+Contains platform-specific components of the GPII architecture for Windows. See http://gpii.net/ for overall details of the GPII
+project. After checkout out using git, this project will require node.js and npm to be installed - please consult
+http://wiki.gpii.net/index.php/Core_(real-time)_Framework_v0.1_-_Installation_Instructions for installation instructions.
+
+After this project is checked out and its prerequisites installed, a run of the Windows batch file "build.cmd" will check out 
+GPII's universal project https://github.com/GPII/universal in a subdirectory. After this process has concluded without error, 
+you can run the GPII personalisation system on Windows by executing start.cmd.
+
+
+
+Note that tests and function involving the High Contrast setting will fail on all current versions of Windows (including 
+Windows 7 SP1 and Windows 8 SP2) unless the following hotfix from Microsoft is applied: http://support.microsoft.com/kb/2516889
+
+See http://issues.gpii.net/browse/GPII-49 for more details of this issue. 
+
