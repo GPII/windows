@@ -113,7 +113,7 @@ const int    MY_SIZE_Y   = 100;
 // Global Variables:
 //---------------------------------------------------------
 const int MAX_BUFFER = 256;
-static char m_szStatus[MAX_BUFFER];
+static char m_szStatus[MAX_BUFFER];		// FIXME potenial buffer overruns as resticted length string functions not used.
 static char m_szUserID[MAX_BUFFER];
 static char m_szReader[MAX_BUFFER];
 static char m_cUserDrive = 0;
@@ -127,7 +127,7 @@ BOOL                MyTrayIcon(HWND hWnd);
 BOOL                MyPopupMenu(HWND hWnd);
 BOOL				InitInstance(HINSTANCE);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-int                 MakeCurlRequest(char szUser,char szAction);
+int                 MakeCurlRequest(const char * szUser,const char * szAction);
 int                 UsbGetDriveLetter(LPARAM lParam);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	//-----------------------------------------------------
 	// Initialize global variables
 	//-----------------------------------------------------
-	wsprintf(m_szUserID,"%s","");
+	wsprintf(m_szUserID,"%s",L"");
 	wsprintf(m_szReader,"%s",lpCmdLine);
 	wsprintf(m_szStatus,"%s","Listening...");
 
@@ -318,18 +318,20 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
 {
 	if (lstrlen(szUser) > 0)
 	{
-		char szRequest[MAX_BUFFER];
-		wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUser,szAction);
-
 		CURL *curl = curl_easy_init();
 		if (curl)
 		{
+			char szRequest[MAX_BUFFER];
+			char * szUserEscaped = curl_easy_escape(curl, szUser, 0);
+			wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUserEscaped,szAction);
+
 #if defined(USE_FIDDLER)
 			(void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP
 #endif
 			(void) curl_easy_setopt(curl, CURLOPT_URL, szRequest);
 			// TODO Check the response code and handle errors.
 			CURLcode responseCode = curl_easy_perform(curl); // expect CURLE_WRITE_ERROR as no buffer given for incoming data
+			curl_free(szUserEscaped);
 			curl_easy_cleanup(curl);
 			return 1;
 		}
@@ -353,8 +355,17 @@ int UsbDriveGetUser(const char cDrive,char* szUser)
 	FILE* hFile = fopen(szPath,"r");
 	if (hFile != NULL)
 	{
-		fgets(szUser,MAX_BUFFER,hFile);
+		char szRawUser[MAX_BUFFER];
+		(void)fgets(szRawUser,MAX_BUFFER,hFile);
 		fclose(hFile);
+		
+		// skip UTF8 BOM if at start of name. Notepad puts this in at start of file
+		const char *szSrc = &szRawUser[0];
+		if (strncmp(szRawUser, "﻿", 3) == 0) 
+		{
+			szSrc = &szRawUser[3]; // skip the BOM
+		}
+		strcpy(szUser, szSrc);
 	}
 	else
 	{
@@ -431,7 +442,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				MakeCurlRequest(m_szUserID,FLOW_LOGIN);
 				m_nLogin = SMART_CARD_ARRIVE;
 			}
-			else
+				else
 			{
 				char szThisUser[MAX_BUFFER];
 				WinSmartCardGetUser(szThisUser,MAX_BUFFER);
@@ -568,9 +579,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				char szReader[MAX_BUFFER];
 				char sReading[MAX_BUFFER];
 				char sCurrent[MAX_BUFFER];
+				wchar_t wsStatus[MAX_BUFFER];
+				wchar_t wsCurrent[MAX_BUFFER];
 				WinSmartCardGetReader(szReader,MAX_BUFFER);
 				rt.top = rt.bottom*10/100;
-				DrawText(hdc, m_szStatus, strlen(m_szStatus), &rt, DT_CENTER);
+				int r = MultiByteToWideChar(CP_UTF8, 0, m_szStatus, -1, wsStatus, _countof(wsStatus));
+				DrawTextW(hdc, wsStatus, wcslen(wsStatus), &rt, DT_CENTER);
 				rt.top = rt.bottom*40/100;
 				wsprintf(sReading,"%s %s %s",szReader,"READER",
 						 WinSmartCardPolling() ? "ONLINE": "OFFLINE");
@@ -578,8 +592,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				rt.top = rt.bottom*70/100;
 				wsprintf(sCurrent,"%s %s","CURRENT USER:",
 						 lstrlen(m_szUserID) ? m_szUserID : "NONE");
-				DrawText(hdc, sCurrent, strlen(sCurrent), &rt, DT_CENTER);
-
+				r = MultiByteToWideChar(CP_UTF8, 0, sCurrent, -1, wsCurrent, _countof(wsCurrent));
+				DrawTextW(hdc, wsCurrent, wcslen(wsCurrent), &rt, DT_CENTER);
 
 				EndPaint(hWnd, &ps);
 			}
