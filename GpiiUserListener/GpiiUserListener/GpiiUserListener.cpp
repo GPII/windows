@@ -97,7 +97,7 @@ const char FLOW_LOGOUT[] = "logout";
 //---------------------------------------------------------
 // Global Constants
 //---------------------------------------------------------
-const char   MY_TITLE[]  = "GpiiUserListener 1.12";
+const char   MY_TITLE[]  = "GpiiUserListener 1.2";
 const char   MY_CLASS[]  = "gpiiWindowClass";
 const int    MY_SIZE_X   = 450;
 const int    MY_SIZE_Y   = 100;
