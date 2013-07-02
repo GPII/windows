@@ -1,6 +1,6 @@
 # GPII User Listener
 
-Windows executable that listens out for NFC RFID tags and raises events to trigger GPII user log on/off. It listens out for RFID tag events and reads the encoded tag data. The listener tracks the login state and generate loginin and logout events on the GPII RESTful API (e.g http://localhost:8081/user/bert/login).
+Windows executable that listens out for NFC RFID tags and raises events to trigger GPII user log on/off. It listens out for RFID tag events and reads the encoded tag data. The listener tracks the login state and generate login and logout events on the GPII RESTful API (e.g http://localhost:8081/user/bert/login).
 
 See the [NFC page on the GPII wiki](http://wiki.gpii.net/index.php/Using_the_NFC_Listener) for details of NFC listenrs and how to encode RFID suitable tags.
 
@@ -10,7 +10,7 @@ Known to work with Advanced Card Systems RFID readers including ACR122.
 
 1. Plug in the USB card reader
 2. Run the GpiiUserListener.exe. A tray icon is created and can be right clicked on to show a menu. Use the menu item "Show Window" to view status.
-3. Place a tag with the user id encoded onto the reader. 
+3. Place a tag with the user id encoded onto the reader. Once the ne status has been recognised the tag can be removed.
 
 ## Build
 
