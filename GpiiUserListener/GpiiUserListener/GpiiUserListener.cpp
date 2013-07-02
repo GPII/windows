@@ -281,9 +281,6 @@ BOOL InitInstance(HINSTANCE hInstance)
 	if (!hWnd) return FALSE;
 
 	MyTrayIcon(hWnd);
-#if !defined(_DEBUG)
-	RegisterHotKey(hWnd,MY_HOTKEY,0,VK_F11);
-#endif //_DEBUG
 
 	if (WinSmartCardInitialize(hWnd,m_szReader) == FALSE)
 	{
@@ -412,7 +409,6 @@ int UsbGetDriveLetter(LPARAM lParam)
 //  WM_PAINT	- Paint the main window
 //  WM_DESTROY	- post a quit message and return
 //  WM_MYTRAY	- a mouse command on the tray icon
-//  WM_HOTKEY	- the user defined hotkey was pressed
 //  WM_DEVICECHANGE - a change to a device on this pc
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -512,22 +508,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 
-#if !defined(_DEBUG)
-
-		//-----------------------------------------------------------
-		// Hotkey Logout
-		//-----------------------------------------------------------
-		case WM_HOTKEY:
-			if (wParam == MY_HOTKEY && m_nLogin)
-			{
-				wsprintf(m_szStatus,"%s","F11 LOGOUT");
-				MakeCurlRequest(m_szUserID,FLOW_LOGOUT);
-				wsprintf(m_szUserID,"%s","");
-				InvalidateRect(hWnd,NULL,TRUE);
-				m_nLogin = 0;
-			}
-			break;
-#endif // _DEBUG
 
 		//-----------------------------------------------------------
 		// Button Click on Tray Icon
