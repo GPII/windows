@@ -24,8 +24,7 @@ The static version of libcurl is used to create the http GET actions and while f
 1. Download curl source from http://curl.haxx.se/libcurl/
 2. Open a MSVC command shell and cd to the libcurl/winbuild folder
 3. Build both static debug and release libraries using a command line of the form:
-    nmake /f Makefile.vc mode=static VC=11 ENABLE_IPV6=yes USE_SSPI=no ENABLE_IDN=no DEBUG=yes
-    (IPv6 is not required but the build fails with IPV6=no in 7.25
+    nmake /f Makefile.vc mode=static VC=11 ENABLE_IPV6=no ENABLE_SSPI=no ENABLE_IDN=no DEBUG=yes
 4. refresh the .h & .lib files in this project's libcurl folder
 
 ## Testing 
