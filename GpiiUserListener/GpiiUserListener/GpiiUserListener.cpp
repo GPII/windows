@@ -506,6 +506,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					m_nLogin = 0;
 				}
 			}
+			return TRUE;
 			break;
 
 
