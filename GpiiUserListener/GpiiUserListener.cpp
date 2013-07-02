@@ -293,10 +293,10 @@ BOOL InitInstance(HINSTANCE hInstance)
 			wsprintf(m_szStatus,"%s","NO CARD READERS FOUND");
 	}
 
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	ShowWindow(hWnd, SW_SHOW);
 	WinSmartCardShowError();
-	#endif
+#endif
 
 	InvalidateRect(hWnd,NULL,TRUE);
 	SetTimer(hWnd,MY_TIMER,2000,NULL);
@@ -468,10 +468,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Smart Card Removed
 		//-----------------------------------------------------------
 		case SMART_CARD_REMOVE:
-			#ifdef _DEBUG
+#ifdef _DEBUG
 			wsprintf(m_szStatus,"%s","CARD REMOVED");
 			InvalidateRect(hWnd,NULL,TRUE);
-			#endif
+#endif
 			break;
 			
 		//-----------------------------------------------------------
@@ -623,9 +623,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		//-----------------------------------------------------------
 		case WM_CLOSE:
 			ShowWindow(hWnd,SW_HIDE);
-			#ifdef _DEBUG
+#ifdef _DEBUG
 			DestroyWindow(hWnd);
-			#endif
+#endif
 			break;
 
 		//-----------------------------------------------------------
