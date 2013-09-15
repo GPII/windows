@@ -1,0 +1,5 @@
+{
+    "includes": [
+        "../../../../../node_modules/universal/gpii/configs/fm.ps.sr.dr.mm.os.development.json"
+    ]
+}
