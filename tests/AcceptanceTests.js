@@ -17,7 +17,7 @@ https://github.com/gpii/universal/LICENSE.txt
 var fluid = require("universal"),
     path = require("path"),
     gpii = fluid.registerNamespace("gpii");
-    
+
 //fluid.registerNamespace("fluid.tests");
 fluid.require("../gpii/node_modules/registrySettingsHandler", require);
 fluid.require("../gpii/node_modules/registryResolver", require);
@@ -38,7 +38,7 @@ var testDefs = [
         token: "os_win7",
         settingsHandlers: {
             "gpii.windows.spiSettingsHandler": {
-                "data": [ 
+                "data": [
                     {
                         "settings": {
                             "MouseTrails": {
@@ -78,7 +78,7 @@ var testDefs = [
            },
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
-                    "settings": { 
+                    "settings": {
                         "Invert": {
                             "dataType": "REG_DWORD",
                             "value": 1
@@ -183,7 +183,7 @@ var testDefs = [
         token: "os_common",
         settingsHandlers: {
             "gpii.windows.spiSettingsHandler": {
-                "data": [ 
+                "data": [
                     {
                         "settings": {
                             "MouseTrails": {
@@ -223,7 +223,7 @@ var testDefs = [
            },
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
-                    "settings": { 
+                    "settings": {
                         "Invert": {
                             "dataType": "REG_DWORD",
                             "value": 1
@@ -437,7 +437,7 @@ var testDefs = [
         token: "screenreader_nvda",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
-                "data": [ 
+                "data": [
                     {
                         "settings": {
                             "speech.espeak.rate": "17.20430107526882",
@@ -477,7 +477,7 @@ var testDefs = [
         token: "screenreader_common",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
-                "data": [ 
+                "data": [
                     {
                         "settings": {
                             "speech.espeak.rate": "17.20430107526882",
@@ -517,7 +517,7 @@ var testDefs = [
         token: "screenreader_orca",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
-                "data": [ 
+                "data": [
                     {
                         "settings": {
                             "speech.symbolLevel": "300",
@@ -548,4 +548,4 @@ var testDefs = [
     }
 ];
 
-gpii.acceptanceTesting.buildTests(testDefs, gpiiConfig);
+gpii.acceptanceTesting.runTests(testDefs, gpiiConfig);
