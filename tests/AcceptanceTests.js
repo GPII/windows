@@ -472,7 +472,7 @@ var testDefs = [
             }
         ]
     }, {
-        name: "Testing screenreader_nvda using Flat matchmaker",
+        name: "Testing screenreader_common using Flat matchmaker",
         gpiiConfig: gpiiConfig,
         token: "screenreader_common",
         settingsHandlers: {
@@ -483,8 +483,6 @@ var testDefs = [
                             "speech.espeak.rate": "17.20430107526882",
                             "speech.espeak.rateBoost": true,
                             "virtualBuffers.autoSayAllOnPageLoad": false,
-                            "speech.synth": "espeak",
-                            "speech.outputDevice": "Microsoft Sound Mapper",
                             "speech.symbolLevel": "300",
                             "speech.espeak.voice": "en\\en-wi",
                             "reviewCursor.followFocus": false,
@@ -512,7 +510,7 @@ var testDefs = [
             }
         ]
     }, {
-        name: "Testing screenreader_nvda using Flat matchmaker",
+        name: "Testing screenreader_orca using Flat matchmaker",
         gpiiConfig: gpiiConfig,
         token: "screenreader_orca",
         settingsHandlers: {
