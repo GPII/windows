@@ -20,6 +20,6 @@ fluid.require("./gpii/node_modules/registryResolver", require);
 fluid.require("./gpii/node_modules/spiSettingsHandler", require);
 
 kettle.config.makeConfigLoader({
-    nodeEnv: kettle.config.getNodeEnv("fm.ps.sr.dr.mm.os.development"),
+    nodeEnv: kettle.config.getNodeEnv("fm.ps.sr.dr.mm.os.lms.development"),
     configPath: kettle.config.getConfigPath() || "../node_modules/universal/gpii/configs"
 });
