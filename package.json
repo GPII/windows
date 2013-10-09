@@ -1,7 +1,7 @@
 {
   "name": "gpii-windows",
   "description": "Components of the GPII personalization infrastructure for use on Microsoft's \"Windows\" ™",
-  "version": "0.1",
+  "version": "0.2.0",
   "author": "GPII",
   "bugs": "http://wiki.gpii.net/index.php/Main_Page",
   "homepage": "http://gpii.net/",
@@ -14,6 +14,6 @@
   ],
   "keywords": ["gpii", "accessibility", "settings", "fluid", "IoC", "Inversion of Control", "configuration", "evented"],
   "repository": "git://github.com/GPII/windows.git",
-  "main": "./gpii/index.js",
+  "main": "./gpii.js",
   "engines": { "node" : ">=0.1.9" }
 }
