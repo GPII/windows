@@ -441,6 +441,8 @@ var testDefs = [
                     {
                         "settings": {
                             "speech.espeak.rate": "17.20430107526882",
+                            "speech.espeak.volume": "80",
+                            "speech.espeak.pitch": "60",
                             "speech.espeak.rateBoost": true,
                             "virtualBuffers.autoSayAllOnPageLoad": false,
                             "speech.synth": "espeak",
@@ -481,6 +483,8 @@ var testDefs = [
                     {
                         "settings": {
                             "speech.espeak.rate": "17.20430107526882",
+                            "speech.espeak.volume": "75",
+                            "speech.espeak.pitch": "15",
                             "speech.espeak.rateBoost": true,
                             "virtualBuffers.autoSayAllOnPageLoad": false,
                             "speech.symbolLevel": "300",
