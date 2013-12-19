@@ -327,25 +327,6 @@ var testDefs = [
         gpiiConfig: gpiiConfig,
         token: "os_gnome",
         settingsHandlers: {
-            "gpii.windows.spiSettingsHandler": {
-                "data": [ {
-                    "settings": {
-                        "CaptionFontHeight": {
-                            "path": "pvParam.lfCaptionFont.lfHeight",
-                            "value": -9
-                        }
-                    },
-                    "options": {
-                        "getAction": "SPI_GETNONCLIENTMETRICS",
-                        "setAction": "SPI_SETNONCLIENTMETRICS",
-                        "uiParam": "struct_size",
-                        "pvParam": {
-                            "type": "struct",
-                            "name": "NONCLIENTMETRICS"
-                        }
-                    }
-                } ]
-            },
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
                     "settings": {
