@@ -2,7 +2,7 @@
 //
 // WinSmartCard.cpp
 //
-// This file simplifies the Winscard inteface by allowing the calling
+// This file simplifies the Winscard interface by allowing the calling
 // function to initialize a card read. This file will then start a new
 // thread to test for card connections and disconnections. Each event
 // will send a SMART_CARD_ARRIVE and SMART_CARD_REMOVE message to the

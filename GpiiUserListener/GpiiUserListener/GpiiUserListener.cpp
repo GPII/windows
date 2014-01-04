@@ -33,7 +33,6 @@
 //
 // Output files:
 //		GpiiUserListener.exe
-//		libcurl.dll
 //
 // Versions:
 //
@@ -74,7 +73,7 @@
 #include <shellapi.h>
 #include "WinSmartCard.h"
 
-// Set TRUE to use fiddler2.com tp dubug http
+// Set TRUE to use fiddler2.com to dubug http
 #if defined(_DEBUG)
   #define USE_FIDDLER	TRUE
 #endif
@@ -83,7 +82,7 @@
 // Let the compiler know we are including the CURL library
 //---------------------------------------------------------
 
-#define CURL_STATICLIB TRUE		// use staic linked version of libcurl
+#define CURL_STATICLIB TRUE		// use static linked version of libcurl
 #include "libcurl\curl.h"
 
 //---------------------------------------------------------
@@ -120,7 +119,7 @@ static char m_cUserDrive = 0;
 static int  m_nLogin = 0;
 
 //---------------------------------------------------------
-// Lcal Functions:
+// Local Functions:
 //---------------------------------------------------------
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL                MyTrayIcon(HWND hWnd);
