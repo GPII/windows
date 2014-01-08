@@ -456,7 +456,7 @@ var testDefs = [
                             "speech.espeak.sayCapForCapitals": true
                         },
                         "options": {
-                            "path": "${{environment}.APPDATA}\\nvda\\nvda.ini",
+                            "path": path.resolve(process.env.APPDATA, "nvda/nvda.ini"),
                             "allowNumberSignComments": true,
                             "allowSubSections": true
                         }
@@ -494,7 +494,7 @@ var testDefs = [
                             "speech.espeak.sayCapForCapitals": true
                         },
                         "options": {
-                            "path": "${{environment}.APPDATA}\\nvda\\nvda.ini",
+                            "path": path.resolve(process.env.APPDATA, "nvda/nvda.ini"),
                             "allowNumberSignComments": true,
                             "allowSubSections": true
                         }
@@ -528,7 +528,7 @@ var testDefs = [
                             "virtualBuffers.autoSayAllOnPageLoad": false
                         },
                         "options": {
-                            "path": "${{environment}.APPDATA}\\nvda\\nvda.ini",
+                            "path": path.resolve(process.env.APPDATA, "nvda/nvda.ini"),
                             "allowNumberSignComments": true,
                             "allowSubSections": true
                         }
