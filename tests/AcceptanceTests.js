@@ -16,14 +16,14 @@ https://github.com/gpii/universal/LICENSE.txt
 "use strict";
 var fluid = require("universal"),
     path = require("path"),
+    kettle = fluid.registerNamespace("kettle"),
     gpii = fluid.registerNamespace("gpii");
 
-//fluid.registerNamespace("fluid.tests");
 fluid.require("../gpii/node_modules/registrySettingsHandler", require);
 fluid.require("../gpii/node_modules/registryResolver", require);
 fluid.require("../gpii/node_modules/spiSettingsHandler", require);
 
-require("../../node_modules/universal/tests/AcceptanceTests.js", require);
+fluid.require("universal/tests/AcceptanceTests", require);
 
 var configPath = path.resolve(__dirname, "./acceptanceTests/setup1/configs");
 var gpiiConfig = {
@@ -34,7 +34,7 @@ var gpiiConfig = {
 var testDefs = [
     {
         name: "Testing os_win7 using Flat matchmaker",
-        gpiiConfig: gpiiConfig,
+        config: gpiiConfig,
         token: "os_win7",
         settingsHandlers: {
             "gpii.windows.spiSettingsHandler": {
@@ -179,7 +179,7 @@ var testDefs = [
         ]
     }, {
         name: "Testing os_common using Flat matchmaker",
-        gpiiConfig: gpiiConfig,
+        config: gpiiConfig,
         token: "os_common",
         settingsHandlers: {
             "gpii.windows.spiSettingsHandler": {
@@ -324,7 +324,7 @@ var testDefs = [
         ]
     }, {
         name: "Testing os_gnome using Flat matchmaker",
-        gpiiConfig: gpiiConfig,
+        config: gpiiConfig,
         token: "os_gnome",
         settingsHandlers: {
             "gpii.windows.registrySettingsHandler": {
@@ -414,7 +414,7 @@ var testDefs = [
         ]
     }, {
         name: "Testing screenreader_nvda using Flat matchmaker",
-        gpiiConfig:  gpiiConfig,
+        config:  gpiiConfig,
         token: "screenreader_nvda",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
@@ -439,7 +439,8 @@ var testDefs = [
                             "speech.espeak.sayCapForCapitals": true
                         },
                         "options": {
-                            "path": "${{environment}.APPDATA}\\nvda\\nvda.ini",
+                            // This needs to be addressed with GPII-497.
+                            "path": path.resolve(process.env.APPDATA, "nvda/nvda.ini"),
                             "allowNumberSignComments": true,
                             "allowSubSections": true
                         }
@@ -456,7 +457,7 @@ var testDefs = [
         ]
     }, {
         name: "Testing screenreader_common using Flat matchmaker",
-        gpiiConfig: gpiiConfig,
+        config: gpiiConfig,
         token: "screenreader_common",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
@@ -479,7 +480,8 @@ var testDefs = [
                             "speech.espeak.sayCapForCapitals": true
                         },
                         "options": {
-                            "path": "${{environment}.APPDATA}\\nvda\\nvda.ini",
+                            // This needs to be addressed with GPII-497.
+                            "path": path.resolve(process.env.APPDATA, "nvda/nvda.ini"),
                             "allowNumberSignComments": true,
                             "allowSubSections": true
                         }
@@ -496,7 +498,7 @@ var testDefs = [
         ]
     }, {
         name: "Testing screenreader_orca using Flat matchmaker",
-        gpiiConfig: gpiiConfig,
+        config: gpiiConfig,
         token: "screenreader_orca",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
@@ -513,7 +515,8 @@ var testDefs = [
                             "virtualBuffers.autoSayAllOnPageLoad": false
                         },
                         "options": {
-                            "path": "${{environment}.APPDATA}\\nvda\\nvda.ini",
+                            // This needs to be addressed with GPII-497.
+                            "path": path.resolve(process.env.APPDATA, "nvda/nvda.ini"),
                             "allowNumberSignComments": true,
                             "allowSubSections": true
                         }
@@ -531,4 +534,5 @@ var testDefs = [
     }
 ];
 
-gpii.acceptanceTesting.runTests(testDefs, gpiiConfig);
+testDefs = gpii.acceptanceTesting.buildTests(testDefs);
+module.exports = kettle.tests.bootstrap(testDefs);
