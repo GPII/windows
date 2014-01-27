@@ -11,7 +11,7 @@ You may obtain a copy of the License at
 https://github.com/gpii/universal/LICENSE.txt
 */
 
-/*global require*/
+/*global require,process*/
 
 "use strict";
 var fluid = require("universal"),
@@ -23,7 +23,6 @@ fluid.require("./AcceptanceTests_incl", require);
 var testDefs = [
     {
         name: "Testing screenreader_nvda using Flat matchmaker",
-        // config:  gpiiConfig,
         token: "screenreader_nvda",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
@@ -66,7 +65,6 @@ var testDefs = [
         ]
     }, {
         name: "Testing screenreader_common using Flat matchmaker",
-        // config: gpiiConfig,
         token: "screenreader_common",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
@@ -107,7 +105,6 @@ var testDefs = [
         ]
     }, {
         name: "Testing screenreader_orca using Flat matchmaker",
-        // config: gpiiConfig,
         token: "screenreader_orca",
         settingsHandlers: {
             "gpii.settingsHandlers.INISettingsHandler": {
