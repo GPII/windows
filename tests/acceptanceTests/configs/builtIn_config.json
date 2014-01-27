@@ -1,0 +1,21 @@
+{
+    "typeName": "acceptanceTests.builtIn",
+    "options": {
+        "components": {
+            "server": {
+                "options": {
+                    "components": {
+                        "deviceReporter": {
+                            "options": {
+                                "installedSolutionsUrl": "file://%root/../../../testData/deviceReporter/acceptanceTests/builtIn.json"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "includes": [
+        "../../../../node_modules/universal/tests/acceptanceTests/localInstall.json"
+    ]
+}

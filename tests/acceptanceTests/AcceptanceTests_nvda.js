@@ -18,7 +18,7 @@ var fluid = require("universal"),
     path = require("path"),
     gpii = fluid.registerNamespace("gpii");
 
-fluid.require("./AcceptanceTests_incl", require);
+fluid.require("./AcceptanceTests_include", require);
 
 var testDefs = [
     {
