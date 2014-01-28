@@ -16,6 +16,6 @@
         }
     },
     "includes": [
-        "../../../../node_modules/universal/tests/acceptanceTests/localInstall.json"
+        "../../../../node_modules/universal/tests/acceptanceTests/configs/localInstall.json"
     ]
 }
