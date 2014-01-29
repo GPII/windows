@@ -7,7 +7,7 @@
                     "components": {
                         "deviceReporter": {
                             "options": {
-                                "installedSolutionsUrl": "file://%root/../../../testData/deviceReporter/acceptanceTests/builtIn.json"
+                                "installedSolutionsUrl": "file://%root/../../../testData/deviceReporter/acceptanceTests/win7_builtIn.json"
                             }
                         }
                     }
