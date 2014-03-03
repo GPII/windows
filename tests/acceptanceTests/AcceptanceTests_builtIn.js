@@ -11,11 +11,10 @@ You may obtain a copy of the License at
 https://github.com/gpii/universal/LICENSE.txt
 */
 
-/*global require,process*/
+/*global require*/
 
 "use strict";
 var fluid = require("universal"),
-    path = require("path"),
     gpii = fluid.registerNamespace("gpii");
 
 fluid.require("./AcceptanceTests_include", require);
