@@ -67,93 +67,59 @@ var testDefs = [
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
                     "settings": {
-                        "Invert": {
-                            "dataType": "REG_DWORD",
-                            "value": 1
-                        },
-                        "Magnification": {
-                            "dataType": "REG_DWORD",
-                            "value": 150
-                        },
-                        "MagnificationMode": {
-                            "dataType": "REG_DWORD",
-                            "value": 3
-                        },
-                        "FollowFocus": {
-                            "value": 0,
-                            "dataType": "REG_DWORD"
-                        },
-                        "FollowCaret": {
-                            "value": 1,
-                            "dataType": "REG_DWORD"
-                        },
-                        "FollowMouse": {
-                            "value": 1,
-                            "dataType": "REG_DWORD"
-                        }
+                        "Invert": 1,
+                        "Magnification": 150,
+                        "MagnificationMode": 3,
+                        "FollowFocus": 0,
+                        "FollowCaret": 1,
+                        "FollowMouse": 1
                     },
                     "options": {
                         "hKey": "HKEY_CURRENT_USER",
-                        "path": "Software\\Microsoft\\ScreenMagnifier"
+                        "path": "Software\\Microsoft\\ScreenMagnifier",
+                        "dataTypes": {
+                            "Magnification": "REG_DWORD",
+                            "Invert": "REG_DWORD",
+                            "FollowFocus": "REG_DWORD",
+                            "FollowCaret": "REG_DWORD",
+                            "FollowMouse": "REG_DWORD",
+                            "MagnificationMode": "REG_DWORD"
+                        }
                     }
                 }, { //cursor size stuff
                     "settings": {
-                        "No": {
-                            "value": "%SystemRoot%\\cursors\\aero_unavail_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Hand": {
-                            "value": "%SystemRoot%\\cursors\\aero_link_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Help": {
-                            "value": "%SystemRoot%\\cursors\\aero_helpsel_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Wait": {
-                            "value": "%SystemRoot%\\cursors\\aero_busy_xl.ani",
-                            "dataType": "REG_SZ"
-                        },
-                        "Arrow": {
-                            "value": "%SystemRoot%\\cursors\\aero_arrow_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "NWPen": {
-                            "value": "%SystemRoot%\\cursors\\aero_pen_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNS": {
-                            "value": "%SystemRoot%\\cursors\\aero_ns_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeWE": {
-                            "value": "%SystemRoot%\\cursors\\aero_ew_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeAll": {
-                            "value": "%SystemRoot%\\cursors\\aero_move_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "UpArrow": {
-                            "value": "%SystemRoot%\\cursors\\aero_up_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNESW": {
-                            "value": "%SystemRoot%\\cursors\\aero_nesw_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNWSE": {
-                            "value": "%SystemRoot%\\cursors\\aero_nwse_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "AppStarting": {
-                            "value": "%SystemRoot%\\cursors\\aero_working_xl.ani",
-                            "dataType": "REG_SZ"
-                        }
+                        "No": "%SystemRoot%\\cursors\\aero_unavail_xl.cur",
+                        "Hand": "%SystemRoot%\\cursors\\aero_link_xl.cur",
+                        "Help": "%SystemRoot%\\cursors\\aero_helpsel_xl.cur",
+                        "Wait": "%SystemRoot%\\cursors\\aero_busy_xl.ani",
+                        "Arrow": "%SystemRoot%\\cursors\\aero_arrow_xl.cur",
+                        "NWPen": "%SystemRoot%\\cursors\\aero_pen_xl.cur",
+                        "SizeNS": "%SystemRoot%\\cursors\\aero_ns_xl.cur",
+                        "SizeWE": "%SystemRoot%\\cursors\\aero_ew_xl.cur",
+                        "SizeAll": "%SystemRoot%\\cursors\\aero_move_xl.cur",
+                        "UpArrow": "%SystemRoot%\\cursors\\aero_up_xl.cur",
+                        "SizeNESW": "%SystemRoot%\\cursors\\aero_nesw_xl.cur",
+                        "SizeNWSE": "%SystemRoot%\\cursors\\aero_nwse_xl.cur",
+                        "AppStarting": "%SystemRoot%\\cursors\\aero_working_xl.ani"
                     },
                     "options": {
                         "hKey": "HKEY_CURRENT_USER",
-                        "path": "Control Panel\\Cursors"
+                        "path": "Control Panel\\Cursors",
+                        "dataTypes": {
+                            "Arrow": "REG_SZ",
+                            "Hand": "REG_SZ",
+                            "Help": "REG_SZ",
+                            "AppStarting": "REG_SZ",
+                            "No": "REG_SZ",
+                            "NWPen": "REG_SZ",
+                            "SizeAll": "REG_SZ",
+                            "SizeNESW": "REG_SZ",
+                            "SizeNS": "REG_SZ",
+                            "SizeNWSE": "REG_SZ",
+                            "SizeWE": "REG_SZ",
+                            "UpArrow": "REG_SZ",
+                            "Wait": "REG_SZ"
+                        }
                     }
                 }]
             }
@@ -211,93 +177,59 @@ var testDefs = [
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
                     "settings": {
-                        "Invert": {
-                            "dataType": "REG_DWORD",
-                            "value": 1
-                        },
-                        "Magnification": {
-                            "dataType": "REG_DWORD",
-                            "value": 150
-                        },
-                        "MagnificationMode": {
-                            "dataType": "REG_DWORD",
-                            "value": 3
-                        },
-                        "FollowFocus": {
-                            "value": 0,
-                            "dataType": "REG_DWORD"
-                        },
-                        "FollowCaret": {
-                            "value": 1,
-                            "dataType": "REG_DWORD"
-                        },
-                        "FollowMouse": {
-                            "value": 1,
-                            "dataType": "REG_DWORD"
-                        }
+                        "Invert": 1,
+                        "Magnification": 150,
+                        "MagnificationMode": 3,
+                        "FollowFocus": 0,
+                        "FollowCaret": 1,
+                        "FollowMouse": 1
                     },
                     "options": {
                         "hKey": "HKEY_CURRENT_USER",
-                        "path": "Software\\Microsoft\\ScreenMagnifier"
+                        "path": "Software\\Microsoft\\ScreenMagnifier",
+                        "dataTypes": {
+                            "Magnification": "REG_DWORD",
+                            "Invert": "REG_DWORD",
+                            "FollowFocus": "REG_DWORD",
+                            "FollowCaret": "REG_DWORD",
+                            "FollowMouse": "REG_DWORD",
+                            "MagnificationMode": "REG_DWORD"
+                        }
                     }
                 }, { //cursor size stuff
                     "settings": {
-                        "No": {
-                            "value": "%SystemRoot%\\cursors\\aero_unavail_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Hand": {
-                            "value": "%SystemRoot%\\cursors\\aero_link_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Help": {
-                            "value": "%SystemRoot%\\cursors\\aero_helpsel_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Wait": {
-                            "value": "%SystemRoot%\\cursors\\aero_busy_xl.ani",
-                            "dataType": "REG_SZ"
-                        },
-                        "Arrow": {
-                            "value": "%SystemRoot%\\cursors\\aero_arrow_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "NWPen": {
-                            "value": "%SystemRoot%\\cursors\\aero_pen_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNS": {
-                            "value": "%SystemRoot%\\cursors\\aero_ns_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeWE": {
-                            "value": "%SystemRoot%\\cursors\\aero_ew_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeAll": {
-                            "value": "%SystemRoot%\\cursors\\aero_move_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "UpArrow": {
-                            "value": "%SystemRoot%\\cursors\\aero_up_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNESW": {
-                            "value": "%SystemRoot%\\cursors\\aero_nesw_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNWSE": {
-                            "value": "%SystemRoot%\\cursors\\aero_nwse_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "AppStarting": {
-                            "value": "%SystemRoot%\\cursors\\aero_working_xl.ani",
-                            "dataType": "REG_SZ"
-                        }
+                        "No": "%SystemRoot%\\cursors\\aero_unavail_xl.cur",
+                        "Hand": "%SystemRoot%\\cursors\\aero_link_xl.cur",
+                        "Help": "%SystemRoot%\\cursors\\aero_helpsel_xl.cur",
+                        "Wait": "%SystemRoot%\\cursors\\aero_busy_xl.ani",
+                        "Arrow": "%SystemRoot%\\cursors\\aero_arrow_xl.cur",
+                        "NWPen": "%SystemRoot%\\cursors\\aero_pen_xl.cur",
+                        "SizeNS": "%SystemRoot%\\cursors\\aero_ns_xl.cur",
+                        "SizeWE": "%SystemRoot%\\cursors\\aero_ew_xl.cur",
+                        "SizeAll": "%SystemRoot%\\cursors\\aero_move_xl.cur",
+                        "UpArrow": "%SystemRoot%\\cursors\\aero_up_xl.cur",
+                        "SizeNESW": "%SystemRoot%\\cursors\\aero_nesw_xl.cur",
+                        "SizeNWSE": "%SystemRoot%\\cursors\\aero_nwse_xl.cur",
+                        "AppStarting": "%SystemRoot%\\cursors\\aero_working_xl.ani"
                     },
                     "options": {
                         "hKey": "HKEY_CURRENT_USER",
-                        "path": "Control Panel\\Cursors"
+                        "path": "Control Panel\\Cursors",
+                        "dataTypes": {
+                            "Arrow": "REG_SZ",
+                            "Hand": "REG_SZ",
+                            "Help": "REG_SZ",
+                            "AppStarting": "REG_SZ",
+                            "No": "REG_SZ",
+                            "NWPen": "REG_SZ",
+                            "SizeAll": "REG_SZ",
+                            "SizeNESW": "REG_SZ",
+                            "SizeNS": "REG_SZ",
+                            "SizeNWSE": "REG_SZ",
+                            "SizeWE": "REG_SZ",
+                            "UpArrow": "REG_SZ",
+                            "Wait": "REG_SZ"
+                        }
                     }
                 }]
             }
@@ -316,77 +248,55 @@ var testDefs = [
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
                     "settings": {
-                        "Magnification": {
-                            "dataType": "REG_DWORD",
-                            "value": 150
-                        },
-                        "MagnificationMode": {
-                            "dataType": "REG_DWORD",
-                            "value": 2
-                        }
+                        "Magnification": 150,
+                        "MagnificationMode": 2
                     },
                     "options": {
                         "hKey": "HKEY_CURRENT_USER",
-                        "path": "Software\\Microsoft\\ScreenMagnifier"
+                        "path": "Software\\Microsoft\\ScreenMagnifier",
+                        "dataTypes": {
+                            "Magnification": "REG_DWORD",
+                            "Invert": "REG_DWORD",
+                            "FollowFocus": "REG_DWORD",
+                            "FollowCaret": "REG_DWORD",
+                            "FollowMouse": "REG_DWORD",
+                            "MagnificationMode": "REG_DWORD"
+                        }
                     }
                 }, { //cursor size stuff
                     "settings": {
-                        "No": {
-                            "value": "%SystemRoot%\\cursors\\aero_unavail_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Hand": {
-                            "value": "%SystemRoot%\\cursors\\aero_link_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Help": {
-                            "value": "%SystemRoot%\\cursors\\aero_helpsel_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "Wait": {
-                            "value": "%SystemRoot%\\cursors\\aero_busy_xl.ani",
-                            "dataType": "REG_SZ"
-                        },
-                        "Arrow": {
-                            "value": "%SystemRoot%\\cursors\\aero_arrow_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "NWPen": {
-                            "value": "%SystemRoot%\\cursors\\aero_pen_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNS": {
-                            "value": "%SystemRoot%\\cursors\\aero_ns_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeWE": {
-                            "value": "%SystemRoot%\\cursors\\aero_ew_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeAll": {
-                            "value": "%SystemRoot%\\cursors\\aero_move_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "UpArrow": {
-                            "value": "%SystemRoot%\\cursors\\aero_up_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNESW": {
-                            "value": "%SystemRoot%\\cursors\\aero_nesw_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "SizeNWSE": {
-                            "value": "%SystemRoot%\\cursors\\aero_nwse_xl.cur",
-                            "dataType": "REG_SZ"
-                        },
-                        "AppStarting": {
-                            "value": "%SystemRoot%\\cursors\\aero_working_xl.ani",
-                            "dataType": "REG_SZ"
-                        }
+                        "No": "%SystemRoot%\\cursors\\aero_unavail_xl.cur",
+                        "Hand": "%SystemRoot%\\cursors\\aero_link_xl.cur",
+                        "Help": "%SystemRoot%\\cursors\\aero_helpsel_xl.cur",
+                        "Wait": "%SystemRoot%\\cursors\\aero_busy_xl.ani",
+                        "Arrow": "%SystemRoot%\\cursors\\aero_arrow_xl.cur",
+                        "NWPen": "%SystemRoot%\\cursors\\aero_pen_xl.cur",
+                        "SizeNS": "%SystemRoot%\\cursors\\aero_ns_xl.cur",
+                        "SizeWE": "%SystemRoot%\\cursors\\aero_ew_xl.cur",
+                        "SizeAll": "%SystemRoot%\\cursors\\aero_move_xl.cur",
+                        "UpArrow": "%SystemRoot%\\cursors\\aero_up_xl.cur",
+                        "SizeNESW": "%SystemRoot%\\cursors\\aero_nesw_xl.cur",
+                        "SizeNWSE": "%SystemRoot%\\cursors\\aero_nwse_xl.cur",
+                        "AppStarting": "%SystemRoot%\\cursors\\aero_working_xl.ani"
                     },
                     "options": {
                         "hKey": "HKEY_CURRENT_USER",
-                        "path": "Control Panel\\Cursors"
+                        "path": "Control Panel\\Cursors",
+                        "dataTypes": {
+                            "Arrow": "REG_SZ",
+                            "Hand": "REG_SZ",
+                            "Help": "REG_SZ",
+                            "AppStarting": "REG_SZ",
+                            "No": "REG_SZ",
+                            "NWPen": "REG_SZ",
+                            "SizeAll": "REG_SZ",
+                            "SizeNESW": "REG_SZ",
+                            "SizeNS": "REG_SZ",
+                            "SizeNWSE": "REG_SZ",
+                            "SizeWE": "REG_SZ",
+                            "UpArrow": "REG_SZ",
+                            "Wait": "REG_SZ"
+                        }
                     }
                 }]
             }
