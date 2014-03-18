@@ -22,11 +22,11 @@ fluid.require("./AcceptanceTests_include", require);
 
 var testDefs = [
     {
-    //     name: "Testing that the system doesn't crashes on login with empty NP set",
-    //     token: "empty",
-    //     settingsHandlers: {},
-    //     processes: []
-    // }, {
+        name: "Testing that the system doesn't crashes on login with empty NP set",
+        token: "empty",
+        settingsHandlers: {},
+        processes: []
+    }, {
         name: "Default device reporter with screenreader_nvda NP set - NVDA is not expected launched",
         token: "screenreader_nvda",
         settingsHandlers: {},
