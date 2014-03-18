@@ -1,0 +1,6 @@
+{
+    "typeName": "acceptanceTests.standard.development",
+    "includes": [
+        "../../../../node_modules/universal/tests/acceptanceTests/configs/localInstall.json"
+    ]
+}
