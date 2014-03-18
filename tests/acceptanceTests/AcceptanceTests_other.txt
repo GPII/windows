@@ -1,0 +1,11 @@
+AcceptanceTests_other.js
+=======================
+
+Description:
+This will run the acceptance tests that falls out of category and dont have any specific requirements on 3rd party applications.
+
+It uses the following NP sets:
+* empty.json
+
+Requirements:
+* none
