@@ -9,7 +9,7 @@
   "devDependencies": {
     "grunt": "~0.4.4",
     "grunt-shell": "0.6.4",
-    "grunt-gpii": "git://github.com/sgithens/grunt-gpii.git"
+    "grunt-gpii": "git://github.com/gpii/grunt-gpii.git"
   },
   "licenses": [
      {
