@@ -1,14 +1,18 @@
-/*!
-USB User Listener for Windows
-
-Copyright 2012 Astea Solutions AD
-
-Licensed under the New BSD license. You may not use this file except in
-compliance with this License.
-
-You may obtain a copy of the License at
-https://github.com/gpii/windows/LICENSE.txt
-*/
+/*
+ * USB User Listener for Windows
+ *
+ * Copyright 2012 Astea Solutions AD
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * The research leading to these results has received funding from the European Union's
+ * Seventh Framework Programme (FP7/2007-2013)
+ * under grant agreement no. 289016.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
 
 #include <curl/curl.h>
 #include <dbt.h>
