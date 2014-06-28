@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// GpiiUserListener.cpp
+// GPII_RFIDListener.cpp
 //
-// This file is used to test various features of an updated
+// The GPII RFID listener has the following features 
 // User Listener which includes USB device arrival and removal,
 // a user hot key (ESC), a task bar icon and menu, and support
 // for the arrival and removal of smart cards.
@@ -9,9 +9,10 @@
 // Files needed for this project:
 //
 //		Project Files:
-//			NfcUserTest.cpp		//FIXME appears to missing from the source
+//			GPII_RFIDListener.cpp
 //			WinSmartCard.cpp
 //			WinSmartCard.H
+//			README.txt // FIXME now ../README.md
 //
 //		CURL Library Files:
 //			curl.h
@@ -28,11 +29,11 @@
 //			Winscard.lib
 //
 //		Optional MSVC Files:
-//			GpiiUserListener.dsp
-//			GpiiUserListener.dsw
+//			GPII_RFIDListener.dsp
+//			GPII_RFIDListener.dsw
 //
 // Output files:
-//		GpiiUserListener.exe
+//		GPII_RFIDListener.exe
 //
 // Versions:
 //
@@ -67,6 +68,7 @@
 //    2013.06.27 version 1.12
 //			 Rebuilt from 7.25 curl source in VS2012 and reorganised curl files into own folder
 ///////////////////////////////////////////////////////////////////////////////
+#define STRICT
 #include <windows.h>
 #include <stdio.h>
 #include <dbt.h>
@@ -126,7 +128,7 @@ BOOL                MyTrayIcon(HWND hWnd);
 BOOL                MyPopupMenu(HWND hWnd);
 BOOL				InitInstance(HINSTANCE);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-int                 MakeCurlRequest(const char * szUser,const char * szAction);
+int                 MakeCurlRequest(const char * szUser, const char * szAction);
 int                 UsbGetDriveLetter(LPARAM lParam);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,7 +173,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		DispatchMessage(&msg);
 	}
 
-	return msg.wParam;
+	return (int) msg.wParam; // FIXME which is correct?
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,6 +189,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 //    function that was added to Windows 95. It is important to call this function
 //    so that the application will get 'well formed' small icons associated
 //    with it.
+//
+//  FIXME - this really isn't required anymore
 //
 ///////////////////////////////////////////////////////////////////////////////
 ATOM MyRegisterClass(HINSTANCE hInstance)
@@ -214,7 +218,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 //   FUNCTION: MyTrayIcon(HWND hWnd)
 //
-//   PURPOSE: Creates a tray icons with message WM_MYTRAY
+//   PURPOSE: Creates a tray icon with message WM_MYTRAY
 //
 //   COMMENTS:
 //
@@ -247,7 +251,7 @@ BOOL MyPopupMenu(HWND hWnd)
 	GetCursorPos(&p);
 	HMENU hPopupMenu = CreatePopupMenu();
     InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING, MY_SHOW, "Show Window");
-    InsertMenu(hPopupMenu, 1, MF_BYPOSITION | MF_STRING, MY_HIDE, "Hide Window");
+    InsertMenu(hPopupMenu, 1, MF_BYPOSITION | MF_STRING, MY_HIDE, "Hide Window"); // FIXME should prolly grey out
     InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING, MY_LOGOUT,"Logout");
     InsertMenu(hPopupMenu, 3, MF_BYPOSITION | MF_STRING, MY_EXIT, "Exit");
     SetForegroundWindow(hWnd);
@@ -330,6 +334,7 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
 			(void) curl_easy_setopt(curl, CURLOPT_URL, szRequest);
 			// TODO Check the response code and handle errors.
 			CURLcode responseCode = curl_easy_perform(curl); // expect CURLE_WRITE_ERROR as no buffer given for incoming data
+			(void) responseCode; // tell compiler we're not doing anything with it - just for debugging 
 			curl_free(szUserEscaped);
 			curl_easy_cleanup(curl);
 			return 1;
@@ -582,17 +587,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				wchar_t wsCurrent[MAX_BUFFER];
 				WinSmartCardGetReader(szReader,MAX_BUFFER);
 				rt.top = rt.bottom*10/100;
-				int r = MultiByteToWideChar(CP_UTF8, 0, m_szStatus, -1, wsStatus, _countof(wsStatus));
-				DrawTextW(hdc, wsStatus, wcslen(wsStatus), &rt, DT_CENTER);
+				int r = MultiByteToWideChar(CP_UTF8, 0, m_szStatus, -1, wsStatus, (int) _countof(wsStatus));
+				DrawTextW(hdc, wsStatus, (int)wcslen(wsStatus), &rt, DT_CENTER);
 				rt.top = rt.bottom*40/100;
 				wsprintf(sReading,"%s %s %s",szReader,"READER",
 						 WinSmartCardPolling() ? "ONLINE": "OFFLINE");
-				DrawText(hdc, sReading, strlen(sReading), &rt, DT_CENTER);
+				DrawText(hdc, sReading, (int) strlen(sReading), &rt, DT_CENTER);
 				rt.top = rt.bottom*70/100;
 				wsprintf(sCurrent,"%s %s","CURRENT USER:",
 						 lstrlen(m_szUserID) ? m_szUserID : "NONE");
 				r = MultiByteToWideChar(CP_UTF8, 0, sCurrent, -1, wsCurrent, _countof(wsCurrent));
-				DrawTextW(hdc, wsCurrent, wcslen(wsCurrent), &rt, DT_CENTER);
+				DrawTextW(hdc, wsCurrent, (int)wcslen(wsCurrent), &rt, DT_CENTER);
 
 				EndPaint(hWnd, &ps);
 			}

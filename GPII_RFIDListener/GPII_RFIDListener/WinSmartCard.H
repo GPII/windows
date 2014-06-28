@@ -12,7 +12,7 @@
 // Note: This code was tested with reader "ACS ACR122 0"
 //
 //	Project Files:
-//		WinSmartCard.cpp
+//		WinSmartCard.cpp // FIXME - rename form SMARTCARD?
 //		WinSmartCard.H
 //
 //	WINSCARD Libary Files:
@@ -37,9 +37,9 @@
 #define SMART_READER_STOPPED  (WM_USER + 103)
 
 int WinSmartCardInitialize(HWND hWnd,const char* szReader = "");
-int WinSmartCardGetUser(char* szUser,int nMaxLen);
+int WinSmartCardGetUser(char* szUser,int nMaxLen); // FIXME - getToken
 int WinSmartCardGetReader(char* szReader,int nMaxLen);
-int WinSmartCardPolling();
+int WinSmartCardPolling(); // FIXME BOOL
 int WinSmartCardShowError();
 
 #endif // _WINSMARTCARD_H_

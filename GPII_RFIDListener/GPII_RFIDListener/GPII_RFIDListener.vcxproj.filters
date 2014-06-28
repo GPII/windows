@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GpiiUserListener.cpp">
+    <ClCompile Include="WinSmartCard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WinSmartCard.cpp">
+    <ClCompile Include="GPII_RFIDListener.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -49,13 +49,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="libcurl\COPYING" />
-  </ItemGroup>
-  <ItemGroup>
     <Library Include="libcurl\libcurl_a_debug.lib" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
-    <Text Include="libcurl\README.txt" />
   </ItemGroup>
 </Project>

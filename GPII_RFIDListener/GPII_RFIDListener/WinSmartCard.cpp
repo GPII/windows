@@ -39,6 +39,7 @@
 //    2012.05.13 Version 1.11
 //           Encapulated Apdu Authenticate and Read Record functions.
 ///////////////////////////////////////////////////////////////////////////////
+#define STRICT
 #include <windows.h>
 #include <process.h>
 #include "WINSCARD.h"
@@ -117,7 +118,7 @@ struct Cleanup
 ///////////////////////////////////////////////////////////////////////////////
 int ApduReadBlock(SCARDHANDLE  hCard,DWORD dwProtocol,BYTE byBlock,BYTE* pRecv)
 {
-	BYTE read_block[] =  { 0xFF, 0xB0, 0x00, 0x04, 0x10 };
+	BYTE read_block[] =  { 0xFF, 0xB0, 0x00, 0x04, 0x10 };  // FIXME const
 	read_block[3] = byBlock;
 
 	DWORD dwRecvLen = 18;
@@ -142,7 +143,7 @@ int ApduReadBlock(SCARDHANDLE  hCard,DWORD dwProtocol,BYTE byBlock,BYTE* pRecv)
 ///////////////////////////////////////////////////////////////////////////////
 int ApduAuthenticate(SCARDHANDLE hCard,DWORD dwProtocol)
 {
-	BYTE auth_key_a[] = { 0xFF, 0x86, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x60, 0x00 };
+	BYTE auth_key_a[] = { 0xFF, 0x86, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x60, 0x00 }; // FIXME const
 	BYTE auth_key_b[] = { 0xFF, 0x86, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x61, 0x00 };
 
 	BYTE pRecv[18];
@@ -240,7 +241,7 @@ int ApduReadRecord(SCARDHANDLE hCard,DWORD dwProtocol,char* pRecord,int nMaxLen)
 //   COMMENTS: Returns 1 if successfull or 0 for a failure.
 //
 ///////////////////////////////////////////////////////////////////////////////
-int WinSmartCardReadUser()
+int WinSmartCardReadUser() // FIXME - rwad token as user to concrete
 {
 	ZeroMemory(m_szUser,MAX_BUFFER);
 
@@ -255,7 +256,7 @@ int WinSmartCardReadUser()
 	//-----------------------------------------------------------
 	if (lstrlen(m_szUser) == 0)
 	{
-		lstrcpyn(m_szUser,DEFAULT_USER_NAME,MAX_BUFFER);
+		lstrcpyn(m_szUser,DEFAULT_USER_NAME,MAX_BUFFER);  // FIXME lose this state!
 	}
 
 	return 1;
