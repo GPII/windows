@@ -2,7 +2,7 @@
 // GPII_RFIDListener.cpp
 //
 // The GPII RFID listener has the following features 
-// User Listener which includes USB device arrival and removal,
+// User Listener which includes device arrival and removal,
 // a user hot key (ESC), a task bar icon and menu, and support
 // for the arrival and removal of smart cards.
 //
@@ -50,7 +50,7 @@
 //           Touching the card a second time will logout user
 //           Changed ESC logout to F11 logout
 //    2012.05.06 Version 1.03 
-//           Changed USB to require user in .gpii-user-token.txt
+//           Changed s to require user in .gpii-user-token.txt
 //           Set window to SW_HIDE, except for _DEBUG it is SW_SHOW
 //           Removed MY_READER="ACS ACR122 0"
 //           Change reader to be set by program command line argument
@@ -129,7 +129,6 @@ BOOL                MyPopupMenu(HWND hWnd);
 BOOL				InitInstance(HINSTANCE);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 int                 MakeCurlRequest(const char * szUser, const char * szAction);
-int                 UsbGetDriveLetter(LPARAM lParam);
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -343,76 +342,6 @@ int MakeCurlRequest(const char* szUser,const char* szAction)
     return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//  FUNCTION: UsbDriveGetUser(DWORD dwUnitMask)
-//
-//  PURPOSE:  Reads the user from a file on a USB drive
-//
-///////////////////////////////////////////////////////////////////////////////
-int UsbDriveGetUser(const char cDrive,char* szUser)
-{
-	char szPath[MAX_BUFFER];
-
-	wsprintf(szPath,"%c:\\%s",cDrive,GPII_USER_FILE);
-
-	FILE* hFile = fopen(szPath,"r");
-	if (hFile != NULL)
-	{
-		char szRawUser[MAX_BUFFER];
-		(void)fgets(szRawUser,MAX_BUFFER,hFile);
-		fclose(hFile);
-		
-		// skip UTF8 BOM if at start of name. Notepad puts this in at start of file
-		const char *szSrc = &szRawUser[0];
-		if (strncmp(szRawUser, "﻿", 3) == 0) 
-		{
-			szSrc = &szRawUser[3]; // skip the BOM
-		}
-		strcpy(szUser, szSrc);
-	}
-	else
-	{
-		wsprintf(szUser,"%s","");
-	}
-
-	return lstrlen(szUser);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-//  FUNCTION: UsbGetDriveLetter(LPARAM lParam)
-//
-//  PURPOSE:  Converts lParam into a USB drive letter if needed.
-//            CD, DVD, etc. are ignored and the function returns 0.
-//
-///////////////////////////////////////////////////////////////////////////////
-int UsbGetDriveLetter(LPARAM lParam)
-{
-	if (!lParam) return 0;
-
-	PDEV_BROADCAST_HDR pHdr = (PDEV_BROADCAST_HDR)lParam;
-	if (pHdr == NULL) return 0;
-	if (pHdr->dbch_devicetype != DBT_DEVTYP_VOLUME) return 0;
-
-    PDEV_BROADCAST_VOLUME pVol = (PDEV_BROADCAST_VOLUME) pHdr;
-	if (pVol == NULL) return 0;
-	if ((pVol->dbcv_flags & DBTF_MEDIA)) return 0;
-
-	unsigned long ulUnitMask = pVol->dbcv_unitmask;
-
-    char c;
-    for (c = 0; c < 26; c++)
-    {
-        if (ulUnitMask & 0x01)
-        {
-            break;
-        }
-        ulUnitMask = ulUnitMask >> 1;
-    }
-
-    return (c + 'A');
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -492,38 +421,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			wsprintf(m_szStatus,"%s","CARD READER STOPPED");
 			InvalidateRect(hWnd,NULL,TRUE);
 			break;
-
+/*
 		//-----------------------------------------------------------
-		// USB Login and Logout
+		// A device has changed
 		//-----------------------------------------------------------
 		case WM_DEVICECHANGE:
-			{
-				char cDrive = (char)UsbGetDriveLetter(lParam);
-
-				if (wParam == DBT_DEVICEARRIVAL && m_nLogin == 0)
-				{
-					m_cUserDrive = cDrive;
-                    if (UsbDriveGetUser(cDrive,m_szUserID))
-					{
-						wsprintf(m_szStatus,"%s %s","USB LOGIN",m_szUserID);
-						InvalidateRect(hWnd,NULL,TRUE);
-						MakeCurlRequest(m_szUserID,FLOW_LOGIN);
-						m_nLogin = DBT_DEVICEARRIVAL;
-					}
-				}
-				else if (wParam == DBT_DEVICEREMOVECOMPLETE && 
-						 m_nLogin == DBT_DEVICEARRIVAL && m_cUserDrive == cDrive)
-				{
-					wsprintf(m_szStatus,"%s","USB LOGOUT");
-					MakeCurlRequest(m_szUserID,FLOW_LOGOUT);
-					wsprintf(m_szUserID,"%s","");
-					InvalidateRect(hWnd,NULL,TRUE);
-					m_nLogin = 0;
-				}
-			}
 			return TRUE;
 			break;
-
+*/
 
 		//-----------------------------------------------------------
 		// Button Click on Tray Icon
