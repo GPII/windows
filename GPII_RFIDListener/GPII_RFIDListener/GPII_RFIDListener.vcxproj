@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EBBEC08-3F91-486B-987E-5D29037EF1B8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>GpiiUserListener</RootNamespace>
+    <RootNamespace>GPII_RFIDListener</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -79,7 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GpiiUserListener.cpp" />
+    <ClCompile Include="GPII_RFIDListener.cpp" />
     <ClCompile Include="WinSmartCard.cpp" />
   </ItemGroup>
   <ItemGroup>
