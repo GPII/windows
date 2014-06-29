@@ -477,7 +477,7 @@ const char* WinSmartCardErrorString(DWORD code)
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//   FUNCTION: WinSmartCardError(int code)
+//   FUNCTION: WinSmartCardShowError(int code)
 //
 //   PURPOSE:  Displays the error and returns 0 for a failure.
 //

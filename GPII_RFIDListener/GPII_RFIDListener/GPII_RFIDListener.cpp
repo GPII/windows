@@ -183,13 +183,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 //
 //  COMMENTS:
 //
-//    This function and its usage is only necessary if you want this code
-//    to be compatible with Win32 systems prior to the 'RegisterClassEx'
-//    function that was added to Windows 95. It is important to call this function
-//    so that the application will get 'well formed' small icons associated
-//    with it.
-//
-//  FIXME - this really isn't required anymore
+//    Register our window class so we can create it
 //
 ///////////////////////////////////////////////////////////////////////////////
 ATOM MyRegisterClass(HINSTANCE hInstance)
