@@ -42,8 +42,13 @@
 #define STRICT
 #include <windows.h>
 #include <process.h>
-#include "WINSCARD.h"
+#ifdef __MINGW_H
+#define DEVICE_TYPE_SMARTCARD // stop redefinition as allready defined in winioctrl.h
+#endif
+#include "winscard.h"       // not included in MinGW so have local copy
 #include "WinSmartCard.h"
+
+// FIXME Using windows::networking::proximity may simplify all this low level hackery
 
 //-------------------------------------------------------------------
 //  Application Protocol Data Unit (APDU) Constants

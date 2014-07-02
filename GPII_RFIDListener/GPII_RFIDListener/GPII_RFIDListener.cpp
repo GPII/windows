@@ -11,7 +11,7 @@
 //		Project Files:
 //			GPII_RFIDListener.cpp
 //			WinSmartCard.cpp
-//			WinSmartCard.H
+//			WinSmartCard.h
 //			README.txt // FIXME now ../README.md
 //
 //		CURL Library Files:
@@ -25,8 +25,8 @@
 //			multi.h
 //
 //		WINSCARD Libary Files:
-//			WINSCARD.H
-//			Winscard.lib
+//			winscard.h
+//			winscard.lib
 //
 //		Optional MSVC Files:
 //			GPII_RFIDListener.dsp
@@ -70,10 +70,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #define STRICT
 #include <windows.h>
-#include <stdio.h>
-#include <dbt.h>
 #include <shellapi.h>
 #include "WinSmartCard.h"
+
+// MinGW doesn't define _countof in stdlib
+/* _countof helper */
+#if !defined (_countof)
+#define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
+#endif  /* !defined (_countof) */
 
 // Set TRUE to use fiddler2.com to dubug http
 #if defined(_DEBUG)
@@ -84,7 +88,6 @@
 // Let the compiler know we are including the CURL library
 //---------------------------------------------------------
 
-#define CURL_STATICLIB TRUE		// use static linked version of libcurl
 #include "libcurl\curl.h"
 
 //---------------------------------------------------------
@@ -117,7 +120,6 @@ const int MAX_BUFFER = 256;
 static char m_szStatus[MAX_BUFFER];		// FIXME potenial buffer overruns as resticted length string functions not used.
 static char m_szUserID[MAX_BUFFER];
 static char m_szReader[MAX_BUFFER];
-static char m_cUserDrive = 0;
 static int  m_nLogin = 0;
 
 //---------------------------------------------------------
@@ -486,7 +488,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				wchar_t wsCurrent[MAX_BUFFER];
 				WinSmartCardGetReader(szReader,MAX_BUFFER);
 				rt.top = rt.bottom*10/100;
-				int r = MultiByteToWideChar(CP_UTF8, 0, m_szStatus, -1, wsStatus, (int) _countof(wsStatus));
+				(void) MultiByteToWideChar(CP_UTF8, 0, m_szStatus, -1, wsStatus, (int) _countof(wsStatus));
 				DrawTextW(hdc, wsStatus, (int)wcslen(wsStatus), &rt, DT_CENTER);
 				rt.top = rt.bottom*40/100;
 				wsprintf(sReading,"%s %s %s",szReader,"READER",
@@ -495,7 +497,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				rt.top = rt.bottom*70/100;
 				wsprintf(sCurrent,"%s %s","CURRENT USER:",
 						 lstrlen(m_szUserID) ? m_szUserID : "NONE");
-				r = MultiByteToWideChar(CP_UTF8, 0, sCurrent, -1, wsCurrent, _countof(wsCurrent));
+				(void) MultiByteToWideChar(CP_UTF8, 0, sCurrent, -1, wsCurrent, _countof(wsCurrent));
 				DrawTextW(hdc, wsCurrent, (int)wcslen(wsCurrent), &rt, DT_CENTER);
 
 				EndPaint(hWnd, &ps);

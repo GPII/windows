@@ -1,0 +1,9 @@
+LIBRARY WinSCard.dll
+EXPORTS
+SCardConnectA@24
+SCardDisconnect@8
+SCardEstablishContext@16
+SCardListReadersA@16
+SCardReleaseContext@4
+SCardStatusA@28
+SCardTransmit@28

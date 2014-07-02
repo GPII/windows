@@ -1,0 +1,27 @@
+The .h files here have been copied from the curl distribution include/ 
+The libcurl.a is built as follows
+
++ Building libcurl for the GPII Windows Listeners
+
+Whilst a Microsoft Visual Studio build is provided with curl there are problems
+linking it from a MinGW build as used in the listeners
+
+Note that whilst the easy way to build libcurl with mingw is
+  mingw32-make mingw32
+this includes ldap and other extra dependencies. 
+
+The following procedure uses the usual configure/make process but requires msys
+make to also be installed. The easiest way is to install msys-base, even if
+Git for Windows is already installed.
+
+* Grab curl source
+* Install minimal mingw packages of 
+	mingw32-base
+	ming32-gcc-g++
+	msys-base (for make) 
+* open msys shell (eg C:\MinGW\msys\1.0\msys.bat)
+* cd to curl source (eg /c/Users/<user>/projects/curl-7.37.0)
+* run ./configure --disable-shared --disable-ldap --without-zlib --without-libsh2
+* run make
+* copy .../libcurl/lib/.libs/libcurl.a to here
+* copy .../libcurl/inc/libcurl to here
