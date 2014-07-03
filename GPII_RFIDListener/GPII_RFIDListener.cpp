@@ -180,7 +180,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
+	wcex.hIcon			= LoadIcon(NULL, IDI_APPLICATION); // FIXME we have icon files so why not use them?
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= NULL;
@@ -346,10 +346,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Smart Card Removed
 		//-----------------------------------------------------------
 		case SMART_CARD_REMOVE:
-#ifdef _DEBUG
-			wsprintf(m_szStatus,"%s","CARD REMOVED");
+			wsprintf(m_szStatus,"%s","Listening...");
 			InvalidateRect(hWnd,NULL,TRUE);
-#endif
 			break;
 			
 		//-----------------------------------------------------------
@@ -452,9 +450,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_TIMER:
 			if (wParam == MY_TIMER && !WinSmartCardPolling())
 			{
-				if (WinSmartCardInitialize(hWnd,m_szReader))
+				if (WinSmartCardInitialize(hWnd,m_szReader)) //FIXME not sure why this as polls indefinitely - perhaps a fail safe?
 				{
-					wsprintf(m_szStatus,"%s","Listening...");
+					wsprintf(m_szStatus,"%s","Listening...");  
 					InvalidateRect(hWnd,NULL,TRUE);
 				}
 			}
