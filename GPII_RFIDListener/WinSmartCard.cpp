@@ -43,7 +43,7 @@
 #include <windows.h>
 #include <process.h>
 #ifdef __MINGW_H
-#define DEVICE_TYPE_SMARTCARD // stop redefinition as allready defined in winioctrl.h
+#define DEVICE_TYPE_SMARTCARD // stop redefinition as already defined in winioctrl.h
 #endif
 #include "winscard.h"       // not included in MinGW so have local copy
 #include "WinSmartCard.h"

@@ -72,31 +72,13 @@
 #include <windows.h>
 #include <shellapi.h>
 #include "WinSmartCard.h"
+#include "FlowManager.h"
 
 // MinGW doesn't define _countof in stdlib
 /* _countof helper */
 #if !defined (_countof)
 #define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 #endif  /* !defined (_countof) */
-
-// Set TRUE to use fiddler2.com to dubug http
-#if defined(_DEBUG)
-  #define USE_FIDDLER	TRUE
-#endif
-
-//---------------------------------------------------------
-// Let the compiler know we are including the CURL library
-//---------------------------------------------------------
-
-#include "libcurl\curl.h"
-
-//---------------------------------------------------------
-// Flow Manager Constants
-//---------------------------------------------------------
-const char GPII_USER_FILE[]   = ".gpii-user-token.txt";
-const char FLOW_MANAGER_URL[] = "http://localhost:8081/user";
-const char FLOW_LOGIN[] = "login";
-const char FLOW_LOGOUT[] = "logout";
 
 //---------------------------------------------------------
 // Global Constants
@@ -116,8 +98,8 @@ const int    MY_SIZE_Y   = 100;
 //---------------------------------------------------------
 // Global Variables:
 //---------------------------------------------------------
-const int MAX_BUFFER = 256;
-static char m_szStatus[MAX_BUFFER];		// FIXME potenial buffer overruns as resticted length string functions not used.
+static const int MAX_BUFFER = 256;
+static char m_szStatus[MAX_BUFFER];		// FIXME potential buffer overruns as restricted length string functions not used.
 static char m_szUserID[MAX_BUFFER];
 static char m_szReader[MAX_BUFFER];
 static int  m_nLogin = 0;
@@ -125,12 +107,11 @@ static int  m_nLogin = 0;
 //---------------------------------------------------------
 // Local Functions:
 //---------------------------------------------------------
-ATOM				MyRegisterClass(HINSTANCE hInstance);
-BOOL                MyTrayIcon(HWND hWnd);
-BOOL                MyPopupMenu(HWND hWnd);
-BOOL				InitInstance(HINSTANCE);
-LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-int                 MakeCurlRequest(const char * szUser, const char * szAction);
+static ATOM		        MyRegisterClass(HINSTANCE hInstance);
+static BOOL             MyTrayIcon(HWND hWnd);
+static BOOL             MyPopupMenu(HWND hWnd);
+static BOOL	    		InitInstance(HINSTANCE);
+static LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -299,45 +280,6 @@ BOOL InitInstance(HINSTANCE hInstance)
 	return TRUE;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//  FUNCTION: MakeCurlRequest(char szUser,char szAction)
-//
-//  PURPOSE:  Uses libcurl to make a HTTP GET request to a specified URL.
-//
-//  EXAMPLES:
-//
-//            http://localhost:8081/user/123/login
-// 
-//            http://localhost:8081/user/123/logout
-//
-///////////////////////////////////////////////////////////////////////////////
-int MakeCurlRequest(const char* szUser,const char* szAction)
-{
-	if (lstrlen(szUser) > 0)
-	{
-		CURL *curl = curl_easy_init();
-		if (curl)
-		{
-			char szRequest[MAX_BUFFER];
-			char * szUserEscaped = curl_easy_escape(curl, szUser, 0);
-			wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUserEscaped,szAction);
-
-#if defined(USE_FIDDLER)
-			(void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP
-#endif
-			(void) curl_easy_setopt(curl, CURLOPT_URL, szRequest);
-			// TODO Check the response code and handle errors.
-			CURLcode responseCode = curl_easy_perform(curl); // expect CURLE_WRITE_ERROR as no buffer given for incoming data
-			(void) responseCode; // tell compiler we're not doing anything with it - just for debugging 
-			curl_free(szUserEscaped);
-			curl_easy_cleanup(curl);
-			return 1;
-		}
-	}
-    return 0;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -368,7 +310,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
 				wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
 				InvalidateRect(hWnd,NULL,TRUE);
-				MakeCurlRequest(m_szUserID,FLOW_LOGIN);
+                FlowManagerLogin(m_szUserID);
 				m_nLogin = SMART_CARD_ARRIVE;
 			}
 				else
@@ -381,7 +323,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					// logout the user
 					//-----------------------------------------------
 					wsprintf(m_szStatus,"%s %s","CARD LOGOUT",m_szUserID);
-					MakeCurlRequest(m_szUserID,FLOW_LOGOUT);
+                    FlowManagerLogout(m_szUserID);
 					wsprintf(m_szUserID,"%s","");
 					InvalidateRect(hWnd,NULL,TRUE);
 					m_nLogin = 0;
@@ -391,9 +333,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					//-----------------------------------------------
 					// logout the old user and login new user
 					//-----------------------------------------------
-					MakeCurlRequest(m_szUserID,FLOW_LOGOUT);
+					FlowManagerLogout(m_szUserID);
 					WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
-					MakeCurlRequest(m_szUserID,FLOW_LOGIN);
+					FlowManagerLogin(m_szUserID);
 					wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
 					InvalidateRect(hWnd,NULL,TRUE);
 				}
@@ -458,7 +400,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					if (m_nLogin)
 					{
 						wsprintf(m_szStatus,"%s","MENU LOGOUT");
-						MakeCurlRequest(m_szUserID,FLOW_LOGOUT);
+						FlowManagerLogout(m_szUserID);
 						wsprintf(m_szUserID,"%s","");
 						m_nLogin = 0;
 					}
@@ -532,7 +474,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Destroy the Window and Exit
 		//-----------------------------------------------------------
 		case WM_DESTROY:
-			if (m_nLogin) MakeCurlRequest(m_szUserID,FLOW_LOGOUT);
+			if (m_nLogin)
+            {
+                FlowManagerLogout(m_szUserID);
+            }
 			KillTimer(hWnd,MY_TIMER);
 			PostQuitMessage(0);
 			break;
