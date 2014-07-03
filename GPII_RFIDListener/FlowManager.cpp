@@ -12,9 +12,14 @@
 #include "FlowManager.h"
 #include "libcurl\curl.h"
 
-// Set TRUE to use fiddler2.com to dubug http
+// not included in mingw headers
+extern void WINAPI OutputDebugString(
+  LPCTSTR lpOutputString
+);
+
+// Set TRUE to use fiddler2.com to debug http
 #if defined(_DEBUG)
-  #define USE_FIDDLER	TRUE
+  #define USE_FIDDLER	FALSE
 #endif
 
 //---------------------------------------------------------
@@ -49,6 +54,10 @@ static int _MakeCurlRequest(const char* szUser, const char* szAction)
 			char szRequest[MAX_BUFFER];
 			char * szUserEscaped = curl_easy_escape(curl, szUser, 0);
 			wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUserEscaped,szAction);
+
+#ifdef _DEBUG
+            OutputDebugString(szRequest); // will show in gdb 
+#endif
 
 #if defined(USE_FIDDLER)
 			(void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP

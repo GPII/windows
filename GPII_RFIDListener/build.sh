@@ -7,7 +7,7 @@
 #
 COPTS_DEBUG='-Og -g3 -Wall -Werror -fmessage-length=0 -DWIN32 -DDEBUG -D_DEBUG -DWIN32_LEAN_AND_MEAN' 
 COPTS_RELEASE='-g0 -O3 -Wall -Werror -fmessage-length=0 -DWIN32 -DNDEBUG -DWIN32_LEAN_AND_MEAN' 
-COPTS=$COPTS_RELEASE
+COPTS=$COPTS_DEBUG
 
 mkdir -p build
 g++ -c $COPTS -o build/GPII_RFIDListener.o GPII_RFIDListener.cpp

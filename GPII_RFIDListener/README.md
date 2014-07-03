@@ -1,6 +1,6 @@
-# GPII User Listener
+# GPII RFIDListener
 
-Windows executable that listens out for USB memory keys or NFC RFID tags and raises events to trigger GPII user log on/off. It listens out for RFID tag events and reads the encoded tag data. The listener tracks the login state and generate login and logout events on the GPII RESTful API (e.g http://localhost:8081/user/bert/login).
+Windows executable that listens out for NFC RFID tags and invokes URLs to trigger GPII user log on/off. It listens out for RFID tag events and reads the encoded tag data. The listener tracks the login state and generate login and logout events on the GPII RESTful API (e.g http://localhost:8081/user/bert/login).
 
 See the [User listener](http://wiki.gpii.net/index.php/User_Listener) and [NFC](http://wiki.gpii.net/index.php/Using_the_NFC_Listener) pages on the GPII wikifor details of USB and NFC listening and how to encode user IDs.
 
@@ -9,25 +9,21 @@ Known to work with Advanced Card Systems RFID readers including ACR122.
 ## Use
 
 1. Plug in the USB NFC card reader if required
-2. Run the GpiiUserListener.exe. A tray icon is created and can be right clicked on to show a menu. Use the menu item "Show Window" to view status.
-3. Either
-    1. Place a tag with the user id encoded onto the reader. Once the ne status has been recognised the tag can be removed.
-    2. or plug in/out a USB key with user id on.
+2. Run the GPII_RFIDListener.exe. A tray icon is created and can be right clicked on to show a menu. Use the menu item "Show Window" to view status.
+3. Place a tag with the user id encoded onto the reader. Once the ne status has been recognised the tag can be removed.
 
 ## Build
 
-Requires Visual Studio >= 2012 should work with the free Express version. 
-Open GpiiUserListener.sln and build the Debug and/or Release versions.
+Build using build.sh in Mingw base installation with g++ installed. Set COPTS in build.sh to change between release and debug builds. Apart form debugging in gdb DEBUG also
+* Displays the monitor window on startup
+* Closing the monitor window exits the listener
+* Flow manger URLs are logged to debug output and are shown in gdb
 
 ### libcurl
 
 The static version of libcurl is used to create the http GET actions and while files for libcurl 7v25 are included in the source you may wish to regenerate them, for example to update libcurl. To generate these files do the following
 
-1. Download curl source from http://curl.haxx.se/libcurl/
-2. Open a MSVC command shell and cd to the libcurl/winbuild folder
-3. Build both static debug and release libraries using a command line of the form:
-    nmake /f Makefile.vc mode=static VC=11 ENABLE_IPV6=no ENABLE_SSPI=no ENABLE_IDN=no DEBUG=yes
-4. refresh the .h & .lib files in this project's libcurl folder
+See the README in libcur/ for details of generating these files
 
 ## Testing 
 
