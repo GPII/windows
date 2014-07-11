@@ -23,12 +23,11 @@ with grunt.js. At some point these will replace the current build scripts.
 To use these, you must be running a recent version of npm, necessarily greater 
 than 1.4.  If you need to upgrade npm you can issue the following command:
 
-	npm install -g npm
+  npm install -g npm
 
 To build the GPII for Windows using grunt, perform the following:
 
-	git clone https://github.com/GPII/windows.git
-	cd windows
-	npm install --ignore-scripts=true
-	grunt build
-	
+  git clone https://github.com/GPII/windows.git
+  cd windows
+  npm install --ignore-scripts=true
+  grunt build
