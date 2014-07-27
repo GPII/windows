@@ -82,7 +82,7 @@
 //-------------------------------------------------------------------
 // Global Variables
 //-------------------------------------------------------------------
-int          m_retCode = 0;
+DWORD        m_retCode = 0;
 int          m_nReaderIndex = 0;
 BOOL         m_bPolling = 0;
 HWND         m_hWnd = 0;
