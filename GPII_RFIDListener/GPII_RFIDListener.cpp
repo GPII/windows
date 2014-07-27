@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // GPII_RFIDListener.cpp
 //
-// The GPII RFID listener has the following features 
+// The GPII RFID listener has the following features
 // User Listener which includes device arrival and removal,
 // a user hot key (ESC), a task bar icon and menu, and support
 // for the arrival and removal of smart cards.
@@ -38,18 +38,18 @@
 // Versions:
 //
 //    2012.05.05 Version 1.00
-//    2012.05.06 Version 1.01 
+//    2012.05.06 Version 1.01
 //           Changed WM_USER messages from const int to #define
 //           Removed unused responseCode variable
 //           Added m_cUserDrive to check correct logout drive
 //           Changed #include so "curl.h" files in same dir as this file
 //           Changed curl library to libcurld_imp.lib
 //           Compiled and added curl files from Curl 7.21.7
-//    2012.05.06 Version 1.02 
+//    2012.05.06 Version 1.02
 //           Changed operation so card remove does not logout user
 //           Touching the card a second time will logout user
 //           Changed ESC logout to F11 logout
-//    2012.05.06 Version 1.03 
+//    2012.05.06 Version 1.03
 //           Changed s to require user in .gpii-user-token.txt
 //           Set window to SW_HIDE, except for _DEBUG it is SW_SHOW
 //           Removed MY_READER="ACS ACR122 0"
@@ -60,7 +60,7 @@
 //           Changed WM_CLOSE to Hide the Window but not Exit Program
 //           Added Display to Show Current User and Reader
 //    2012.05.07 Version 1.04
-//           Added GpiiUserListener.sln file for Visual Studio 2010 
+//           Added GpiiUserListener.sln file for Visual Studio 2010
 //    2012.05.12 Version 1.05
 //           Changed authentication to key b
 //    2012.05.12 Version 1.06
@@ -121,7 +121,7 @@ static LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 //
 //  COMMENTS:
 //
-//    The user-provided entry point for a graphical Windows-based 
+//    The user-provided entry point for a graphical Windows-based
 //    application. WinMain is the conventional name used for the
 //    application entry point
 //
@@ -131,31 +131,31 @@ int APIENTRY WinMain(HINSTANCE hInstance,
                      LPSTR     lpCmdLine,
                      int       /*nCmdShow*/)
 {
-	MSG msg;
+    MSG msg;
 
-	//-----------------------------------------------------
-	// Initialize global variables
-	//-----------------------------------------------------
-	wsprintf(m_szUserID,"%s",L"");
-	wsprintf(m_szReader,"%s",lpCmdLine);
-	wsprintf(m_szStatus,"%s","Listening...");
+    //-----------------------------------------------------
+    // Initialize global variables
+    //-----------------------------------------------------
+    wsprintf(m_szUserID,"%s",L"");
+    wsprintf(m_szReader,"%s",lpCmdLine);
+    wsprintf(m_szStatus,"%s","Listening...");
 
-	//-----------------------------------------------------
-	// Initialize the window
-	//-----------------------------------------------------
-	if (!MyRegisterClass(hInstance)) return FALSE;
-	if (!InitInstance (hInstance)) return FALSE;
+    //-----------------------------------------------------
+    // Initialize the window
+    //-----------------------------------------------------
+    if (!MyRegisterClass(hInstance)) return FALSE;
+    if (!InitInstance (hInstance)) return FALSE;
 
-	//-----------------------------------------------------
-	// Main message loop:
-	//-----------------------------------------------------
-	while (GetMessage(&msg, NULL, 0, 0)) 
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
+    //-----------------------------------------------------
+    // Main message loop:
+    //-----------------------------------------------------
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
 
-	return (int) msg.wParam; // FIXME which is correct?
+    return (int) msg.wParam; // FIXME which is correct?
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,23 +171,23 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 ///////////////////////////////////////////////////////////////////////////////
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-	WNDCLASSEX wcex;
+    WNDCLASSEX wcex;
 
-	wcex.cbSize = sizeof(WNDCLASSEX); 
+    wcex.cbSize = sizeof(WNDCLASSEX);
 
-	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= (WNDPROC)WndProc;
-	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= 0;
-	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(NULL, IDI_APPLICATION); // FIXME we have icon files so why not use them?
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= NULL;
-	wcex.lpszClassName	= MY_CLASS;
-	wcex.hIconSm		= LoadIcon(NULL, IDI_APPLICATION);
+    wcex.style			= CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc	= (WNDPROC)WndProc;
+    wcex.cbClsExtra		= 0;
+    wcex.cbWndExtra		= 0;
+    wcex.hInstance		= hInstance;
+    wcex.hIcon			= LoadIcon(NULL, IDI_APPLICATION); // FIXME we have icon files so why not use them?
+    wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+    wcex.lpszMenuName	= NULL;
+    wcex.lpszClassName	= MY_CLASS;
+    wcex.hIconSm		= LoadIcon(NULL, IDI_APPLICATION);
 
-	return RegisterClassEx(&wcex);
+    return RegisterClassEx(&wcex);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -201,15 +201,15 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 ///////////////////////////////////////////////////////////////////////////////
 BOOL MyTrayIcon(HWND hWnd)
 {
-	NOTIFYICONDATA nid;
-	nid.cbSize = sizeof(NOTIFYICONDATA);
-	nid.hWnd = hWnd;
-	nid.uID = 100;
-	nid.uCallbackMessage = WM_MYTRAY;
-	nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wsprintf(nid.szTip,"%s",MY_TITLE);
-	nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-	return Shell_NotifyIcon(NIM_ADD, &nid);
+    NOTIFYICONDATA nid;
+    nid.cbSize = sizeof(NOTIFYICONDATA);
+    nid.hWnd = hWnd;
+    nid.uID = 100;
+    nid.uCallbackMessage = WM_MYTRAY;
+    nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wsprintf(nid.szTip,"%s",MY_TITLE);
+    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+    return Shell_NotifyIcon(NIM_ADD, &nid);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -224,8 +224,8 @@ BOOL MyTrayIcon(HWND hWnd)
 BOOL MyPopupMenu(HWND hWnd)
 {
     POINT p;
-	GetCursorPos(&p);
-	HMENU hPopupMenu = CreatePopupMenu();
+    GetCursorPos(&p);
+    HMENU hPopupMenu = CreatePopupMenu();
     InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING, MY_SHOW, "Show Window");
     InsertMenu(hPopupMenu, 1, MF_BYPOSITION | MF_STRING, MY_HIDE, "Hide Window"); // FIXME should prolly grey out
     InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING, MY_LOGOUT,"Logout");
@@ -242,42 +242,42 @@ BOOL MyPopupMenu(HWND hWnd)
 //
 //   COMMENTS:
 //
-//        In this function, we save the instance handle in a global 
+//        In this function, we save the instance handle in a global
 //        variable and create and display the main program window.
 //
 ///////////////////////////////////////////////////////////////////////////////
 BOOL InitInstance(HINSTANCE hInstance)
 {
-	HWND hWnd;
-	RECT rc;
+    HWND hWnd;
+    RECT rc;
 
-	GetWindowRect(GetDesktopWindow(),&rc);
+    GetWindowRect(GetDesktopWindow(),&rc);
 
-	hWnd = CreateWindow(MY_CLASS, MY_TITLE,WS_OVERLAPPED|WS_SYSMENU,
-					    rc.right/2-MY_SIZE_X/2,rc.bottom/3,
-						MY_SIZE_X,MY_SIZE_Y,NULL,NULL,hInstance,NULL);
+    hWnd = CreateWindow(MY_CLASS, MY_TITLE,WS_OVERLAPPED|WS_SYSMENU,
+                        rc.right/2-MY_SIZE_X/2,rc.bottom/3,
+                        MY_SIZE_X,MY_SIZE_Y,NULL,NULL,hInstance,NULL);
 
-	if (!hWnd) return FALSE;
+    if (!hWnd) return FALSE;
 
-	MyTrayIcon(hWnd);
+    MyTrayIcon(hWnd);
 
-	if (WinSmartCardInitialize(hWnd,m_szReader) == FALSE)
-	{
-		if (lstrlen(m_szReader))
-			wsprintf(m_szStatus,"%s %s",m_szReader," READER NOT FOUND");
-		else
-			wsprintf(m_szStatus,"%s","NO CARD READERS FOUND");
-	}
+    if (WinSmartCardInitialize(hWnd,m_szReader) == FALSE)
+    {
+        if (lstrlen(m_szReader))
+            wsprintf(m_szStatus,"%s %s",m_szReader," READER NOT FOUND");
+        else
+            wsprintf(m_szStatus,"%s","NO CARD READERS FOUND");
+    }
 
 #ifdef _DEBUG
-	ShowWindow(hWnd, SW_SHOW);
-	WinSmartCardShowError();
+    ShowWindow(hWnd, SW_SHOW);
+    WinSmartCardShowError();
 #endif
 
-	InvalidateRect(hWnd,NULL,TRUE);
-	SetTimer(hWnd,MY_TIMER,2000,NULL);
+    InvalidateRect(hWnd,NULL,TRUE);
+    SetTimer(hWnd,MY_TIMER,2000,NULL);
 
-	return TRUE;
+    return TRUE;
 }
 
 
@@ -296,196 +296,196 @@ BOOL InitInstance(HINSTANCE hInstance)
 ///////////////////////////////////////////////////////////////////////////////
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message) 
-	{
-		//-----------------------------------------------------------
-		// Smart Card User Login
-		//-----------------------------------------------------------
-		case SMART_CARD_ARRIVE:
-			if (m_nLogin == 0)
-			{
-				//-----------------------------------------------
-				// login a new user
-				//-----------------------------------------------
-				WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
-				wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
-				InvalidateRect(hWnd,NULL,TRUE);
-                FlowManagerLogin(m_szUserID);
-				m_nLogin = SMART_CARD_ARRIVE;
-			}
-				else
-			{
-				char szThisUser[MAX_BUFFER];
-				WinSmartCardGetUser(szThisUser,MAX_BUFFER);
-				if (lstrcmp(szThisUser,m_szUserID) == 0)
-				{
-					//-----------------------------------------------
-					// logout the user
-					//-----------------------------------------------
-					wsprintf(m_szStatus,"%s %s","CARD LOGOUT",m_szUserID);
-                    FlowManagerLogout(m_szUserID);
-					wsprintf(m_szUserID,"%s","");
-					InvalidateRect(hWnd,NULL,TRUE);
-					m_nLogin = 0;
-				}
-				else
-				{
-					//-----------------------------------------------
-					// logout the old user and login new user
-					//-----------------------------------------------
-					FlowManagerLogout(m_szUserID);
-					WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
-					FlowManagerLogin(m_szUserID);
-					wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
-					InvalidateRect(hWnd,NULL,TRUE);
-				}
-			}
-			break;
-
-		//-----------------------------------------------------------
-		// Smart Card Removed
-		//-----------------------------------------------------------
-		case SMART_CARD_REMOVE:
-			wsprintf(m_szStatus,"%s","Listening...");
-			InvalidateRect(hWnd,NULL,TRUE);
-			break;
-			
-		//-----------------------------------------------------------
-		// Smart Reader Stopped
-		//-----------------------------------------------------------
-		case SMART_READER_STOPPED:
-			wsprintf(m_szStatus,"%s","CARD READER STOPPED");
-			InvalidateRect(hWnd,NULL,TRUE);
-			break;
-/*
-		//-----------------------------------------------------------
-		// A device has changed
-		//-----------------------------------------------------------
-		case WM_DEVICECHANGE:
-			return TRUE;
-			break;
-*/
-
-		//-----------------------------------------------------------
-		// Button Click on Tray Icon
-		//-----------------------------------------------------------
-		case WM_MYTRAY:
-			if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
-			{
-				MyPopupMenu(hWnd);
-			}
-			break;
-
-		//-----------------------------------------------------------
-		// Tray Icon Menu Commands to Show, Hide, Exit or Logout
-		//-----------------------------------------------------------
-		case WM_COMMAND:
-			{
-				if (LOWORD(wParam) == MY_SHOW)
-				{
-					ShowWindow(hWnd,SW_SHOW);
-				}
-				else if (LOWORD(wParam) == MY_HIDE)
-				{
-					ShowWindow(hWnd,SW_HIDE);
-				}
-				else if (LOWORD(wParam) == MY_EXIT)
-				{
-					DestroyWindow(hWnd);
-				}
-				else if (LOWORD(wParam) == MY_LOGOUT)
-				{
-					if (m_nLogin)
-					{
-						wsprintf(m_szStatus,"%s","MENU LOGOUT");
-						FlowManagerLogout(m_szUserID);
-						wsprintf(m_szUserID,"%s","");
-						m_nLogin = 0;
-					}
-					else
-					{
-						wsprintf(m_szStatus,"%s","NO USER TO LOGOUT");
-					}
-					InvalidateRect(hWnd,NULL,TRUE);
-				}
-			}
-			break;
-
-		//-----------------------------------------------------------
-		// Paint the Current Status String
-		//-----------------------------------------------------------
-		case WM_PAINT:
-			{
-				PAINTSTRUCT ps;
-				HDC hdc;
-				hdc = BeginPaint(hWnd, &ps);
-				RECT rt;
-				GetClientRect(hWnd, &rt);
-				char szReader[MAX_BUFFER];
-				char sReading[MAX_BUFFER];
-				char sCurrent[MAX_BUFFER];
-				wchar_t wsStatus[MAX_BUFFER];
-				wchar_t wsCurrent[MAX_BUFFER];
-				WinSmartCardGetReader(szReader,MAX_BUFFER);
-				rt.top = rt.bottom*10/100;
-				(void) MultiByteToWideChar(CP_UTF8, 0, m_szStatus, -1, wsStatus, (int) _countof(wsStatus));
-				DrawTextW(hdc, wsStatus, (int)wcslen(wsStatus), &rt, DT_CENTER);
-				rt.top = rt.bottom*40/100;
-				wsprintf(sReading,"%s %s %s",szReader,"READER",
-						 WinSmartCardPolling() ? "ONLINE": "OFFLINE");
-				DrawText(hdc, sReading, (int) strlen(sReading), &rt, DT_CENTER);
-				rt.top = rt.bottom*70/100;
-				wsprintf(sCurrent,"%s %s","CURRENT USER:",
-						 lstrlen(m_szUserID) ? m_szUserID : "NONE");
-				(void) MultiByteToWideChar(CP_UTF8, 0, sCurrent, -1, wsCurrent, _countof(wsCurrent));
-				DrawTextW(hdc, wsCurrent, (int)wcslen(wsCurrent), &rt, DT_CENTER);
-
-				EndPaint(hWnd, &ps);
-			}
-			break;
-
-		//-----------------------------------------------------------
-		// Check to see if the card reader is polling
-		//-----------------------------------------------------------
-		case WM_TIMER:
-			if (wParam == MY_TIMER && !WinSmartCardPolling())
-			{
-				if (WinSmartCardInitialize(hWnd,m_szReader)) //FIXME not sure why this as polls indefinitely - perhaps a fail safe?
-				{
-					wsprintf(m_szStatus,"%s","Listening...");  
-					InvalidateRect(hWnd,NULL,TRUE);
-				}
-			}
-			break;
-
-		//-----------------------------------------------------------
-		// Close [X] Hides the Window
-		//-----------------------------------------------------------
-		case WM_CLOSE:
-			ShowWindow(hWnd,SW_HIDE);
-#ifdef _DEBUG
-			DestroyWindow(hWnd);
-#endif
-			break;
-
-		//-----------------------------------------------------------
-		// Destroy the Window and Exit
-		//-----------------------------------------------------------
-		case WM_DESTROY:
-			if (m_nLogin)
+    switch (message)
+    {
+    //-----------------------------------------------------------
+    // Smart Card User Login
+    //-----------------------------------------------------------
+    case SMART_CARD_ARRIVE:
+        if (m_nLogin == 0)
+        {
+            //-----------------------------------------------
+            // login a new user
+            //-----------------------------------------------
+            WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
+            wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
+            InvalidateRect(hWnd,NULL,TRUE);
+            FlowManagerLogin(m_szUserID);
+            m_nLogin = SMART_CARD_ARRIVE;
+        }
+        else
+        {
+            char szThisUser[MAX_BUFFER];
+            WinSmartCardGetUser(szThisUser,MAX_BUFFER);
+            if (lstrcmp(szThisUser,m_szUserID) == 0)
             {
+                //-----------------------------------------------
+                // logout the user
+                //-----------------------------------------------
+                wsprintf(m_szStatus,"%s %s","CARD LOGOUT",m_szUserID);
                 FlowManagerLogout(m_szUserID);
+                wsprintf(m_szUserID,"%s","");
+                InvalidateRect(hWnd,NULL,TRUE);
+                m_nLogin = 0;
             }
-			KillTimer(hWnd,MY_TIMER);
-			PostQuitMessage(0);
-			break;
+            else
+            {
+                //-----------------------------------------------
+                // logout the old user and login new user
+                //-----------------------------------------------
+                FlowManagerLogout(m_szUserID);
+                WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
+                FlowManagerLogin(m_szUserID);
+                wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
+                InvalidateRect(hWnd,NULL,TRUE);
+            }
+        }
+        break;
 
-		//-----------------------------------------------------------
-		// Default Window Proc
-		//-----------------------------------------------------------
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-   }
-   return 0;
+    //-----------------------------------------------------------
+    // Smart Card Removed
+    //-----------------------------------------------------------
+    case SMART_CARD_REMOVE:
+        wsprintf(m_szStatus,"%s","Listening...");
+        InvalidateRect(hWnd,NULL,TRUE);
+        break;
+
+    //-----------------------------------------------------------
+    // Smart Reader Stopped
+    //-----------------------------------------------------------
+    case SMART_READER_STOPPED:
+        wsprintf(m_szStatus,"%s","CARD READER STOPPED");
+        InvalidateRect(hWnd,NULL,TRUE);
+        break;
+        /*
+        		//-----------------------------------------------------------
+        		// A device has changed
+        		//-----------------------------------------------------------
+        		case WM_DEVICECHANGE:
+        			return TRUE;
+        			break;
+        */
+
+    //-----------------------------------------------------------
+    // Button Click on Tray Icon
+    //-----------------------------------------------------------
+    case WM_MYTRAY:
+        if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
+        {
+            MyPopupMenu(hWnd);
+        }
+        break;
+
+    //-----------------------------------------------------------
+    // Tray Icon Menu Commands to Show, Hide, Exit or Logout
+    //-----------------------------------------------------------
+    case WM_COMMAND:
+    {
+        if (LOWORD(wParam) == MY_SHOW)
+        {
+            ShowWindow(hWnd,SW_SHOW);
+        }
+        else if (LOWORD(wParam) == MY_HIDE)
+        {
+            ShowWindow(hWnd,SW_HIDE);
+        }
+        else if (LOWORD(wParam) == MY_EXIT)
+        {
+            DestroyWindow(hWnd);
+        }
+        else if (LOWORD(wParam) == MY_LOGOUT)
+        {
+            if (m_nLogin)
+            {
+                wsprintf(m_szStatus,"%s","MENU LOGOUT");
+                FlowManagerLogout(m_szUserID);
+                wsprintf(m_szUserID,"%s","");
+                m_nLogin = 0;
+            }
+            else
+            {
+                wsprintf(m_szStatus,"%s","NO USER TO LOGOUT");
+            }
+            InvalidateRect(hWnd,NULL,TRUE);
+        }
+    }
+    break;
+
+    //-----------------------------------------------------------
+    // Paint the Current Status String
+    //-----------------------------------------------------------
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC hdc;
+        hdc = BeginPaint(hWnd, &ps);
+        RECT rt;
+        GetClientRect(hWnd, &rt);
+        char szReader[MAX_BUFFER];
+        char sReading[MAX_BUFFER];
+        char sCurrent[MAX_BUFFER];
+        wchar_t wsStatus[MAX_BUFFER];
+        wchar_t wsCurrent[MAX_BUFFER];
+        WinSmartCardGetReader(szReader,MAX_BUFFER);
+        rt.top = rt.bottom*10/100;
+        (void) MultiByteToWideChar(CP_UTF8, 0, m_szStatus, -1, wsStatus, (int) _countof(wsStatus));
+        DrawTextW(hdc, wsStatus, (int)wcslen(wsStatus), &rt, DT_CENTER);
+        rt.top = rt.bottom*40/100;
+        wsprintf(sReading,"%s %s %s",szReader,"READER",
+                 WinSmartCardPolling() ? "ONLINE": "OFFLINE");
+        DrawText(hdc, sReading, (int) strlen(sReading), &rt, DT_CENTER);
+        rt.top = rt.bottom*70/100;
+        wsprintf(sCurrent,"%s %s","CURRENT USER:",
+                 lstrlen(m_szUserID) ? m_szUserID : "NONE");
+        (void) MultiByteToWideChar(CP_UTF8, 0, sCurrent, -1, wsCurrent, _countof(wsCurrent));
+        DrawTextW(hdc, wsCurrent, (int)wcslen(wsCurrent), &rt, DT_CENTER);
+
+        EndPaint(hWnd, &ps);
+    }
+    break;
+
+    //-----------------------------------------------------------
+    // Check to see if the card reader is polling
+    //-----------------------------------------------------------
+    case WM_TIMER:
+        if (wParam == MY_TIMER && !WinSmartCardPolling())
+        {
+            if (WinSmartCardInitialize(hWnd,m_szReader)) //FIXME not sure why this as polls indefinitely - perhaps a fail safe?
+            {
+                wsprintf(m_szStatus,"%s","Listening...");
+                InvalidateRect(hWnd,NULL,TRUE);
+            }
+        }
+        break;
+
+    //-----------------------------------------------------------
+    // Close [X] Hides the Window
+    //-----------------------------------------------------------
+    case WM_CLOSE:
+        ShowWindow(hWnd,SW_HIDE);
+#ifdef _DEBUG
+        DestroyWindow(hWnd);
+#endif
+        break;
+
+    //-----------------------------------------------------------
+    // Destroy the Window and Exit
+    //-----------------------------------------------------------
+    case WM_DESTROY:
+        if (m_nLogin)
+        {
+            FlowManagerLogout(m_szUserID);
+        }
+        KillTimer(hWnd,MY_TIMER);
+        PostQuitMessage(0);
+        break;
+
+    //-----------------------------------------------------------
+    // Default Window Proc
+    //-----------------------------------------------------------
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
 }
 
