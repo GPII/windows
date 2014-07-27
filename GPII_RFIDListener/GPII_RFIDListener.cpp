@@ -234,6 +234,26 @@ BOOL MyPopupMenu(HWND hWnd)
     return TrackPopupMenu(hPopupMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, p.x,p.y,0,hWnd, NULL);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//   FUNCTION: WinSmartCardShowError(int code)
+//
+//   PURPOSE:  Displays the error and returns 0 for a failure.
+//
+//   COMMENTS:
+//
+///////////////////////////////////////////////////////////////////////////////
+static void WinSmartCardShowError()
+{
+    const char* pszErr = WinSmartCardErrorString();
+    if (pszErr)
+    {
+        MessageBox(NULL,pszErr,"WinSmartCard Error",MB_ICONEXCLAMATION);
+    }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 //   FUNCTION: InitInstance(HANDLE)

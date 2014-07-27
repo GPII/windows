@@ -22,7 +22,7 @@
 // Versions:
 //
 //		2012.05.05 Version 1.00
-//		2012.05.06 Version 1.03 
+//		2012.05.06 Version 1.03
 //           Changed WinSmartCardInitialize to not require a reader name
 //           Added SMART_READER_STOPPED message
 //
@@ -40,7 +40,6 @@ int WinSmartCardInitialize(HWND hWnd,const char* szReader = "");
 int WinSmartCardGetUser(char* szUser,int nMaxLen); // FIXME - getToken
 int WinSmartCardGetReader(char* szReader,int nMaxLen);
 int WinSmartCardPolling(); // FIXME BOOL
-int WinSmartCardShowError();
+const char* WinSmartCardErrorString();
 
 #endif // _WINSMARTCARD_H_
-

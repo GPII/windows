@@ -408,8 +408,12 @@ int WinSmartCardPolling()
 //             be replaced with the correct variables.
 //
 ///////////////////////////////////////////////////////////////////////////////
-const char* WinSmartCardErrorString(DWORD code)
+const char* WinSmartCardErrorString()
 {
+    if (m_retCode == SCARD_S_SUCCESS)
+        return NULL;
+
+    DWORD code = m_retCode;
     if (code == SCARD_S_SUCCESS) return "SCARD_S_SUCCESS";
     if (code == NO_READERS_FOUND) return "NO_READERS_FOUND";
     if (code == READER_NOT_FOUND) return "READER_NOT_FOUND";
@@ -480,25 +484,6 @@ const char* WinSmartCardErrorString(DWORD code)
     return ("UNKNOWN CARD READER ERROR");
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//   FUNCTION: WinSmartCardShowError(int code)
-//
-//   PURPOSE:  Displays the error and returns 0 for a failure.
-//
-//   COMMENTS:
-//
-///////////////////////////////////////////////////////////////////////////////
-int WinSmartCardShowError()
-{
-    if (m_retCode != SCARD_S_SUCCESS)
-        MessageBox(NULL,WinSmartCardErrorString(m_retCode),
-                   "WinSmartCard Error",MB_ICONEXCLAMATION);
-    return 0;
-}
-
-//-------------------------------------------------------------------
-//
 //   FUNCTION: WinSmartCardInitialize(HWND hWnd,const char* szReader)
 //
 //   PURPOSE:  Search for the desired reader and start polling to
