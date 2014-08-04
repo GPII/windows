@@ -9,7 +9,9 @@
   "devDependencies": {
     "grunt": "~0.4.4",
     "grunt-shell": "0.6.4",
-    "grunt-gpii": "git://github.com/gpii/grunt-gpii.git"
+    "grunt-contrib-jshint": "~0.9.0",
+    "grunt-jsonlint": "1.0.4",
+    "grunt-gpii": "git://github.com/amb26/grunt-gpii.git#a1ec3cba74de0a481a921be2985f7bb443364bfb"
   },
   "licenses": [
      {

@@ -62,7 +62,7 @@ var testDefs = [
                         }
                     }
                 ]
-           },
+            },
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
                     "settings": {
@@ -172,7 +172,7 @@ var testDefs = [
                         }
                     }
                 ]
-           },
+            },
             "gpii.windows.registrySettingsHandler": {
                 "data": [{ //magnifier stuff
                     "settings": {

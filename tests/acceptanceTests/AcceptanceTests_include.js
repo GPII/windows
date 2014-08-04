@@ -30,12 +30,12 @@ fluid.require("universal/tests/AcceptanceTests", require);
 
 gpii.acceptanceTesting.windows.runTests = function (configFile, testDefs) {
     var gpiiConfig = {
-       nodeEnv: configFile,
-       configPath: path.resolve(__dirname, "./configs")
+        nodeEnv: configFile,
+        configPath: path.resolve(__dirname, "./configs")
     };
     fluid.each(testDefs, function (testDef) {
         testDef.config = gpiiConfig;
     });
     testDefs = gpii.acceptanceTesting.buildTests(testDefs);
     module.exports = kettle.tests.bootstrap(testDefs);
-}
+};
