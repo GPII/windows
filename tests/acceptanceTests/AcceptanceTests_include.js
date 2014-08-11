@@ -21,11 +21,9 @@ var fluid = require("universal"),
 
 fluid.registerNamespace("gpii.acceptanceTesting.windows");
 
-fluid.require("../../gpii/node_modules/registrySettingsHandler", require);
-fluid.require("../../gpii/node_modules/registryResolver", require);
-fluid.require("../../gpii/node_modules/spiSettingsHandler", require);
+require("../../gpii/index.js");
 
-fluid.require("universal/tests/AcceptanceTests", require);
+fluid.require("universal/tests/AcceptanceTests.js", require);
 
 
 gpii.acceptanceTesting.windows.runTests = function (configFile, testDefs) {
