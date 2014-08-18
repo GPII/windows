@@ -99,17 +99,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\libcurl\curl.h" />
+    <ClInclude Include="include\libcurl\curlbuild.h" />
+    <ClInclude Include="include\libcurl\curlrules.h" />
+    <ClInclude Include="include\libcurl\curlver.h" />
+    <ClInclude Include="include\libcurl\easy.h" />
+    <ClInclude Include="include\libcurl\mprintf.h" />
+    <ClInclude Include="include\libcurl\multi.h" />
     <ClInclude Include="include\WinSmartCard.h" />
     <ClInclude Include="include\FlowManager.h" />
-    <ClInclude Include="lib\libcurl\curl.h" />
-    <ClInclude Include="lib\libcurl\curlbuild.h" />
-    <ClInclude Include="lib\libcurl\curlrules.h" />
-    <ClInclude Include="lib\libcurl\curlver.h" />
-    <ClInclude Include="lib\libcurl\easy.h" />
-    <ClInclude Include="lib\libcurl\mprintf.h" />
-    <ClInclude Include="lib\libcurl\multi.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\libcurl\COPYING" />
     <None Include="lib\libcurl\README" />
     <None Include="README.md" />
   </ItemGroup>
