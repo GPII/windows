@@ -58,7 +58,8 @@ static int _MakeCurlRequest(const char* szUser, const char* szAction)
             wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUserEscaped,szAction);
 
 #ifdef _DEBUG
-            OutputDebugString(szRequest); // will show in gdb
+            OutputDebugString(szRequest); // will show in VisualStudio and gdb
+            OutputDebugString("\r\n");
 #endif
 
 #if defined(USE_FIDDLER)
