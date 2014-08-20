@@ -10,6 +10,7 @@
 // not be used by that same main window.
 //
 // Note: This code was tested with reader "ACS ACR122 0"
+// Note: For APDU commands see ISO7816-4 eg http ://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-4.aspx
 //
 //	Project Files:
 //  	WinSmartCard.cpp
@@ -44,6 +45,7 @@
 #ifdef __MINGW_H
 #define DEVICE_TYPE_SMARTCARD // stop redefinition as already defined in winioctrl.h
 #endif
+#include <Diagnostic.h>
 #include <winscard.h>       // Nore for MinGW builds is not included in MinGW so need a local copy
 #include "WinSmartCard.h"
 
@@ -81,7 +83,7 @@
 //-------------------------------------------------------------------
 // Global Variables
 //-------------------------------------------------------------------
-DWORD        m_retCode = 0;
+DWORD        m_retCode = SCARD_S_SUCCESS;
 int          m_nReaderIndex = 0;
 BOOL         m_bPolling = 0;
 HWND         m_hWnd = 0;
@@ -92,6 +94,12 @@ DWORD        m_dwProtocol = 0;
 char         m_szReader[MAX_BUFFER];
 char         m_szUser[MAX_BUFFER];
 DWORD        m_dwTotalBytes = 0;
+
+//-------------------------------------------------------------------
+// Private functions
+//-------------------------------------------------------------------
+static const char* _WinSmartCardErrorString(DWORD code);
+static void _dumpRetCode(void);
 
 //-------------------------------------------------------------------
 // Structure Used to Cleanup on Exit
@@ -122,8 +130,8 @@ struct Cleanup
 ///////////////////////////////////////////////////////////////////////////////
 int ApduReadBlock(SCARDHANDLE  hCard,DWORD dwProtocol,BYTE byBlock,BYTE* pRecv)
 {
-    BYTE read_block[] =  { 0xFF, 0xB0, 0x00, 0x04, 0x10 };  // FIXME const
-    read_block[3] = byBlock;
+    const BYTE READ_BINARY = 0xB0;  // Spec TS 51.011
+    const BYTE read_block[] = { 0xFF, READ_BINARY, 0x00, byBlock, 16 };  // read 16 bytes for block byBloc ISO 7816-4, Section 8.2.1
 
     DWORD dwRecvLen = 18;
     SCARD_IO_REQUEST io_req;
@@ -145,10 +153,11 @@ int ApduReadBlock(SCARDHANDLE  hCard,DWORD dwProtocol,BYTE byBlock,BYTE* pRecv)
 //   COMMENTS: Returns 1 if successfull or 0 for a failure.
 //
 ///////////////////////////////////////////////////////////////////////////////
-int ApduAuthenticate(SCARDHANDLE hCard,DWORD dwProtocol)
+BOOL ApduAuthenticate(SCARDHANDLE hCard,DWORD dwProtocol)
 {
-    BYTE auth_key_a[] = { 0xFF, 0x86, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x60, 0x00 }; // FIXME const
-    BYTE auth_key_b[] = { 0xFF, 0x86, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x61, 0x00 };
+    const BYTE GET_PREVIOUS_PSAM_SIGNATURE = 0x86;  // Spec EN 1546-3
+    const BYTE auth_key_a[] = { 0xFF, GET_PREVIOUS_PSAM_SIGNATURE, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x60, 0x00 };
+    const BYTE auth_key_b[] = { 0xFF, GET_PREVIOUS_PSAM_SIGNATURE, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x61, 0x00 };
 
     BYTE pRecv[18];
     DWORD dwRecvLen = 2;
@@ -156,17 +165,28 @@ int ApduAuthenticate(SCARDHANDLE hCard,DWORD dwProtocol)
     io_req.cbPciLength = sizeof(io_req);
     io_req.dwProtocol = dwProtocol;
 
+    // Myfair need to be authenticated.
     if (SCardTransmit(hCard,&io_req,auth_key_a,sizeof(auth_key_a),
-                      &io_req,pRecv,&dwRecvLen) != SCARD_S_SUCCESS) return 0;
+        &io_req,pRecv,&dwRecvLen) != SCARD_S_SUCCESS) 
+        return FALSE;
 
-    if (ApduReadBlock(hCard,dwProtocol,4,pRecv) == 16) return 1;
+    if (ApduReadBlock(hCard, dwProtocol, 4, pRecv) == 16)
+    {
+        Diagnostic_LogString("Authenticated", "Key a");
+        return TRUE;
+    }
 
     if (SCardTransmit(hCard,&io_req,auth_key_b,sizeof(auth_key_b),
-                      &io_req,pRecv,&dwRecvLen) != SCARD_S_SUCCESS) return 0;
+                      &io_req,pRecv,&dwRecvLen) != SCARD_S_SUCCESS)
+      return FALSE;
 
-    if (ApduReadBlock(hCard,dwProtocol,4,pRecv) == 16) return 1;
+    if (ApduReadBlock(hCard,dwProtocol,4,pRecv) == 16)
+    {
+        Diagnostic_LogString("Authenticated", "Key b");
+        return TRUE;
+    }
 
-    return 0;
+    return FALSE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,11 +248,37 @@ int ApduReadRecord(SCARDHANDLE hCard,DWORD dwProtocol,char* pRecord,int nMaxLen)
 
     for (BYTE byBlock = BLOCK_START; byBlock < nMaxLen/BLOCK_BYTES + BLOCK_START; byBlock++)
     {
-        if (ApduReadBlock(hCard,dwProtocol,byBlock,pRecv) != BLOCK_BYTES) return 0;
-        if (ApduAppendAsciiRecord(pRecord,pRecv) == 0) return lstrlen(pRecord);
+        if (ApduReadBlock(hCard,dwProtocol,byBlock,pRecv) != BLOCK_BYTES) 
+            return 0;
+        if (ApduAppendAsciiRecord(pRecord,pRecv) == 0)
+            return lstrlen(pRecord);
     }
 
     return lstrlen(pRecord);;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//   FUNCTION: DumpCard()
+//
+//   PURPOSE:  Hex dump of card contents.
+//
+//   COMMENTS: 
+//
+///////////////////////////////////////////////////////////////////////////////
+static void DumpCard()
+{
+    Diagnostic_LogString("Card dump", NULL);
+
+    const BYTE NumBlocks = 4 * 16; // Each block is 16 bytes
+    for (BYTE byBlock = 0; byBlock < NumBlocks; byBlock++)
+    {
+        BYTE pRecv[18];
+        (void)ApduReadBlock(m_hCard, m_dwProtocol, byBlock, pRecv);
+        UINT uSector = byBlock / 4;
+        UINT uBlock = byBlock % 4;
+        Diagnostic_LogBlock(uSector, uBlock, pRecv);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -252,8 +298,11 @@ int WinSmartCardReadUser() // FIXME - rwad token as user to concrete
     //-----------------------------------------------------------
     // Authenticate the card and read the user text
     //-----------------------------------------------------------
-    ApduAuthenticate(m_hCard,m_dwProtocol);
-    ApduReadRecord(m_hCard,m_dwProtocol,m_szUser,MAX_BUFFER);
+    if (ApduAuthenticate(m_hCard, m_dwProtocol))
+    {
+        DumpCard();
+        ApduReadRecord(m_hCard, m_dwProtocol, m_szUser, MAX_BUFFER);
+    }
 
     //-----------------------------------------------------------
     // Failed to read user text, default to GUEST
@@ -300,24 +349,31 @@ DWORD WINAPI WinSmartCardThread(void*)
                                      SCARD_PROTOCOL_T0|SCARD_PROTOCOL_T1,
                                      &m_hCard,&m_dwProtocol);
 
+            _dumpRetCode();
             if (m_retCode == SCARD_S_SUCCESS)
             {
                 bConnected = TRUE;
+                Diagnostic_LogString("Reader status", "Card connected");
             }
-            else if (m_retCode == SCARD_E_READER_UNAVAILABLE ||
-                     m_retCode == SCARD_E_UNKNOWN_READER)
+            else
             {
-                m_bPolling = FALSE;
-                SCardReleaseContext(m_hContext);
-                PostMessage(m_hWnd,SMART_READER_STOPPED,0,0);
+                if (m_retCode == SCARD_E_READER_UNAVAILABLE ||
+                    m_retCode == SCARD_E_UNKNOWN_READER)
+                {
+                    m_bPolling = FALSE;
+                    SCardReleaseContext(m_hContext);
+                    PostMessage(m_hWnd, SMART_READER_STOPPED, 0, 0);
+                }
             }
         }
 
         //-----------------------------------------------------------
         // Try to read the user and post the arrive message
         //-----------------------------------------------------------
+
         bConnected = WinSmartCardReadUser();
         if (bConnected) PostMessage(m_hWnd,SMART_CARD_ARRIVE,0,0);
+        Diagnostic_LogString("Reader status", "Found record");
         Sleep(1500);
 
         //-----------------------------------------------------------
@@ -329,6 +385,7 @@ DWORD WINAPI WinSmartCardThread(void*)
             m_retCode = SCardStatus(m_hCard,m_szReader,
                                     &dwLength,&dwState,&dwProtocol,
                                     pAttrib,&dwAttrib);
+            _dumpRetCode();
             if (m_retCode != SCARD_S_SUCCESS)
             {
                 bConnected = FALSE;
@@ -394,9 +451,23 @@ int WinSmartCardPolling()
     return m_bPolling;
 }
 
+
+static void _dumpRetCode(void)
+{
+    static DWORD lastRetCode = SCARD_S_SUCCESS;   // we only print code when it changes
+
+    if (m_retCode == SCARD_S_SUCCESS || m_retCode == lastRetCode)
+        return;
+
+    lastRetCode = m_retCode;
+
+    Diagnostic_LogString("Reader status", _WinSmartCardErrorString(m_retCode));
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //
-//   FUNCTION: WinSmartCardErrorString(int code)
+//   FUNCTION: WinSmartCardErrorString(DWORD code)
 //
 //   PURPOSE:  Creates the text of a card reader error
 //
@@ -407,12 +478,8 @@ int WinSmartCardPolling()
 //             be replaced with the correct variables.
 //
 ///////////////////////////////////////////////////////////////////////////////
-const char* WinSmartCardErrorString()
+static const char* _WinSmartCardErrorString(DWORD code)
 {
-    if (m_retCode == SCARD_S_SUCCESS)
-        return NULL;
-
-    DWORD code = m_retCode;
     if (code == SCARD_S_SUCCESS) return "SCARD_S_SUCCESS";
     if (code == NO_READERS_FOUND) return "NO_READERS_FOUND";
     if (code == READER_NOT_FOUND) return "READER_NOT_FOUND";

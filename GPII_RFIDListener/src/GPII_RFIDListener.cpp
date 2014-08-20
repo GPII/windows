@@ -71,6 +71,7 @@
 #include <windows.h>
 #include <shellapi.h>
 #include <FlowManager.h>
+#include <Diagnostic.h>
 #include "WinSmartCard.h"
 
 // MinGW doesn't define _countof in stdlib
@@ -93,6 +94,7 @@ const int    MY_SIZE_Y   = 100;
 #define      MY_EXIT      (WM_USER + 5)
 #define      MY_LOGOUT    (WM_USER + 6)
 #define      MY_TIMER     (WM_USER + 7)
+#define      MY_SHOWDIAG  (WM_USER + 8)
 
 //---------------------------------------------------------
 // Global Variables:
@@ -144,6 +146,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     //-----------------------------------------------------
     if (!MyRegisterClass(hInstance)) return FALSE;
     if (!InitInstance (hInstance)) return FALSE;
+    if (!Diagnostic_Init(hInstance)) return FALSE;
+#ifdef _DEBUG
+    Diagnostic_Show(TRUE);
+#endif
 
     //-----------------------------------------------------
     // Main message loop:
@@ -227,32 +233,16 @@ BOOL MyPopupMenu(HWND hWnd)
     HMENU hPopupMenu = CreatePopupMenu();
     InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING, MY_SHOW, "Show Window");
     InsertMenu(hPopupMenu, 1, MF_BYPOSITION | MF_STRING, MY_HIDE, "Hide Window"); // FIXME should prolly grey out
-    InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING, MY_LOGOUT,"Logout");
-    InsertMenu(hPopupMenu, 3, MF_BYPOSITION | MF_STRING, MY_EXIT, "Exit");
+    UINT fDiagChecked = (Diagnostic_IsShowing()) ? MF_CHECKED : 0;
+    InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING | fDiagChecked, MY_SHOWDIAG, "View Diagnostics Window");
+    InsertMenu(hPopupMenu, 3, MF_BYPOSITION | MF_STRING, MY_LOGOUT, "Logout");
+    InsertMenu(hPopupMenu, 4, MF_BYPOSITION | MF_STRING, MY_EXIT, "Exit");
+    SetMenuItemBitmaps(hPopupMenu, MY_SHOWDIAG, MF_BYCOMMAND, NULL, NULL);
     SetForegroundWindow(hWnd);
+
     return TrackPopupMenu(hPopupMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, p.x,p.y,0,hWnd, NULL);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-//
-//   FUNCTION: WinSmartCardShowError(int code)
-//
-//   PURPOSE:  Displays the error and returns 0 for a failure.
-//
-//   COMMENTS:
-//
-///////////////////////////////////////////////////////////////////////////////
-#ifdef _DEBUG
-static void WinSmartCardShowError()
-{
-    const char* pszErr = WinSmartCardErrorString();
-    if (pszErr)
-    {
-        MessageBox(NULL,pszErr,"WinSmartCard Error",MB_ICONEXCLAMATION);
-    }
-}
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -289,13 +279,12 @@ BOOL InitInstance(HINSTANCE hInstance)
             wsprintf(m_szStatus,"%s","NO CARD READERS FOUND");
     }
 
-#ifdef _DEBUG
-    ShowWindow(hWnd, SW_SHOW);
-    WinSmartCardShowError();
-#endif
-
     InvalidateRect(hWnd,NULL,TRUE);
     SetTimer(hWnd,MY_TIMER,2000,NULL);
+
+#ifdef _DEBUG
+    ShowWindow(hWnd, SW_SHOW);
+#endif
 
     return TRUE;
 }
@@ -427,6 +416,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 wsprintf(m_szStatus,"%s","NO USER TO LOGOUT");
             }
             InvalidateRect(hWnd,NULL,TRUE);
+        }
+        if (LOWORD(wParam) == MY_SHOWDIAG)
+        {
+            Diagnostic_Show(!Diagnostic_IsShowing());
         }
     }
     break;

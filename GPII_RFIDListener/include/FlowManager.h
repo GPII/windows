@@ -10,9 +10,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef _FLOWMANAGER_H_
-#define __FLOWMANAGER_H_
+#define _FLOWMANAGER_H_
 
 void FlowManagerLogin(const char * szToken);
 void FlowManagerLogout(const char * szToken);
 
-#endif // __FLOWMANAGER_H_
+#endif // _FLOWMANAGER_H_

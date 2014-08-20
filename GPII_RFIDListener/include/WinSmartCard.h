@@ -40,6 +40,5 @@ int WinSmartCardInitialize(HWND hWnd,const char* szReader = "");
 int WinSmartCardGetUser(char* szUser,int nMaxLen); // FIXME - getToken
 int WinSmartCardGetReader(char* szReader,int nMaxLen);
 int WinSmartCardPolling(); // FIXME BOOL
-const char* WinSmartCardErrorString();
 
 #endif // _WINSMARTCARD_H_
