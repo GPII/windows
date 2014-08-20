@@ -89,12 +89,11 @@ const int    MY_SIZE_X   = 450;
 const int    MY_SIZE_Y   = 100;
 #define      WM_MYTRAY    (WM_USER + 1)
 #define      MY_HOTKEY    (WM_USER + 2)
-#define      MY_SHOW      (WM_USER + 3)
-#define      MY_HIDE      (WM_USER + 4)
+#define      MY_SHOWSTATUS (WM_USER + 3)
+#define      MY_SHOWDIAG  (WM_USER + 4)
 #define      MY_EXIT      (WM_USER + 5)
 #define      MY_LOGOUT    (WM_USER + 6)
 #define      MY_TIMER     (WM_USER + 7)
-#define      MY_SHOWDIAG  (WM_USER + 8)
 
 //---------------------------------------------------------
 // Global Variables:
@@ -231,10 +230,10 @@ BOOL MyPopupMenu(HWND hWnd)
     POINT p;
     GetCursorPos(&p);
     HMENU hPopupMenu = CreatePopupMenu();
-    InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING, MY_SHOW, "Show Window");
-    InsertMenu(hPopupMenu, 1, MF_BYPOSITION | MF_STRING, MY_HIDE, "Hide Window"); // FIXME should prolly grey out
-    UINT fDiagChecked = (Diagnostic_IsShowing()) ? MF_CHECKED : 0;
-    InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING | fDiagChecked, MY_SHOWDIAG, "View Diagnostics Window");
+    const UINT fStatusChecked = (IsWindowVisible(hWnd)) ? MF_CHECKED : 0;
+    InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING | fStatusChecked, MY_SHOWSTATUS, "View status window");
+    const UINT fDiagChecked = (Diagnostic_IsShowing()) ? MF_CHECKED : 0;
+    InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING | fDiagChecked, MY_SHOWDIAG, "View Diagnostic Window");
     InsertMenu(hPopupMenu, 3, MF_BYPOSITION | MF_STRING, MY_LOGOUT, "Logout");
     InsertMenu(hPopupMenu, 4, MF_BYPOSITION | MF_STRING, MY_EXIT, "Exit");
     SetMenuItemBitmaps(hPopupMenu, MY_SHOWDIAG, MF_BYCOMMAND, NULL, NULL);
@@ -390,19 +389,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     //-----------------------------------------------------------
     case WM_COMMAND:
     {
-        if (LOWORD(wParam) == MY_SHOW)
+        const WORD cmd = LOWORD(wParam);
+
+        if ( cmd == MY_SHOWSTATUS)
         {
-            ShowWindow(hWnd,SW_SHOW);
+            ShowWindow(hWnd, (IsWindowVisible(hWnd)) ? SW_HIDE : SW_SHOW);
         }
-        else if (LOWORD(wParam) == MY_HIDE)
-        {
-            ShowWindow(hWnd,SW_HIDE);
-        }
-        else if (LOWORD(wParam) == MY_EXIT)
+        else if (cmd == MY_EXIT)
         {
             DestroyWindow(hWnd);
         }
-        else if (LOWORD(wParam) == MY_LOGOUT)
+        else if (cmd == MY_LOGOUT)
         {
             if (m_nLogin)
             {
@@ -417,7 +414,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             InvalidateRect(hWnd,NULL,TRUE);
         }
-        if (LOWORD(wParam) == MY_SHOWDIAG)
+        if (cmd == MY_SHOWDIAG)
         {
             Diagnostic_Show(!Diagnostic_IsShowing());
         }
