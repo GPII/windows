@@ -389,7 +389,6 @@ DWORD WINAPI WinSmartCardThread(void*)
             m_retCode = SCardStatus(m_hCard,m_szReader,
                                     &dwLength,&dwState,&dwProtocol,
                                     pAttrib,&dwAttrib);
-            _dumpRetCode();
             if (m_retCode != SCARD_S_SUCCESS)
             {
                 bConnected = FALSE;
@@ -404,6 +403,7 @@ DWORD WINAPI WinSmartCardThread(void*)
                     PostMessage(m_hWnd,SMART_READER_STOPPED,0,0);
                 }
             }
+            _dumpRetCode();
         }
         Sleep(1500);
     }
@@ -460,10 +460,15 @@ static void _dumpRetCode(void)
 {
     static DWORD lastRetCode = SCARD_S_SUCCESS;   // we only print code when it changes
 
-    if (m_retCode == SCARD_S_SUCCESS || m_retCode == lastRetCode)
+    if (m_retCode == lastRetCode)
         return;
 
     lastRetCode = m_retCode;
+
+    if (m_retCode == SCARD_S_SUCCESS)
+    {
+        return;
+    }
 
     Diagnostic_LogString("Reader status", _WinSmartCardErrorString(m_retCode));
 }
