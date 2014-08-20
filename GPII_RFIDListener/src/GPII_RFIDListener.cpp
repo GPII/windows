@@ -144,8 +144,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     // Initialize the window
     //-----------------------------------------------------
     if (!MyRegisterClass(hInstance)) return FALSE;
-    if (!InitInstance (hInstance)) return FALSE;
     if (!Diagnostic_Init(hInstance)) return FALSE;
+    if (!InitInstance(hInstance)) return FALSE;
 #ifdef _DEBUG
     Diagnostic_Show(TRUE);
 #endif
@@ -270,7 +270,7 @@ BOOL InitInstance(HINSTANCE hInstance)
 
     MyTrayIcon(hWnd);
 
-    if (WinSmartCardInitialize(hWnd,m_szReader) == FALSE)
+    if (WinSmartCardInitialize(hWnd,m_szReader) == 0)
     {
         if (lstrlen(m_szReader))
             wsprintf(m_szStatus,"%s %s",m_szReader," READER NOT FOUND");

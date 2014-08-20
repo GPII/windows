@@ -302,17 +302,18 @@ int WinSmartCardReadUser() // FIXME - rwad token as user to concrete
     {
         DumpCard();
         ApduReadRecord(m_hCard, m_dwProtocol, m_szUser, MAX_BUFFER);
+
+        //-----------------------------------------------------------
+        // Failed to read user text, default to GUEST
+        //-----------------------------------------------------------
+        if (lstrlen(m_szUser) == 0)
+        {
+            lstrcpyn(m_szUser,DEFAULT_USER_NAME,MAX_BUFFER);  // FIXME lose this state!
+        }
+        return 1;
     }
 
-    //-----------------------------------------------------------
-    // Failed to read user text, default to GUEST
-    //-----------------------------------------------------------
-    if (lstrlen(m_szUser) == 0)
-    {
-        lstrcpyn(m_szUser,DEFAULT_USER_NAME,MAX_BUFFER);  // FIXME lose this state!
-    }
-
-    return 1;
+    return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -372,8 +373,11 @@ DWORD WINAPI WinSmartCardThread(void*)
         //-----------------------------------------------------------
 
         bConnected = WinSmartCardReadUser();
-        if (bConnected) PostMessage(m_hWnd,SMART_CARD_ARRIVE,0,0);
-        Diagnostic_LogString("Reader status", "Found record");
+        if (bConnected)
+        {
+            PostMessage(m_hWnd, SMART_CARD_ARRIVE, 0, 0);
+            Diagnostic_LogString("Reader status", "Found record");
+        }
         Sleep(1500);
 
         //-----------------------------------------------------------
@@ -560,7 +564,7 @@ static const char* _WinSmartCardErrorString(DWORD code)
 //             will be used.
 //
 //-------------------------------------------------------------------
-int WinSmartCardInitialize(HWND hWnd,const char* szReader)
+int _WinSmartCardInitialize(HWND hWnd,const char* szReader)
 {
     int nFound = 0;
     int nLen = 0;
@@ -589,8 +593,9 @@ int WinSmartCardInitialize(HWND hWnd,const char* szReader)
     // Establish Context
     //---------------------------------------------------------------
     m_retCode = SCardEstablishContext(SCARD_SCOPE_USER,
-                                      NULL,NULL,&m_hContext);
-    if (m_retCode != SCARD_S_SUCCESS) return 0;
+                                      NULL,NULL,&m_hContext);   // FIXME this context is never freed and may get overwritten
+    if (m_retCode != SCARD_S_SUCCESS) 
+        return 0;
 
     //---------------------------------------------------------------
     // List the Card Readers
@@ -655,3 +660,13 @@ int WinSmartCardInitialize(HWND hWnd,const char* szReader)
 
     return 1;
 }
+
+int WinSmartCardInitialize(HWND hWnd, const char* szReader)
+{
+    int r = _WinSmartCardInitialize(hWnd, szReader);
+    _dumpRetCode();
+    return r;
+}
+
+
+
