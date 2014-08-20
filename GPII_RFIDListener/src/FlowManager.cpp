@@ -10,6 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include <FlowManager.h>
+#include <Diagnostic.h>
 #include <libcurl\curl.h>
 
 #ifdef __MINGW_H
@@ -61,6 +62,7 @@ static int _MakeCurlRequest(const char* szUser, const char* szAction)
             OutputDebugString(szRequest); // will show in VisualStudio and gdb
             OutputDebugString("\r\n");
 #endif
+            Diagnostic_LogString("FlowManger URL", szRequest);
 
 #if defined(USE_FIDDLER)
             (void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP

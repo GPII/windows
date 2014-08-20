@@ -30,6 +30,8 @@
 #ifndef _WINSMARTCARD_H_
 #define _WINSMARTCARD_H_
 
+#include <windows.h>
+
 #define DEFAULT_USER_NAME "GUEST"
 
 #define SMART_CARD_ARRIVE     (WM_USER + 101)
