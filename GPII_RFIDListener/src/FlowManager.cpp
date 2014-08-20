@@ -58,13 +58,9 @@ static int _MakeCurlRequest(const char* szUser, const char* szAction)
             char * szUserEscaped = curl_easy_escape(curl, szUser, 0);
             wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUserEscaped,szAction);
 
-#ifdef _DEBUG
-            OutputDebugString(szRequest); // will show in VisualStudio and gdb
-            OutputDebugString("\r\n");
-#endif
-            Diagnostic_LogString("FlowManger URL", szRequest);
+            Diagnostic_LogString("FlowManger URL", szRequest); // FIXME is getting printed twice but code doesn't seem to rreach here twice
 
-#if defined(USE_FIDDLER)
+#if USE_FIDDLER == TRUE
             (void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP
 #endif
             (void) curl_easy_setopt(curl, CURLOPT_URL, szRequest);

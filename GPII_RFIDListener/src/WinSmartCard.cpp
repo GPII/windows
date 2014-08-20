@@ -99,7 +99,8 @@ DWORD        m_dwTotalBytes = 0;
 // Private functions
 //-------------------------------------------------------------------
 static const char* _WinSmartCardErrorString(DWORD code);
-static void _dumpRetCode(void);
+static void _DumpRetCode(void);
+static void _DumpCard(void);
 
 //-------------------------------------------------------------------
 // Structure Used to Cleanup on Exit
@@ -259,30 +260,6 @@ int ApduReadRecord(SCARDHANDLE hCard,DWORD dwProtocol,char* pRecord,int nMaxLen)
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//   FUNCTION: DumpCard()
-//
-//   PURPOSE:  Hex dump of card contents.
-//
-//   COMMENTS: 
-//
-///////////////////////////////////////////////////////////////////////////////
-static void DumpCard()
-{
-    Diagnostic_LogString("Card dump", NULL);
-
-    const BYTE NumBlocks = 4 * 16; // Each block is 16 bytes
-    for (BYTE byBlock = 0; byBlock < NumBlocks; byBlock++)
-    {
-        BYTE pRecv[18];
-        (void)ApduReadBlock(m_hCard, m_dwProtocol, byBlock, pRecv);
-        UINT uSector = byBlock / 4;
-        UINT uBlock = byBlock % 4;
-        Diagnostic_LogBlock(uSector, uBlock, pRecv);
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
 //   FUNCTION: WinSmartCardReadUser()
 //
 //   PURPOSE:  This function authenticates the user ID block on
@@ -300,7 +277,7 @@ int WinSmartCardReadUser() // FIXME - rwad token as user to concrete
     //-----------------------------------------------------------
     if (ApduAuthenticate(m_hCard, m_dwProtocol))
     {
-        DumpCard();
+        _DumpCard();
         ApduReadRecord(m_hCard, m_dwProtocol, m_szUser, MAX_BUFFER);
 
         //-----------------------------------------------------------
@@ -350,7 +327,7 @@ DWORD WINAPI WinSmartCardThread(void*)
                                      SCARD_PROTOCOL_T0|SCARD_PROTOCOL_T1,
                                      &m_hCard,&m_dwProtocol);
 
-            _dumpRetCode();
+            _DumpRetCode();
             if (m_retCode == SCARD_S_SUCCESS)
             {
                 bConnected = TRUE;
@@ -372,8 +349,7 @@ DWORD WINAPI WinSmartCardThread(void*)
         // Try to read the user and post the arrive message
         //-----------------------------------------------------------
 
-        bConnected = WinSmartCardReadUser();
-        if (bConnected)
+        if (WinSmartCardReadUser())
         {
             PostMessage(m_hWnd, SMART_CARD_ARRIVE, 0, 0);
             Diagnostic_LogString("Reader status", "Found record");
@@ -403,7 +379,7 @@ DWORD WINAPI WinSmartCardThread(void*)
                     PostMessage(m_hWnd,SMART_READER_STOPPED,0,0);
                 }
             }
-            _dumpRetCode();
+            _DumpRetCode();
         }
         Sleep(1500);
     }
@@ -455,10 +431,42 @@ int WinSmartCardPolling()
     return m_bPolling;
 }
 
-
-static void _dumpRetCode(void)
+///////////////////////////////////////////////////////////////////////////////
+//
+//   FUNCTION: DumpCard()
+//
+//   PURPOSE:  Hex dump of card contents.
+//
+//   COMMENTS: 
+//
+///////////////////////////////////////////////////////////////////////////////
+static void _DumpCard()
 {
-    static DWORD lastRetCode = SCARD_S_SUCCESS;   // we only print code when it changes
+    Diagnostic_LogString("Card dump", NULL);
+
+    const BYTE NumBlocks = 4 * 8; // Each block is 16 bytes in mifare
+    for (BYTE byBlock = 0; byBlock < NumBlocks; byBlock++)
+    {
+        BYTE pRecv[18];
+        (void)ApduReadBlock(m_hCard, m_dwProtocol, byBlock, pRecv);
+        UINT uSector = byBlock / 4;
+        UINT uBlock = byBlock % 4;
+        Diagnostic_LogBlock(uSector, uBlock, pRecv);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//   FUNCTION: _DumpRetCode()
+//
+//   PURPOSE:  log the m_retcode if it has changed.
+//
+//   COMMENTS: 
+//
+///////////////////////////////////////////////////////////////////////////////
+static void _DumpRetCode(void)
+{
+    static DWORD lastRetCode = SCARD_S_SUCCESS;
 
     if (m_retCode == lastRetCode)
         return;
@@ -669,7 +677,7 @@ int _WinSmartCardInitialize(HWND hWnd,const char* szReader)
 int WinSmartCardInitialize(HWND hWnd, const char* szReader)
 {
     int r = _WinSmartCardInitialize(hWnd, szReader);
-    _dumpRetCode();
+    _DumpRetCode();
     return r;
 }
 
