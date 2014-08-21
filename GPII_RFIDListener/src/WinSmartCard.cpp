@@ -268,7 +268,7 @@ int ApduReadRecord(SCARDHANDLE hCard,DWORD dwProtocol,char* pRecord,int nMaxLen)
 //   COMMENTS: Returns 1 if successfull or 0 for a failure.
 //
 ///////////////////////////////////////////////////////////////////////////////
-int WinSmartCardReadUser() // FIXME - rwad token as user to concrete
+int WinSmartCardReadUser() // FIXME - read token as user to concrete
 {
     ZeroMemory(m_szUser,MAX_BUFFER);
 

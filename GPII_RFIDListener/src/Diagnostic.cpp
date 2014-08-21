@@ -24,6 +24,8 @@ static const int    MY_SIZE_X = 480;
 static const int    MY_SIZE_Y = 450;
 static const int    MY_FONT_HEIGHT = 16;
 
+#define WM_MYLOG  WM_USER + 100
+
 #define ID_EDIT 1000
 
 //---------------------------------------------------------
@@ -157,8 +159,18 @@ LRESULT CALLBACK _WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     //-----------------------------------------------------------
     // Tray Icon Menu Commands to Show, Hide, Exit or Logout
     //-----------------------------------------------------------
-    case WM_COMMAND:
+    case WM_MYLOG:
     {
+        LPCSTR pszStr = (LPCSTR)lParam;
+
+        // Append text - note will eventually fill up
+        const HWND hwndEdit = GetWindow(hWnd, GW_CHILD);
+        int len = Edit_GetTextLength(hwndEdit);
+        Edit_SetSel(hwndEdit, len, len);
+        Edit_ReplaceSel(hwndEdit, pszStr);
+
+        HANDLE hheap = GetProcessHeap();
+        HeapFree(hheap, 0, (LPVOID)pszStr);
     }
     break;
 
@@ -207,19 +219,31 @@ LRESULT CALLBACK _WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 #define _countof(a) (sizeof(a)/sizeof(a[0]))
 
-void Diagnostic_LogString(LPCSTR pszPrefix, LPCSTR pszStr)
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION: Diagnostic_LogString(LPCSTR pszPrefix, LPCSTR pszStr)
+//
+//  PURPOSE:  Cause a string to be logged in the daignostic window.
+//
+//  NOTES:    We PostMessage to be more thread safe. String is on Process Heap
+//
+///////////////////////////////////////////////////////////////////////////////
+void Diagnostic_LogString(LPCSTR pszPrefix, LPCSTR pszString)
 {
-    static TCHAR str[500];
     pszPrefix = (pszPrefix) ? pszPrefix : "";
-    pszStr = (pszStr) ? pszStr : "";
+    pszString = (pszString) ? pszString : "";
 
-    LPCTSTR pszFormat = TEXT("%s: %s\r\n");
-    (void)StringCchPrintf(str, _countof(str), pszFormat, pszPrefix, pszStr);
+    const STRSAFE_LPCSTR pszFormat = TEXT("%s: %s\r\n");
 
-    // Append text - note will evenually full up
-    int len = Edit_GetTextLength(g_hwndEdit);
-    Edit_SetSel(g_hwndEdit, len, len);
-    Edit_ReplaceSel(g_hwndEdit, str);
+    HANDLE hheap = GetProcessHeap();
+    SIZE_T cbHeap = strlen(pszPrefix) + strlen(pszString) + strlen(pszFormat);
+    STRSAFE_LPSTR pszStrLog = (STRSAFE_LPSTR)HeapAlloc(hheap, 0, cbHeap);
+    if (pszStrLog)
+    {
+        (void)StringCchPrintf(pszStrLog, cbHeap, pszFormat, pszPrefix, pszString);
+        PostMessage(GetParent(g_hwndEdit), WM_MYLOG, NULL, (LPARAM)pszStrLog);
+    }
 }
 
 typedef const BYTE far            *LPCBYTE;
