@@ -39,7 +39,9 @@
 #define SMART_READER_STOPPED  (WM_USER + 103)
 
 int WinSmartCardInitialize(HWND hWnd,const char* szReader = "");
-int WinSmartCardGetUser(char* szUser,int nMaxLen); // FIXME - getToken
+void WinSmartCardCleanUp(void);
+
+int WinSmartCardGetUser(char* szUser, int nMaxLen); // FIXME - getToken
 int WinSmartCardGetReader(char* szReader,int nMaxLen);
 int WinSmartCardPolling(); // FIXME BOOL
 

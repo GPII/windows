@@ -567,6 +567,7 @@ static const char* _WinSmartCardErrorString(DWORD code)
     return ("UNKNOWN CARD READER ERROR");
 }
 
+///////////////////////////////////////////////////////////////////////////////
 //   FUNCTION: WinSmartCardInitialize(HWND hWnd,const char* szReader)
 //
 //   PURPOSE:  Search for the desired reader and start polling to
@@ -576,12 +577,12 @@ static const char* _WinSmartCardErrorString(DWORD code)
 //   COMMENTS: If szReader is not specified, the first reader found
 //             will be used.
 //
-//-------------------------------------------------------------------
-int _WinSmartCardInitialize(HWND hWnd,const char* szReader)
+///////////////////////////////////////////////////////////////////////////////
+int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
 {
     int nFound = 0;
     int nLen = 0;
-    DWORD dwSize = MAX_BUFFER;
+    DWORD dwSize = MAX_BUFFER; // FIXME: pretty small
     DWORD dwThreadId = 0;
     char readerList [MAX_BUFFER];
 
@@ -613,7 +614,7 @@ int _WinSmartCardInitialize(HWND hWnd,const char* szReader)
     //---------------------------------------------------------------
     // List the Card Readers
     //---------------------------------------------------------------
-    m_retCode = SCardListReaders(m_hContext,NULL,readerList,&dwSize);
+    m_retCode = SCardListReaders(m_hContext, SCARD_ALL_READERS, readerList, &dwSize);
     if (m_retCode != SCARD_S_SUCCESS) return 0;
     if (readerList == NULL)
     {
@@ -681,5 +682,14 @@ int WinSmartCardInitialize(HWND hWnd, const char* szReader)
     return r;
 }
 
-
+///////////////////////////////////////////////////////////////////////////////
+//   FUNCTION: WinSmartCardCleanUp
+//
+//   PURPOSE:  Cleam up and free resources
+//
+///////////////////////////////////////////////////////////////////////////////
+void WinSmartCardCleanUp(void)
+{
+    (void)SCardReleaseContext(m_hContext);
+}
 

@@ -159,6 +159,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
         DispatchMessage(&msg);
     }
 
+    WinSmartCardCleanUp();
+
     return (int) msg.wParam; // FIXME which is correct?
 }
 
