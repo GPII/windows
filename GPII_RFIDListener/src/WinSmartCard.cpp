@@ -582,9 +582,9 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
 {
     int nFound = 0;
     int nLen = 0;
-    DWORD dwSize = MAX_BUFFER; // FIXME: pretty small
     DWORD dwThreadId = 0;
-    char readerList [MAX_BUFFER];
+    DWORD cchReaderList = SCARD_AUTOALLOCATE;
+    LPTSTR pmszReaderList = NULL;
 
     //---------------------------------------------------------------
     // Stop polling if already running
@@ -614,21 +614,21 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
     //---------------------------------------------------------------
     // List the Card Readers
     //---------------------------------------------------------------
-    m_retCode = SCardListReaders(m_hContext, SCARD_ALL_READERS, readerList, &dwSize);
-    if (m_retCode != SCARD_S_SUCCESS) return 0;
-    if (readerList == NULL)
+    m_retCode = SCardListReaders(m_hContext, SCARD_ALL_READERS, (LPTSTR)&pmszReaderList, &cchReaderList);
+    if (m_retCode != SCARD_S_SUCCESS)
     {
         m_retCode = NO_READERS_FOUND;
+        (void)SCardReleaseContext(m_hContext);
         return 0;
     }
 
     //---------------------------------------------------------------
     // Find the Desired Reader
-    //---------------------------------------------------------------
+    
     if (lstrlen(szReader))
     {
         m_nReaderIndex = -1;
-        char *p = readerList;
+        char *p = pmszReaderList;
         while ( *p )
         {
             nLen = lstrlen(p) + 1;
@@ -642,6 +642,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
         if (m_nReaderIndex < 0)
         {
             m_retCode = READER_NOT_FOUND;
+            (void)SCardReleaseContext(m_hContext);
             return 0;
         }
     }
@@ -650,7 +651,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
     //---------------------------------------------------------------
     else
     {
-        lstrcpyn(m_szReader,readerList,MAX_BUFFER);
+        lstrcpyn(m_szReader, pmszReaderList, MAX_BUFFER);
         m_nReaderIndex = 0;
     }
 
@@ -669,6 +670,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
     {
         m_bPolling = FALSE;
         m_retCode= POLLING_THREAD_FAILED;
+        (void)SCardReleaseContext(m_hContext);
         return 0;
     }
 
