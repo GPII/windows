@@ -75,7 +75,6 @@
 // Constants For This File
 //-------------------------------------------------------------------
 #define   POLLING_DELAY                 250  // polling delay in ms
-#define   NO_READERS_FOUND             1001  // error finding readers
 #define   READER_NOT_FOUND             1002  // error finding user reader
 #define   POLLING_THREAD_FAILED        1003  // cannot start thread
 #define   MAX_BUFFER                    256  // maximum string size
@@ -498,7 +497,6 @@ static void _DumpRetCode(void)
 static const char* _WinSmartCardErrorString(DWORD code)
 {
     if (code == SCARD_S_SUCCESS) return "SCARD_S_SUCCESS";
-    if (code == NO_READERS_FOUND) return "NO_READERS_FOUND";
     if (code == READER_NOT_FOUND) return "READER_NOT_FOUND";
     if (code == POLLING_THREAD_FAILED) return "POLLING_THREAD_FAILED";
     if (code == ((DWORD)0x80100001)) return "SCARD_F_INTERNAL_ERROR";
@@ -617,7 +615,6 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
     m_retCode = SCardListReaders(m_hContext, SCARD_ALL_READERS, (LPTSTR)&pmszReaderList, &cchReaderList);
     if (m_retCode != SCARD_S_SUCCESS)
     {
-        m_retCode = NO_READERS_FOUND;
         (void)SCardReleaseContext(m_hContext);
         return 0;
     }
@@ -631,7 +628,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
         char *p = pmszReaderList;
         while ( *p )
         {
-            nLen = lstrlen(p) + 1;
+            nLen = lstrlen(p) + 1;      //FIXME: ugh!
             if ( *p != 0 )
             {
                 if (lstrcmp(szReader,p) == 0) m_nReaderIndex = nFound;
@@ -654,6 +651,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
         lstrcpyn(m_szReader, pmszReaderList, MAX_BUFFER);
         m_nReaderIndex = 0;
     }
+    (void)SCardFreeMemory(m_hContext, pmszReaderList);
 
     //---------------------------------------------------------------
     // Start the Polling Thread
