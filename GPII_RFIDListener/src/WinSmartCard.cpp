@@ -111,7 +111,7 @@ struct Cleanup
     {
         if (m_bPolling)
         {
-            m_bPolling = 0;
+            m_bPolling = FALSE;
             WaitForSingleObject(m_hThread,3000);
             SCardDisconnect(m_hCard, SCARD_LEAVE_CARD);
             SCardReleaseContext(m_hContext);
@@ -690,6 +690,7 @@ int WinSmartCardInitialize(HWND hWnd, const char* szReader)
 ///////////////////////////////////////////////////////////////////////////////
 void WinSmartCardCleanUp(void)
 {
+    SCardDisconnect(m_hCard, SCARD_LEAVE_CARD);
     (void)SCardReleaseContext(m_hContext);
 }
 

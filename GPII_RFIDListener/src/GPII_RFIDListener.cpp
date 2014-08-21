@@ -245,6 +245,29 @@ BOOL MyPopupMenu(HWND hWnd)
 }
 
 
+static void _FindReader(HWND hWnd)
+{
+    if (WinSmartCardInitialize(hWnd, m_szReader))
+    {
+        // Update status
+        wsprintf(m_szStatus, "%s", "Listening...");
+        InvalidateRect(hWnd, NULL, TRUE);
+
+        // Log
+        char szReader[MAX_BUFFER];
+        WinSmartCardGetReader(szReader, MAX_BUFFER);
+        Diagnostic_LogString("Initialised reader", szReader);
+    }
+    else
+    {
+        // Update Status
+        if (lstrlen(m_szReader))
+            wsprintf(m_szStatus, "%s %s", m_szReader, " READER NOT FOUND");
+        else
+            wsprintf(m_szStatus, "%s", "NO CARD READERS FOUND");
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 //   FUNCTION: InitInstance(HANDLE)
@@ -272,15 +295,8 @@ BOOL InitInstance(HINSTANCE hInstance)
 
     MyTrayIcon(hWnd);
 
-    if (WinSmartCardInitialize(hWnd,m_szReader) == 0)
-    {
-        if (lstrlen(m_szReader))
-            wsprintf(m_szStatus,"%s %s",m_szReader," READER NOT FOUND");
-        else
-            wsprintf(m_szStatus,"%s","NO CARD READERS FOUND");
-    }
+    _FindReader(hWnd);
 
-    InvalidateRect(hWnd,NULL,TRUE);
     SetTimer(hWnd,MY_TIMER,2000,NULL);
 
 #ifdef _DEBUG
@@ -462,11 +478,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_TIMER:
         if (wParam == MY_TIMER && !WinSmartCardPolling())
         {
-            if (WinSmartCardInitialize(hWnd,m_szReader)) //FIXME not sure why this as polls indefinitely - perhaps a fail safe?
-            {
-                wsprintf(m_szStatus,"%s","Listening...");
-                InvalidateRect(hWnd,NULL,TRUE);
-            }
+            _FindReader(hWnd);
         }
         break;
 
@@ -489,6 +501,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             FlowManagerLogout(m_szUserID);
         }
         KillTimer(hWnd,MY_TIMER);
+        Diagnostic_CleanUp();
         PostQuitMessage(0);
         break;
 

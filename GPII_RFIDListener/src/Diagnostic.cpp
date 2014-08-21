@@ -31,7 +31,7 @@ static const int    MY_FONT_HEIGHT = 16;
 //---------------------------------------------------------
 // Global Variables
 //---------------------------------------------------------
-static HWND     g_hwndEdit = NULL;
+static HWND     g_hWnd = NULL;
 static HFONT    g_hFont;
 
 //---------------------------------------------------------
@@ -121,22 +121,26 @@ BOOL Diagnostic_Init(HINSTANCE hInstance)
     g_hFont = CreateFont(MY_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Courier New"));
     SetWindowFont(hwndEdit, g_hFont, FALSE);
 
-    g_hwndEdit = hwndEdit;
+    g_hWnd = hWnd;
 
     return TRUE;
 }
 
+void Diagnostic_CleanUp(void)
+{
+    DestroyWindow(g_hWnd);
+}
+
+
 void Diagnostic_Show(BOOL bShow)
 {
-    HWND hwndDiag = GetParent(g_hwndEdit);
-    ShowWindow(hwndDiag, (bShow) ? SW_SHOW : SW_HIDE);
+    ShowWindow(g_hWnd, (bShow) ? SW_SHOW : SW_HIDE);
 
 }
 
 BOOL Diagnostic_IsShowing(void)
 {
-    HWND hwndDiag = GetParent(g_hwndEdit);
-    return IsWindowVisible(hwndDiag);
+    return IsWindowVisible(g_hWnd);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -197,7 +201,10 @@ LRESULT CALLBACK _WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // Close [X] Hides the Window
     //-----------------------------------------------------------
     case WM_CLOSE:
-        DestroyWindow(hWnd);
+    {
+        const HWND hwndEdit = GetWindow(hWnd, GW_CHILD);
+        Edit_SetText(hwndEdit, "");
+    }
     break;
 
     //-----------------------------------------------------------
@@ -207,7 +214,6 @@ LRESULT CALLBACK _WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         DeleteObject(g_hFont); 
     break;
         
-
     //-----------------------------------------------------------
     // Default Window Proc
     //-----------------------------------------------------------
@@ -242,7 +248,7 @@ void Diagnostic_LogString(LPCSTR pszPrefix, LPCSTR pszString)
     if (pszStrLog)
     {
         (void)StringCchPrintf(pszStrLog, cbHeap, pszFormat, pszPrefix, pszString);
-        PostMessage(GetParent(g_hwndEdit), WM_MYLOG, NULL, (LPARAM)pszStrLog);
+        PostMessage(g_hWnd, WM_MYLOG, NULL, (LPARAM)pszStrLog);
     }
 }
 

@@ -16,6 +16,7 @@
 
 // Windows control
 extern BOOL Diagnostic_Init(HINSTANCE hInstance);
+extern void Diagnostic_CleanUp(void);
 extern void Diagnostic_Show(BOOL bShow);
 extern BOOL Diagnostic_IsShowing(void);
 
