@@ -57,8 +57,9 @@ static int _MakeCurlRequest(const char* szUser, const char* szAction)
             char szRequest[MAX_BUFFER];
             char * szUserEscaped = curl_easy_escape(curl, szUser, 0);
             wsprintf(szRequest,"%s/%s/%s",FLOW_MANAGER_URL,szUserEscaped,szAction);
-
-            Diagnostic_LogString("FlowManger URL", szRequest); // FIXME is getting printed twice but code doesn't seem to rreach here twice
+            Diagnostic_LogString("Token", szUser); // FIXME is ocaisionally getting printed twice but code doesn't seem to reach here twice
+            Diagnostic_LogString("Action", szAction); // FIXME is ocaisionally getting printed twice but code doesn't seem to reach here twice
+            Diagnostic_LogString("FlowManger URL", szRequest);
 
 #if USE_FIDDLER == TRUE
             (void) curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:8888"); // use http://fiddler2.com to monitor HTTP
