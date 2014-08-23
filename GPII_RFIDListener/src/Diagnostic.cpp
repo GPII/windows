@@ -252,18 +252,31 @@ void Diagnostic_LogString(LPCSTR pszPrefix, LPCSTR pszString)
     }
 }
 
-typedef const BYTE far            *LPCBYTE;
+//FIXME perhaps inline these functions. Perhasp use pointers not indexes
+void Diagnostic_PrintHexBytes(LPTSTR pszDest, size_t cchDest, LPCBYTE pBytes, size_t cBytes)
+{
+    for (size_t i = 0; i < cBytes; i++)
+    {
+        (void)StringCchPrintf(&pszDest[i * 3], cchDest - (i * 3), TEXT("%02hhx "), pBytes[i]);
+    }
+}
 
-void Diagnostic_LogBlock(UINT uSector, UINT uBlock, LPBYTE pbBlock)
+void Diagnostic_PrintCharBytes(LPTSTR pszDest, size_t cchDest, LPCBYTE pBytes, size_t cBytes)
+{
+    for (size_t i = 0; i < cBytes; i++)
+    {
+        (void)StringCchPrintf(&pszDest[i], cchDest - i, TEXT("%c"), pBytes[i]);
+    }
+}
+
+void Diagnostic_LogBlock(UINT uSector, UINT uBlock, LPCBYTE pbBlock, size_t cBytes)
 {
     static TCHAR pszPrefix[20];
     static TCHAR pszString[500];
 
-    LPCTSTR pszFormatPrefix = TEXT("%.2hu-%.2hu");
+    LPCTSTR pszFormatPrefix = TEXT("%02u-%02u");
     (void)StringCchPrintf(pszPrefix, _countof(pszPrefix), pszFormatPrefix, uSector, uBlock);
 
-    LPCTSTR pszFormatString = TEXT("%.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX %.2hX ");
-    (void)StringCchPrintf(pszString, _countof(pszString), pszFormatString, pbBlock[0], pbBlock[1], pbBlock[2], pbBlock[3], pbBlock[4], pbBlock[5], pbBlock[6], pbBlock[7], pbBlock[8], pbBlock[9], pbBlock[10], pbBlock[11], pbBlock[12], pbBlock[13], pbBlock[14], pbBlock[15]);
-
+    Diagnostic_PrintHexBytes(pszString, _countof(pszString), pbBlock, cBytes);
     Diagnostic_LogString(pszPrefix, pszString);
 }
