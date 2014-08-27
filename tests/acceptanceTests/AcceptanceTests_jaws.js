@@ -56,7 +56,7 @@ var testDefs = [
                         "settings": {
                             "cloud4allVoiceProfile-GlobalContext.Speed": "37.875",
                             "cloud4allVoiceProfile-GlobalContext.Punctuation": "3"
-                        },  
+                        },
                         "options": {
                             // This needs to be addressed with GPII-497.
                             "path": path.resolve(process.env.APPDATA, "Freedom Scientific/JAWS/15.0/Settings/VoiceProfiles.ini")

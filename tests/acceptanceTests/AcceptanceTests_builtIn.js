@@ -44,7 +44,7 @@ var testDefs = [
                                 "type": "BOOL"
                             }
                         }
-                    }, { //high contrast settings
+                    }, { // high contrast settings
                         "settings": {
                             "HighContrastOn": {
                                 "path": "pvParam.dwFlags.HCF_HIGHCONTRASTON",
