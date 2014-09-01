@@ -4,20 +4,19 @@ Windows executable that listens out for NFC RFID tags and invokes URLs to trigge
 
 See the [User listener](http://wiki.gpii.net/index.php/User_Listener) and [NFC](http://wiki.gpii.net/index.php/Using_the_NFC_Listener) pages on the GPII wikifor details of USB and NFC listening and how to encode user IDs.
 
-Known to work with Advanced Card Systems RFID readers including ACR122.
+Known to work with Advanced Card Systems RFID readers including ACR122 with Mifare Classic 1K and NTAG203 tags.
 
 ## Use
 
 1. Plug in the USB NFC card reader if required
-2. Run the GPII_RFIDListener.exe. A tray icon is created and can be right clicked on to show a menu. Use the menu item "Show Window" to view status.
-3. Place a tag with the user id encoded onto the reader. Once the ne status has been recognised the tag can be removed.
+2. Run the GPII_RFIDListener.exe. A tray icon is created and can be right clicked on to show a menu.
+3. Optionally use the menu item "Show Status Window" to view status. 
+4. Optionally use the "Show Diagnostic Window" for debugging. The X to close window actually clears the text as edit controll will fill up.
+5. Place a tag with the user UID encoded as UTF8 onto the reader. Once the new status has been recognised the tag can be removed.
 
 ## Build
 
-Build using build.sh in Mingw base installation with g++ installed. Set COPTS in build.sh to change between release and debug builds. Apart form debugging in gdb DEBUG also
-* Displays the monitor window on startup
-* Closing the monitor window exits the listener
-* Flow manger URLs are logged to debug output and are shown in gdb
+Build using Visual studio. The 2013 Express version is know to work. You can build using the IDE or command line. An Installer will be created soon. 
 
 ### libcurl
 
@@ -27,4 +26,4 @@ See the README in libcur/ for details of generating these files
 
 ## Testing 
 
-Apart from normal debugging the [Fiddler HTTP proxy](http://fiddler2.com/) is useful to monitor the URLs being created. Note by default Fiddler won't show Http://localhost URLs so specific code to make it work has been added to the listener in a debug build.
+Apart from normal debugging the Diagnostic window provides plenty of details, including a dump of the TAG memory
