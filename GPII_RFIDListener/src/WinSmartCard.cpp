@@ -54,15 +54,17 @@
 //-------------------------------------------------------------------
 //  Application Protocol Data Unit (APDU) Constants
 //-------------------------------------------------------------------
-#define APDU_CLA_RFU                   0xFF
-#define APDU_INS_GENERAL_AUTHENTICATE  0x86
-#define APDU_INS_READ_BINARY           0xB0
-#define APDU_KEY_TYPE_A                0x60
-#define APDU_KEY_TYPE_B                0x61
-#define NFC_WELL_KNOWN_RECORD          0xD1
-#define NFC_RECORD_LENGTH_OFFSET       0x02
-#define NFC_EXTRA_BYTES                0x03
-#define NFC_DATA_OFFSET                0x07
+const BYTE APDU_CLA_RFU = 0xFF;
+const BYTE APDU_INS_GENERAL_AUTHENTICATE = 0x86;
+const BYTE APDU_INS_READ_BINARY = 0xB0;
+const BYTE APDU_INS_GET_UID = 0xCA;
+const BYTE APDU_KEY_TYPE_A = 0x60;
+const BYTE APDU_KEY_TYPE_B = 0x61;
+
+const BYTE NFC_WELL_KNOWN_RECORD = 0xD1;
+const BYTE NFC_RECORD_LENGTH_OFFSET = 0x02;
+const BYTE NFC_EXTRA_BYTES = 0x03;
+const BYTE NFC_DATA_OFFSET = 0x07;
 
 //-------------------------------------------------------------------
 // Constants For User Data
@@ -70,6 +72,15 @@
 #define USER_BLOCK                     0x04  // user data block
 #define USER_BYTES                       16  // user data bytes
 #define USER_KEY                       0x00  // user auth key store
+
+// Card WORDS are transferred Big endian 
+#define MAKEWORDBE(p2B) MAKEWORD((BYTE)(p2B)[1], (BYTE)(p2B)[0])
+
+// Status Word (SW1 and SW2 bytes) in APDU responses
+#define MAKESW MAKEWORDBE
+const WORD SW_SUCCESS = 0x9000;
+const WORD SW_FAIL = 0x6300;
+
 
 //-------------------------------------------------------------------
 // Constants For This File
@@ -80,7 +91,7 @@
 #define   MAX_BUFFER                    256  // maximum string size
 typedef enum {
     UNSPECIFIED_CARDTYPE = 0,
-    CARDTYPE_MIFAIR_CLASSIC_1K,
+    CARDTYPE_MIFARE_CLASSIC_1K,
     CARDTYPE_NTAG203
 } CARDTYPE;
 
@@ -89,6 +100,7 @@ typedef enum {
 // Global Variables
 //-------------------------------------------------------------------
 DWORD        m_retCode = SCARD_S_SUCCESS;
+WORD         m_respCode = 0;
 int          m_nReaderIndex = 0;
 BOOL         m_bPolling = 0;
 HWND         m_hWnd = 0;
@@ -128,26 +140,92 @@ struct Cleanup
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//   FUNCTION: ApduReadBlock()
+//   FUNCTION: ApduAuthenticate()
+//
+//   PURPOSE:  Attempt to authenticate with MIFARE classic with key a and then key b.
+//             Must done once for each sector before reading any block.
+//
+//   COMMENTS: Returns 1 if successfull or 0 for a failure.
+//
+///////////////////////////////////////////////////////////////////////////////
+static BOOL ApduAuthenticateMifare(SCARDHANDLE hCard, DWORD dwProtocol, BYTE bBlockNum)
+{
+    const BYTE auth_key_a[] = { APDU_CLA_RFU, APDU_INS_GENERAL_AUTHENTICATE, 0x00, 0x00, 0x05, 0x01, 0x00, bBlockNum, APDU_KEY_TYPE_A, 0x01 };
+    const BYTE auth_key_b[] = { APDU_CLA_RFU, APDU_INS_GENERAL_AUTHENTICATE, 0x00, 0x00, 0x05, 0x01, 0x00, bBlockNum, APDU_KEY_TYPE_B, 0x01 };
+
+    BYTE pRecv[16 + 2] = { 0 };;
+    DWORD dwRecvLen = 2;
+    SCARD_IO_REQUEST io_req;
+    io_req.cbPciLength = sizeof(io_req);
+    io_req.dwProtocol = dwProtocol;
+
+    m_retCode = SCardTransmit(hCard, &io_req, auth_key_a, sizeof(auth_key_a),
+        &io_req, pRecv, &dwRecvLen);
+    m_respCode = MAKESW(&pRecv[0]);
+     
+    if (m_retCode != SCARD_S_SUCCESS)
+    {
+        _DumpRetCode();
+        return FALSE;
+    }
+
+    if (SW_SUCCESS == m_respCode)
+    {
+        Diagnostic_LogString("Authenticated", "Key a");
+        return TRUE;
+    }
+
+    m_retCode = SCardTransmit(hCard, &io_req, auth_key_b, sizeof(auth_key_b),
+        &io_req, pRecv, &dwRecvLen);
+    m_respCode = MAKESW(&pRecv[0]);
+    if (m_retCode != SCARD_S_SUCCESS)
+    {
+        _DumpRetCode();
+        return FALSE;
+    }
+
+    if (SW_SUCCESS == m_respCode)
+    {
+        Diagnostic_LogString("Authenticated", "Key b");
+        return TRUE;
+    }
+
+    Diagnostic_LogString("Mifare Authentication Failed", NULL);
+
+    return FALSE;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//   FUNCTION: ApduRead16()
 //
 //   PURPOSE:  Reads 16 bytes of data from block number byBlock into pRecv.
 //
 //   COMMENTS: Returns 16 (bytes read) if successfull or 0 for a failure.
 //
 ///////////////////////////////////////////////////////////////////////////////
-int ApduReadBlock(SCARDHANDLE  hCard,DWORD dwProtocol,BYTE byBlock,BYTE* pRecv)
+static int ApduRead16(SCARDHANDLE  hCard,DWORD dwProtocol,BYTE byBlock,BYTE* pRecv)
 {
-    const BYTE READ_BINARY = 0xB0;  // Spec TS 51.011
-    const BYTE read_block[] = { 0xFF, READ_BINARY, 0x00, byBlock, 16 };  // read 16 bytes for block byBloc ISO 7816-4, Section 8.2.1
+    const BYTE read_block[] = { APDU_CLA_RFU, APDU_INS_READ_BINARY, 0x00, byBlock, 16 };  // read 16 bytes for block byBloc ISO 7816-4, Section 8.2.1
 
-    DWORD dwRecvLen = 18;
+    DWORD dwRecvLen = 16 + 2;       // FIXME - callee must make it big enough
     SCARD_IO_REQUEST io_req;
     io_req.cbPciLength = sizeof(io_req);
     io_req.dwProtocol = dwProtocol;
 
+    const BOOL fFirstBlockInSector = (byBlock % 4 == 0);            // Assumes we read blocks sequentially
+    if (CARDTYPE_MIFARE_CLASSIC_1K == m_cardtype 
+        && fFirstBlockInSector)
+    {
+        // only need to authenticate once per sector.
+        // ideally would cache so only ever do once.
+        ApduAuthenticateMifare(m_hCard, m_dwProtocol, byBlock);
+    }
     m_retCode = SCardTransmit(hCard, &io_req, read_block, sizeof(read_block),
         &io_req, pRecv, &dwRecvLen);
-    if (m_retCode != SCARD_S_SUCCESS)
+    m_respCode = MAKESW(&pRecv[dwRecvLen - 2]);
+    if (m_retCode != SCARD_S_SUCCESS || m_respCode != SW_SUCCESS )
     {
         _DumpRetCode();
         return 0;
@@ -156,107 +234,26 @@ int ApduReadBlock(SCARDHANDLE  hCard,DWORD dwProtocol,BYTE byBlock,BYTE* pRecv)
     return (dwRecvLen - 2);
 }
 
-
-
-// Estimate card type based on the unique-ish ATR string
-// See http://smartcard-atr.appspot.com
-// For now we match the entire ATR rather than mask and match parts of it
-//
-void _getCardtype(SCARDHANDLE hSCard)
+// Note APDU_INS_GET_UID only works for MIFARE so we read from block 0
+// UID length must be 7 bytes (for NTAG203)
+static int ApduGetUID(SCARDHANDLE hCard, DWORD dwProtocol, BYTE* pUID)
 {
-    DWORD       cbATR = SCARD_AUTOALLOCATE;
-    LPBYTE      pbATR;
-    
-    // Obtain the ATR of the inserted card
-    LONG lReturn = SCardGetAttrib(
-        hSCard,
-        SCARD_ATTR_ATR_STRING,
-        (LPBYTE)&pbATR,            // NOTE: This due to wierd declaration in windows.h given this is a pointer to LPBYTE
-        &cbATR);
-    if (SCARD_S_SUCCESS != lReturn)
+    BYTE pRecv[16 + 2];
+
+    if (ApduRead16(hCard, dwProtocol, 0, pRecv) != 16)
     {
-        _DumpRetCode();
-        return;
+        return 0;
     }
-
-    // log the ATR
-    TCHAR       chBuff[100];
-    Diagnostic_PrintHexBytes(chBuff, sizeof(chBuff), pbATR, cbATR);
-    Diagnostic_LogString("ATR", chBuff);
-
-    static const BYTE ATR_MIFAIR_NTAG203[] = { 0x3b, 0x8f, 0x80, 0x01, 0x80, 0x4f, 0x0c, 0xa0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x6a };
-    static const BYTE ATR_MIFAIR_CLASSIC_1K[] = { 0x3b, 0x8f, 0x80, 0x01, 0x80, 0x4f, 0x0c, 0xa0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x68 };
-
-    // decide which card`
-    if (memcmp(pbATR, ATR_MIFAIR_CLASSIC_1K, sizeof(ATR_MIFAIR_CLASSIC_1K)))
+    if (CARDTYPE_MIFARE_CLASSIC_1K == m_cardtype)
     {
-        Diagnostic_LogString("Card type", "MYFAIR Classic 1K");
-        m_cardtype = CARDTYPE_MIFAIR_CLASSIC_1K;
+        memcpy(pUID, pRecv, 4);
     }
-    else if (memcmp(pbATR, ATR_MIFAIR_NTAG203, sizeof(ATR_MIFAIR_NTAG203)))
+    else
     {
-        Diagnostic_LogString("Card type", "NTAG203");
-        m_cardtype = CARDTYPE_NTAG203;
+        memcpy(pUID, pRecv, 3);
+        memcpy(pUID + 3, pRecv + 4, 4);
     }
-    (void)SCardFreeMemory(m_hContext, pbATR);
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-//   FUNCTION: ApduAuthenticate()
-//
-//   PURPOSE:  Attempt to authenticate with key a and then key b.
-//
-//   COMMENTS: Returns 1 if successfull or 0 for a failure.
-//
-///////////////////////////////////////////////////////////////////////////////
-BOOL ApduAuthenticate(SCARDHANDLE hCard,DWORD dwProtocol)
-{
-    const BYTE GET_PREVIOUS_PSAM_SIGNATURE = 0x86;  // Spec EN 1546-3
-    const BYTE auth_key_a[] = { 0xFF, GET_PREVIOUS_PSAM_SIGNATURE, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x60, 0x00 };
-    const BYTE auth_key_b[] = { 0xFF, GET_PREVIOUS_PSAM_SIGNATURE, 0x00, 0x00, 0x05, 0x01, 0x00, 0x04, 0x61, 0x00 };
-
-    BYTE pRecv[18];
-    DWORD dwRecvLen = 2;
-    SCARD_IO_REQUEST io_req;
-    io_req.cbPciLength = sizeof(io_req);
-    io_req.dwProtocol = dwProtocol;
-
-    Diagnostic_LogString("Authenticating", NULL);
-
-    // Myfair need to be authenticated.
-    m_retCode = SCardTransmit(hCard, &io_req, auth_key_a, sizeof(auth_key_a),
-        &io_req, pRecv, &dwRecvLen);
-    if (m_retCode != SCARD_S_SUCCESS)
-    {
-        _DumpRetCode();
-        return FALSE;
-    }
-
-    if (ApduReadBlock(hCard, dwProtocol, 4, pRecv) == 16)
-    {
-        Diagnostic_LogString("Authenticated", "Key a");
-        return TRUE;
-    }
-
-    m_retCode = SCardTransmit(hCard, &io_req, auth_key_b, sizeof(auth_key_b),
-        &io_req, pRecv, &dwRecvLen);
-    if (m_retCode != SCARD_S_SUCCESS)
-    {
-        _DumpRetCode();
-        return FALSE;
-    }
-
-    if (ApduReadBlock(hCard,dwProtocol,4,pRecv) == 16)
-    {
-        Diagnostic_LogString("Authenticated", "Key b");
-        return TRUE;
-    }
-
-    Diagnostic_LogString("Authentication Failed", NULL);
-
-    return FALSE;
+    return (CARDTYPE_MIFARE_CLASSIC_1K == m_cardtype) ? 4 : 7;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,29 +266,29 @@ BOOL ApduAuthenticate(SCARDHANDLE hCard,DWORD dwProtocol)
 //   COMMENTS: Returns 1 if all bytes are ascii, or 0 if end of data.
 //
 ///////////////////////////////////////////////////////////////////////////////
-int ApduAppendAsciiRecord(char* pDst,BYTE* pSrc)
+static int _AppendAsciiRecord(char* pDst, BYTE* pSrc)
 {
     const BYTE WELL_KNOWN_RECORD = 0xD1;
-    const BYTE TEXT_DATA_OFFSET  = 0x07;
-    const BYTE ASCII_MIN         = 0x20;
-    const BYTE ASCII_MAX         = 0x7E;
-    const BYTE BLOCK_BYTES       = 16;
+    const BYTE TEXT_DATA_OFFSET = 0x07;
+    const BYTE ASCII_MIN = 0x20;
+    const BYTE ASCII_MAX = 0x7E;
+    const BYTE BLOCK_BYTES = 16;
 
     int nLen = strlen(pDst);
 
-    for (int i=0; i<BLOCK_BYTES; i++)
+    for (int i = 0; i<BLOCK_BYTES; i++)
     {
         if (nLen == 0)
         {
             if (pSrc[i] == WELL_KNOWN_RECORD &&
-                    i < TEXT_DATA_OFFSET)
+                i < BLOCK_BYTES - TEXT_DATA_OFFSET)
             {
                 i += TEXT_DATA_OFFSET;
                 pDst[nLen++] = pSrc[i];
                 pDst[nLen] = 0;
             }
         }
-        else if (pSrc[i] >= ASCII_MIN && pSrc[i] <= ASCII_MAX)
+        else if (pSrc[i] >= ASCII_MIN && pSrc[i] <= ASCII_MAX) 
         {
             pDst[nLen++] = pSrc[i];
             pDst[nLen] = 0;
@@ -306,26 +303,80 @@ int ApduAppendAsciiRecord(char* pDst,BYTE* pSrc)
     return 1;
 }
 
+
+// FIX ME rework this to properly look for NDEF records in non ASCII UTF8. Cache mem first?
 ///////////////////////////////////////////////////////////////////////////////
-int ApduReadRecord(SCARDHANDLE hCard,DWORD dwProtocol,char* pRecord,int nMaxLen)
+static int ApduReadRecord(SCARDHANDLE hCard,DWORD dwProtocol,char* pRecord,int nMaxLen)
 {
     const BYTE BLOCK_BYTES = 16;
-    const BYTE BLOCK_START =  4;
+    const BYTE BLOCK_INC = (CARDTYPE_MIFARE_CLASSIC_1K == m_cardtype) ? 1 : 4;
+    const BYTE BLOCK_START = 4;
 
     BYTE pRecv[256];
-
     pRecord[0] = 0;
 
-    for (BYTE byBlock = BLOCK_START; byBlock < nMaxLen/BLOCK_BYTES + BLOCK_START; byBlock++)
+    for (BYTE byBlock = BLOCK_START; byBlock < nMaxLen/BLOCK_BYTES + BLOCK_START; byBlock += BLOCK_INC)
     {
-        if (ApduReadBlock(hCard,dwProtocol,byBlock,pRecv) != BLOCK_BYTES) 
+        if (ApduRead16(hCard,dwProtocol,byBlock,pRecv) != 16)
+        {
             return 0;
-        if (ApduAppendAsciiRecord(pRecord,pRecv) == 0)
+        }
+        if (_AppendAsciiRecord(pRecord,pRecv) == 0)      //FIXME maxno lengnth so possible overrun
             return lstrlen(pRecord);
     }
 
     return lstrlen(pRecord);;
 }
+
+// Estimate card type based on the unique-ish ATR string
+// See http://smartcard-atr.appspot.com
+// For now we match the entire ATR rather than mask and match parts of it
+//
+static void _getCardtype(SCARDHANDLE hSCard, DWORD dwProtocol)
+{
+    DWORD       cbATR = SCARD_AUTOALLOCATE;
+    LPBYTE      pbATR;
+    TCHAR       chBuff[100];
+
+    // Obtain the card's ATR 
+    LONG lReturn = SCardGetAttrib(
+        hSCard,
+        SCARD_ATTR_ATR_STRING,
+        (LPBYTE)&pbATR,            // NOTE: This due to wierd declaration in windows.h given this is a pointer to LPBYTE
+        &cbATR);
+    if (SCARD_S_SUCCESS != lReturn)
+    {
+        _DumpRetCode();
+        return;
+    }
+    // log it
+    Diagnostic_PrintHexBytes(chBuff, sizeof(chBuff), pbATR, cbATR);
+    Diagnostic_LogString("ATR", chBuff);
+
+    static const BYTE ATR_MIFAIR_NTAG203[] = { 0x3b, 0x8f, 0x80, 0x01, 0x80, 0x4f, 0x0c, 0xa0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x6a };
+    static const BYTE ATR_MIFAIR_CLASSIC_1K[] = { 0x3b, 0x8f, 0x80, 0x01, 0x80, 0x4f, 0x0c, 0xa0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x68 };
+
+    // decide which card`
+    if (memcmp(pbATR, ATR_MIFAIR_CLASSIC_1K, sizeof(ATR_MIFAIR_CLASSIC_1K)))
+    {
+        Diagnostic_LogString("Card type", "MYFAIR Classic 1K");
+        m_cardtype = CARDTYPE_MIFARE_CLASSIC_1K;
+    }
+    else if (memcmp(pbATR, ATR_MIFAIR_NTAG203, sizeof(ATR_MIFAIR_NTAG203)))
+    {
+        Diagnostic_LogString("Card type", "NTAG203");
+        m_cardtype = CARDTYPE_NTAG203;
+    }
+    (void)SCardFreeMemory(m_hContext, pbATR);
+
+    // Get card's UID
+    BYTE        pbUID[7];
+    UINT UIDlen = ApduGetUID(hSCard, dwProtocol, pbUID);
+    Diagnostic_PrintHexBytes(chBuff, sizeof(chBuff), pbUID, UIDlen);
+    Diagnostic_LogString("UID", chBuff);
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -337,20 +388,17 @@ int ApduReadRecord(SCARDHANDLE hCard,DWORD dwProtocol,char* pRecord,int nMaxLen)
 //   COMMENTS: Returns 1 if successfull or 0 for a failure.
 //
 ///////////////////////////////////////////////////////////////////////////////
-int WinSmartCardReadUser() // FIXME - read token as user to concrete
+int WinSmartCardReadUser() // FIXME - rename as readToken as user too specific
 {
     ZeroMemory(m_szUser,MAX_BUFFER);
-//    _DumpCard();
 
     //-----------------------------------------------------------
     // Authenticate the card and read the user text
     //-----------------------------------------------------------
-    _getCardtype(m_hCard);
-
-    if (CARDTYPE_MIFAIR_CLASSIC_1K == m_cardtype && ApduAuthenticate(m_hCard, m_dwProtocol)
-        || CARDTYPE_NTAG203 == m_cardtype)
+    if (CARDTYPE_MIFARE_CLASSIC_1K == m_cardtype || CARDTYPE_NTAG203 == m_cardtype)
     {
-        _DumpCard();
+        if (Diagnostic_IsShowing())
+            _DumpCard();
         ApduReadRecord(m_hCard, m_dwProtocol, m_szUser, MAX_BUFFER);
 
         //-----------------------------------------------------------
@@ -365,6 +413,52 @@ int WinSmartCardReadUser() // FIXME - read token as user to concrete
 
     return 0;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//   FUNCTION: DumpCard()
+//
+//   PURPOSE:  Hex dump of card contents.
+//
+//   COMMENTS: 
+//
+///////////////////////////////////////////////////////////////////////////////
+static void _DumpCard()
+{
+    Diagnostic_LogString("Card dump", NULL);
+
+    if (CARDTYPE_MIFARE_CLASSIC_1K == m_cardtype)
+    {
+        const BYTE NumBlocks = 16;          // no need to do more given current usages
+        for (BYTE byBlock = 0; byBlock < NumBlocks; byBlock++)
+        {
+            BYTE pRecv[16 + 2];
+            const UINT uSector = byBlock / 4;
+            const UINT uBlock = byBlock % 4;
+
+            (void)ApduRead16(m_hCard, m_dwProtocol, byBlock, pRecv);
+            Diagnostic_LogHexBlock(uSector, uBlock, pRecv, 16);
+        }
+    }
+    else
+    {
+        const BYTE NumBlocks = 41;
+        for (BYTE byBlock = 0; byBlock < NumBlocks; byBlock += 4)
+        {
+            BYTE pRecv[16 + 2];
+            (void)ApduRead16(m_hCard, m_dwProtocol, byBlock, pRecv);
+
+            for (UINT row = 0; row < 4; row++)
+            {
+                // Type 2 is on pages of 4 bytes
+                UINT page = byBlock + row;
+                Diagnostic_LogHexBlock(0, page, pRecv + (row * 4), 4);
+            }
+        }
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -421,6 +515,8 @@ DWORD WINAPI WinSmartCardThread(void*)
         //-----------------------------------------------------------
         // Try to read the user and post the arrive message
         //-----------------------------------------------------------
+
+        _getCardtype(m_hCard, m_dwProtocol);
 
         if (WinSmartCardReadUser())
         {
@@ -504,29 +600,6 @@ int WinSmartCardPolling()
     return m_bPolling;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//   FUNCTION: DumpCard()
-//
-//   PURPOSE:  Hex dump of card contents.
-//
-//   COMMENTS: 
-//
-///////////////////////////////////////////////////////////////////////////////
-static void _DumpCard()
-{
-    Diagnostic_LogString("Card dump", NULL);
-
-    const BYTE NumBlocks = 4 * 8; // Each block is 16 bytes in mifare
-    for (BYTE byBlock = 0; byBlock < NumBlocks; byBlock++)
-    {
-        BYTE pRecv[18];
-        (void)ApduReadBlock(m_hCard, m_dwProtocol, byBlock, pRecv);
-        UINT uSector = byBlock / 4;
-        UINT uBlock = byBlock % 4;
-        Diagnostic_LogBlock(uSector, uBlock, pRecv);
-    }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -661,7 +734,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
     //---------------------------------------------------------------
     // Stop polling if already running
     //---------------------------------------------------------------
-    if (m_bPolling)
+    if (m_bPolling)                                         // FIXME: why poll? There is API that yields 'till a card event occurs. 
     {
         m_bPolling = 0;
         WaitForSingleObject(m_hThread,3000);
@@ -679,7 +752,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
     // Establish Context
     //---------------------------------------------------------------
     m_retCode = SCardEstablishContext(SCARD_SCOPE_USER,
-                                      NULL,NULL,&m_hContext);   // FIXME this context is never freed and may get overwritten
+                                      NULL,NULL,&m_hContext); 
     if (m_retCode != SCARD_S_SUCCESS) 
         return 0;
 

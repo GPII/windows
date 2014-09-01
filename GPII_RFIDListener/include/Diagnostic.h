@@ -26,6 +26,6 @@ typedef const BYTE far            *LPCBYTE;     // Strangley missing form window
 extern void Diagnostic_PrintHexBytes(LPTSTR pszDest, size_t cchDest, LPCBYTE pBytes, size_t cBytes);
 extern void Diagnostic_PrintCharBytes(LPTSTR pszDest, size_t cchDest, LPCBYTE pBytes, size_t cBytes);
 extern void Diagnostic_LogString(LPCSTR pszPrefix, LPCSTR pszStr);
-extern void Diagnostic_LogBlock(UINT uSector, UINT uBlock, LPCBYTE pbBlock, size_t cBytes = 16);
+extern void Diagnostic_LogHexBlock(UINT uSector, UINT uBlock, LPCBYTE pbBlock, size_t cBytes);
 
 #endif // _DIAGNOSTIC_H_

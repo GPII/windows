@@ -255,6 +255,7 @@ void Diagnostic_LogString(LPCSTR pszPrefix, LPCSTR pszString)
 //FIXME perhaps inline these functions. Perhasp use pointers not indexes
 void Diagnostic_PrintHexBytes(LPTSTR pszDest, size_t cchDest, LPCBYTE pBytes, size_t cBytes)
 {
+    *pszDest = '\0';
     for (size_t i = 0; i < cBytes; i++)
     {
         (void)StringCchPrintf(&pszDest[i * 3], cchDest - (i * 3), TEXT("%02hhx "), pBytes[i]);
@@ -263,13 +264,14 @@ void Diagnostic_PrintHexBytes(LPTSTR pszDest, size_t cchDest, LPCBYTE pBytes, si
 
 void Diagnostic_PrintCharBytes(LPTSTR pszDest, size_t cchDest, LPCBYTE pBytes, size_t cBytes)
 {
+    *pszDest = '\0';
     for (size_t i = 0; i < cBytes; i++)
     {
         (void)StringCchPrintf(&pszDest[i], cchDest - i, TEXT("%c"), pBytes[i]);
     }
 }
 
-void Diagnostic_LogBlock(UINT uSector, UINT uBlock, LPCBYTE pbBlock, size_t cBytes)
+void Diagnostic_LogHexBlock(UINT uSector, UINT uBlock, LPCBYTE pbBlock, size_t cBytes)
 {
     static TCHAR pszPrefix[20];
     static TCHAR pszString[500];
