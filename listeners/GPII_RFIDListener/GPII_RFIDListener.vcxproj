@@ -57,13 +57,13 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;WIN32_LEAN_AND_MEAN;STRICT;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ShowIncludes>false</ShowIncludes>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>C:\Users\Steve\projects\gpii\windows\GPII_RFIDListener\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;..\common\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winscard.lib;libcurl\libcurl_a_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\Steve\projects\gpii\windows\GPII_RFIDListener\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winscard.lib;\libcurl\libcurl_a_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>lib;..\common\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
@@ -76,7 +76,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;WIN32_LEAN_AND_MEAN;STRICT;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Steve\projects\gpii\windows\GPII_RFIDListener\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;..\common\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -85,14 +85,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>winscard.lib;libcurl\libcurl_a.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\Steve\projects\gpii\windows\GPII_RFIDListener\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>lib;..\common\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\GPII_RFIDListener.cpp" />
     <ClCompile Include="src\Diagnostic.cpp" />
+    <ClCompile Include="src\GPII_RFIDListener.cpp" />
     <ClCompile Include="src\WinSmartCard.cpp" />
     <ClCompile Include="src\FlowManager.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -100,20 +100,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\libcurl\curl.h" />
-    <ClInclude Include="include\libcurl\curlbuild.h" />
-    <ClInclude Include="include\libcurl\curlrules.h" />
-    <ClInclude Include="include\libcurl\curlver.h" />
-    <ClInclude Include="include\libcurl\easy.h" />
-    <ClInclude Include="include\libcurl\mprintf.h" />
-    <ClInclude Include="include\libcurl\multi.h" />
+    <ClInclude Include="..\common\include\libcurl\curl.h" />
+    <ClInclude Include="..\common\include\libcurl\curlbuild.h" />
+    <ClInclude Include="..\common\include\libcurl\curlrules.h" />
+    <ClInclude Include="..\common\include\libcurl\curlver.h" />
+    <ClInclude Include="..\common\include\libcurl\easy.h" />
+    <ClInclude Include="..\common\include\libcurl\mprintf.h" />
+    <ClInclude Include="..\common\include\libcurl\multi.h" />
+    <ClInclude Include="include\Diagnostic.h" />
     <ClInclude Include="include\WinSmartCard.h" />
     <ClInclude Include="include\FlowManager.h" />
-    <ClInclude Include="include\Diagnostic.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\libcurl\COPYING" />
-    <None Include="lib\libcurl\README" />
+    <None Include="..\common\include\libcurl\COPYING" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>

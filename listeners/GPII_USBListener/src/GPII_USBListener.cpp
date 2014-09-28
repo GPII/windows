@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 https://github.com/gpii/windows/LICENSE.txt
 */
 
-#include <curl/curl.h>
+#include <libcurl/curl.h>
 #include <dbt.h>
 #include <string>
 #include <iostream>
@@ -40,7 +40,7 @@ CURLcode            MakeGetRequest(const std::string&);
  *
  * http://msdn.microsoft.com/en-us/library/windows/desktop/ms632680(v=vs.85).aspx
  */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/)
 {
     HWND hwnd;
     MSG Msg;
@@ -200,7 +200,7 @@ void CallFlowManager(const std::string& token, const std::string& action)
 CURLcode MakeGetRequest(const std::string& url)
 {
     CURL *curl;
-    CURLcode responseCode;
+    CURLcode responseCode = CURLE_COULDNT_CONNECT;
     curl = curl_easy_init();
     if (curl)
     {
