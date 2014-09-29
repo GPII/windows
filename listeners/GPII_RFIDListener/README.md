@@ -20,7 +20,7 @@ Build using Visual studio. The 2013 Express version is know to work. You can bui
 
 ### libcurl
 
-The static version of libcurl is used to create the http GET actions and while files for libcurl 7v25 are included in the source you may wish to regenerate them, for example to update libcurl. To generate these files do the following
+The static version of libcurl is used to create the http GET actions and while files for libcurl 7v37 are included in the source you may wish to regenerate them, for example to update libcurl. To generate these files do the following
 
 See the README in libcur/ for details of generating these files
 

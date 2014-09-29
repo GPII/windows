@@ -2,6 +2,17 @@ GPII USB User Listener for Windows
 
 This folder contains the necessary files for the Windows USB listener (source code and libraries).
 
+## Build
+
+Build using Visual studio. The 2013 Express version is know to work. You can build using the IDE or command line. An Installer will be created soon. 
+
+### libcurl
+
+The static version of libcurl is used to create the http GET actions and while files for libcurl 7v37 are included in the source you may wish to regenerate them, for example to update libcurl. To generate these files do the following
+
+### Alternative build (not used)
+
+See the README in libcur/ for details of generating these files
 Dependencies:
 1. MinGW - download and install from http://www.mingw.org
 2. libcurl - download from http://curl.haxx.se/download.html and follow build/installation instructions for Windows MinGW (http://curl.haxx.se/docs/install.html)
