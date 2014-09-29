@@ -15,25 +15,11 @@
     <ClInclude Include="include\WinSmartCard.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\include\libcurl\curl.h" />
-    <ClInclude Include="..\common\include\libcurl\curlbuild.h" />
-    <ClInclude Include="..\common\include\libcurl\curlrules.h" />
-    <ClInclude Include="..\common\include\libcurl\curlver.h" />
-    <ClInclude Include="..\common\include\libcurl\easy.h" />
-    <ClInclude Include="..\common\include\libcurl\mprintf.h" />
-    <ClInclude Include="..\common\include\libcurl\multi.h" />
     <ClInclude Include="include\Diagnostic.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\GPII_RFIDListener.ico" />
     <Image Include="src\small.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="README.md" />
-    <None Include="..\common\include\libcurl\COPYING" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

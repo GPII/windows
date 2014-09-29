@@ -1,3 +1,7 @@
++ These files
+
+The curl include files and libs
+ 
 + Building libcurl for the GPII Windows Listeners
 
 While http://curl.haxx.se/download.html list binaries for win32 these are usually out of date so is best to build from source
@@ -10,7 +14,7 @@ The \lib\libcurl libs are built as follows. We build the static version to minim
 As we are now build using VisualStudio we need the VS build of libcurl
 See the instructions in <curl>\winbuild\BUILD.WINDOWS.txt (known to work with VS Express 2013)
 
-For a minum version run this command in the visual studio command prompt
+For a minimum version run this command in the visual studio command prompt
   nmake /f Makefile.vc mode=static ENABLE_SSPI=no ENABLE_IPV6=no ENABLE_IDN=no ENABLE_WINSSL=no
 Run again with DEBUG=yes and copy the 2 libraries
 

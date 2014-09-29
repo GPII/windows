@@ -4,8 +4,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPII_RFIDListener", "GPII_RFIDListener\GPII_RFIDListener.vcxproj", "{7EBBEC08-3F91-486B-987E-5D29037EF1B8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1B4390E9-DB8C-4205-906B-080C6F25C551} = {1B4390E9-DB8C-4205-906B-080C6F25C551}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPII_USBListener", "GPII_USBListener\GPII_USBListener.vcxproj", "{7EBBEC08-0000-0000-0000-000000000000}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1B4390E9-DB8C-4205-906B-080C6F25C551} = {1B4390E9-DB8C-4205-906B-080C6F25C551}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcurl", "libcurl\libcurl.vcxproj", "{1B4390E9-DB8C-4205-906B-080C6F25C551}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +29,10 @@ Global
 		{7EBBEC08-0000-0000-0000-000000000000}.Debug|Win32.Build.0 = Debug|Win32
 		{7EBBEC08-0000-0000-0000-000000000000}.Release|Win32.ActiveCfg = Release|Win32
 		{7EBBEC08-0000-0000-0000-000000000000}.Release|Win32.Build.0 = Release|Win32
+		{1B4390E9-DB8C-4205-906B-080C6F25C551}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1B4390E9-DB8C-4205-906B-080C6F25C551}.Debug|Win32.Build.0 = Debug|Win32
+		{1B4390E9-DB8C-4205-906B-080C6F25C551}.Release|Win32.ActiveCfg = Release|Win32
+		{1B4390E9-DB8C-4205-906B-080C6F25C551}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
