@@ -110,7 +110,7 @@ static int  m_nLogin = 0;
 static ATOM		        MyRegisterClass(HINSTANCE hInstance);
 static BOOL             MyTrayIcon(HWND hWnd);
 static BOOL             MyPopupMenu(HWND hWnd);
-static BOOL	    		InitInstance(HINSTANCE);
+static BOOL	    		InitInstance(HINSTANCE;)
 static LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     //-----------------------------------------------------
     // Initialize global variables
     //-----------------------------------------------------
-    wsprintf(m_szUserID,"%s",L"");
+    wsprintf(m_szUserID,"%s","");
     wsprintf(m_szReader,"%s",lpCmdLine);
     wsprintf(m_szStatus,"%s","Listening...");
 

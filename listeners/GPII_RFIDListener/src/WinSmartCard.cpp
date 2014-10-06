@@ -772,7 +772,7 @@ int _WinSmartCardInitialize(HWND hWnd, const char* szReader)
     if (lstrlen(szReader))
     {
         m_nReaderIndex = -1;
-        char *p = pmszReaderList;
+        char *p = pmszReaderList;       // FIXME p could be NULL which would break lstrlen
         while ( *p )
         {
             nLen = lstrlen(p) + 1;      //FIXME: ugh!
