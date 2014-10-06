@@ -110,7 +110,7 @@ static int  m_nLogin = 0;
 static ATOM		        MyRegisterClass(HINSTANCE hInstance);
 static BOOL             MyTrayIcon(HWND hWnd);
 static BOOL             MyPopupMenu(HWND hWnd);
-static BOOL	    		InitInstance(HINSTANCE;)
+static BOOL	    		InitInstance(HINSTANCE);
 static LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 
 ///////////////////////////////////////////////////////////////////////////////

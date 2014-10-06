@@ -108,6 +108,9 @@
     <Image Include="src\GPII_RFIDListener.ico" />
     <Image Include="src\small.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\GPII_RFIDListener.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

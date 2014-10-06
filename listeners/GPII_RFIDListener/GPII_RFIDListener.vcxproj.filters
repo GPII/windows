@@ -27,4 +27,7 @@
       <Extensions>*.h</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\GPII_RFIDListener.rc" />
+  </ItemGroup>
 </Project>
