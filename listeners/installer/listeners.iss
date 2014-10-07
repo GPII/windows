@@ -1,4 +1,4 @@
-#define binPath  "..\bin\debug\" 
+#define binPath  "..\bin\Release\" 
 
 ; Our version is the greater of the version of listners
 #define maxVersion(str fileA, str fileB) \

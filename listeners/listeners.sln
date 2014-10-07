@@ -15,6 +15,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPII_USBListener", "GPII_US
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcurl", "libcurl\libcurl.vcxproj", "{1B4390E9-DB8C-4205-906B-080C6F25C551}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "installer", "installer\Installer.vcxproj", "{50FB1EFD-9DC6-4F65-B891-8EA29C39C0F5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7EBBEC08-0000-0000-0000-000000000000} = {7EBBEC08-0000-0000-0000-000000000000}
+		{7EBBEC08-3F91-486B-987E-5D29037EF1B8} = {7EBBEC08-3F91-486B-987E-5D29037EF1B8}
+		{1B4390E9-DB8C-4205-906B-080C6F25C551} = {1B4390E9-DB8C-4205-906B-080C6F25C551}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -33,6 +40,10 @@ Global
 		{1B4390E9-DB8C-4205-906B-080C6F25C551}.Debug|Win32.Build.0 = Debug|Win32
 		{1B4390E9-DB8C-4205-906B-080C6F25C551}.Release|Win32.ActiveCfg = Release|Win32
 		{1B4390E9-DB8C-4205-906B-080C6F25C551}.Release|Win32.Build.0 = Release|Win32
+		{50FB1EFD-9DC6-4F65-B891-8EA29C39C0F5}.Debug|Win32.ActiveCfg = Release|Win32
+		{50FB1EFD-9DC6-4F65-B891-8EA29C39C0F5}.Debug|Win32.Build.0 = Release|Win32
+		{50FB1EFD-9DC6-4F65-B891-8EA29C39C0F5}.Release|Win32.ActiveCfg = Release|Win32
+		{50FB1EFD-9DC6-4F65-B891-8EA29C39C0F5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
