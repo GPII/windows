@@ -2,6 +2,15 @@
 //
 // WinSmartCard.cpp
 //
+// Copyright 2014 University of Wisconsin, Madison
+// Copyright 2014 OpenDirective Ltd.
+//
+// Licensed under the New BSD license. You may not use this file except in
+// compliance with this License.
+//
+// You may obtain a copy of the License at
+// https://github.com/gpii/windows/blob/master/LICENSE.txt
+//
 // This file simplifies the Winscard interface by allowing the calling
 // function to initialize a card read. This file will then start a new
 // thread to test for card connections and disconnections. Each event

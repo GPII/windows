@@ -1,13 +1,14 @@
-/*!
+/*
 USB User Listener for Windows
 
 Copyright 2012 Astea Solutions AD
+Copyright 2014 OpenDirective Ltd.
 
 Licensed under the New BSD license. You may not use this file except in
 compliance with this License.
 
 You may obtain a copy of the License at
-https://github.com/gpii/windows/LICENSE.txt
+https://github.com/gpii/windows/blob/master/LICENSE.txt
 */
 
 #include <libcurl/curl.h>

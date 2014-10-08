@@ -2,6 +2,14 @@
 //
 // Diagnostic.h
 //
+// Copyright 2014 OpenDirective Ltd.
+//
+// Licensed under the New BSD license. You may not use this file except in
+// compliance with this License.
+//
+// You may obtain a copy of the License at
+// https://github.com/gpii/windows/blob/master/LICENSE.txt
+//
 // Access to the diagnostic information display
 //
 //	Project Files:

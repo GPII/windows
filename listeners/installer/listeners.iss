@@ -1,3 +1,15 @@
+//
+// listeners.iss
+//
+// Copyright 2014 OpenDirective Ltd.
+//
+// Licensed under the New BSD license. You may not use this file except in
+// compliance with this License.
+//
+// You may obtain a copy of the License at
+// https://github.com/gpii/windows/blob/master/LICENSE.txt
+//
+
 ; Defined here so can be compliled in IDE but can be overridden on command line
 #define binPath  "..\bin\Release\" 
 #define ouputDir binPath 

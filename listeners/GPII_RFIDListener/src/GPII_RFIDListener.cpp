@@ -1,6 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // GPII_RFIDListener.cpp
 //
+// Copyright 2014 University of Wisconsin, Madison
+// Copyright 2014 OpenDirective Ltd.
+//
+// Licensed under the New BSD license. You may not use this file except in
+// compliance with this License.
+//
+// You may obtain a copy of the License at
+// https://github.com/gpii/windows/blob/master/LICENSE.txt
+//
 // The GPII RFID listener has the following features
 // User Listener which includes device arrival and removal,
 // a user hot key (ESC), a task bar icon and menu, and support
