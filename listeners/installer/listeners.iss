@@ -1,6 +1,8 @@
+; Defined here so can be compliled in IDE but can be overridden on command line
 #define binPath  "..\bin\Release\" 
+#define ouputDir binPath 
 
-; Our version is the greater of the version of listners
+; Setup version is the greater of the listener versions
 #define maxVersion(str fileA, str fileB) \
   ParseVersion(fileA, Local[0], Local[1], Local[2], Local[3]), \
   Local[4] = EncodeVer(Local[0], Local[1], Local[2], Local[3]), \
@@ -8,12 +10,12 @@
   Local[5] = EncodeVer(Local[0], Local[1], Local[2], Local[3]), \
   DecodeVer(Max(Local[4], Local[5])) 
 
-#define USB Str(AddBackslash(SourcePath) + binPath + "GPII_USBListener.exe")
-#define RFID Str(AddBackslash(SourcePath) + binPath + "GPII_RFIDListener.exe")
-#if GetFileVersion(USB) == "" || GetFileVersion(RFID) == ""
+#define USBExe Str(AddBackslash(SourcePath) + binPath + "GPII_USBListener.exe")
+#define RFIDExe Str(AddBackslash(SourcePath) + binPath + "GPII_RFIDListener.exe")
+#if GetFileVersion(USBExe) == "" || GetFileVersion(RFIDExe) == ""
   #error A Listener EXE file is missing - check bin\Release
 #endif
-#define AppVersion maxVersion(USB, RFID)
+#define AppVersion maxVersion(USBExe, RFIDExe)
  
 ; Define this to write the preprocessed output to a file Preprocessed.iss and open it in the IDE
 ;#define DebugPP
@@ -25,7 +27,7 @@ VersionInfoVersion={#AppVersion}
 DefaultDirName={pf}\GPII
 DefaultGroupName=GPII
 UninstallDisplayIcon={app}\GPII_RFIDListener.exe
-OutputDir=..\bin\Release
+OutputDir={#ouputDir}
 OutputBaseFilename=GPIIListenerSetup-{#AppVersion}
 
 AppPublisher=OpenDirective for RtF
@@ -42,8 +44,8 @@ Name: "desktop"; Description: "Add icons to desktop"; Flags: unchecked
 Name: "startmenu"; Description: "Add icons to start menu"; Flags: unchecked  
 
 [Files]
-Source: "{#binPath}GPII_USBListener.exe"; DestDir: "{app}"; Tasks: usb
-Source: "{#binPath}GPII_RFIDListener.exe"; DestDir: "{app}"; Tasks: rfid
+Source: "{#USBExe}"; DestDir: "{app}"; Tasks: usb
+Source: "{#RFIDExe}"; DestDir: "{app}"; Tasks: rfid
 Source: "..\..\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "GPII.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "GPII_USBListener.ico"; DestDir: "{app}"; Flags: ignoreversion

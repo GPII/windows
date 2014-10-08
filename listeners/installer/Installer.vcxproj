@@ -33,8 +33,9 @@
     </NMakeOutput>
     <NMakePreprocessorDefinitions>
     </NMakePreprocessorDefinitions>
-    <OutDir>..\bin\Release</OutDir>
-    <IntDir>.</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)</IntDir>
+    <NMakeCleanCommandLine>del $(SolutionDir)\bin\$(Configuration)\GPIIListenerSetup*.exe &amp;&amp; rmdir /s /q obj</NMakeCleanCommandLine>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <BuildLog>
