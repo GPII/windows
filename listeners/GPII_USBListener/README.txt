@@ -4,7 +4,7 @@ This folder contains the necessary files for the Windows USB listener (source co
 
 ## Build
 
-Build using Visual studio. The 2013 Express version is know to work. You can build using the IDE or command line. An Installer will be created soon. 
+Build using Visual studio. The 2013 Express version is know to work. You can build using the IDE or command line.  Build the solution to get the installer.
 
 ### libcurl
 

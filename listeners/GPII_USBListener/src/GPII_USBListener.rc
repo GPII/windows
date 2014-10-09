@@ -24,8 +24,8 @@
 #define VER_FILEVERSION             VER_PRODUCTVERSION
 #define VER_FILEVERSION_STR         VER_PRODUCTVERSION_STR
 
-#define VER_COMPANYNAME_STR         "University of Wisconsin, Madison"
-#define VER_COPYRIGHT_STR           "(c) 2014 University of Wisconsin, Madison. All rights reserved."
+#define VER_COMPANYNAME_STR         "Raising the Floor"
+#define VER_COPYRIGHT_STR           "(c) 2012,14 Members of the Raising the Floor Consortium"
 #define VER_FILEDESCRIPTION_STR     "GPII USB User Listener"
 #define VER_ORIGINALFILENAME_STR    "GPII_USBListener.exe"
 #define VER_PRODUCTNAME_STR         "GPII USB Listener"
