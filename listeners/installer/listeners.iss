@@ -33,9 +33,6 @@
 #endif
 #define AppVersion maxVersion(USBExe, RFIDExe)
  
-#define sys GetEnv("windir") + "\system32"
-#define CRT sys +"\MSVCR120.DLL"
-
 ; Define this to write the preprocessed output to a file Preprocessed.iss and open it in the IDE
 ;#define DebugPP
 
@@ -74,7 +71,7 @@ Source: "GPII_RFIDListener.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; We copy the VS x86 redistributable CRT files in case they are not on the system
 ; C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT
 ; Note Inno does a 32bit install by default so sys is actually SysWow64 (yeah, I know!)
- Source: "MSVCRedist\*"; DestDir: "{sys}"; Flags: onlyifdoesntexist sharedfile
+ Source: "MSVCRedist\*"; DestDir: "{sys}"; Flags: restartreplace uninsneveruninstall sharedfile
 
 [Icons]
 ; Start menu
