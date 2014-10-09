@@ -11,6 +11,10 @@
 // You may obtain a copy of the License at
 // https://github.com/gpii/windows/blob/master/LICENSE.txt
 //
+// The research leading to these results has received funding from 
+// the European Union's Seventh Framework Programme (FP7/2007-2013) 
+// under grant agreement no. 289016.
+//
 // This file simplifies the Winscard inteface by allowing the calling
 // function to initialize a card read. This file will then start a new
 // thread to test for card connections and disconnections. Each event

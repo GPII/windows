@@ -9,6 +9,10 @@
 // You may obtain a copy of the License at
 // https://github.com/gpii/windows/blob/master/LICENSE.txt
 //
+// The research leading to these results has received funding from 
+// the European Union's Seventh Framework Programme (FP7/2007-2013) 
+// under grant agreement no. 289016.
+//
 
 ; Defined here so can be compliled in IDE but can be overridden on command line
 #define binPath  "..\bin\Release\" 

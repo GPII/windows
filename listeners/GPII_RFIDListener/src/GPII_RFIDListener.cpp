@@ -10,6 +10,10 @@
 // You may obtain a copy of the License at
 // https://github.com/gpii/windows/blob/master/LICENSE.txt
 //
+// The research leading to these results has received funding from 
+// the European Union's Seventh Framework Programme (FP7/2007-2013) 
+// under grant agreement no. 289016.
+//
 // The GPII RFID listener has the following features
 // User Listener which includes device arrival and removal,
 // a user hot key (ESC), a task bar icon and menu, and support
