@@ -39,6 +39,10 @@
 [Setup]
 AppName=GPII Listeners
 AppVersion={#AppVersion}
+AppPublisher=Raising the Floor
+AppCopyright=(c) 2014 Members of the Raising the Floor Consortium"
+AppPublisherURL=http://gpii.net
+
 VersionInfoVersion={#AppVersion}
 DefaultDirName={pf}\GPII
 DefaultGroupName=GPII
@@ -46,9 +50,6 @@ UninstallDisplayIcon={app}\GPII_RFIDListener.exe
 OutputDir={#ouputDir}
 OutputBaseFilename=GPIIListenerSetup-{#AppVersion}
 
-AppPublisher=OpenDirective for RtF
-AppCopyright=Copyright (C) 2014 OpenDirective
-AppPublisherURL=http://opendirective.com
 ;SetupIconFile=GPII.ico
 
 [Tasks]
