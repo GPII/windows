@@ -21,21 +21,19 @@ var fluid = require("universal"),
 
 fluid.registerNamespace("gpii.acceptanceTesting.windows");
 
-fluid.require("../../gpii/node_modules/registrySettingsHandler", require);
-fluid.require("../../gpii/node_modules/registryResolver", require);
-fluid.require("../../gpii/node_modules/spiSettingsHandler", require);
+require("../../gpii/index.js");
 
-fluid.require("universal/tests/AcceptanceTests", require);
+fluid.require("universal/tests/AcceptanceTests.js", require);
 
 
 gpii.acceptanceTesting.windows.runTests = function (configFile, testDefs) {
     var gpiiConfig = {
-       nodeEnv: configFile,
-       configPath: path.resolve(__dirname, "./configs")
+        nodeEnv: configFile,
+        configPath: path.resolve(__dirname, "./configs")
     };
     fluid.each(testDefs, function (testDef) {
         testDef.config = gpiiConfig;
     });
     testDefs = gpii.acceptanceTesting.buildTests(testDefs);
     module.exports = kettle.tests.bootstrap(testDefs);
-}
+};

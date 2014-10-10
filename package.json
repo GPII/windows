@@ -1,11 +1,18 @@
 {
   "name": "gpii-windows",
   "description": "Components of the GPII personalization infrastructure for use on Microsoft's \"Windows\" ™",
-  "version": "0.1",
+  "version": "0.1.0",
   "author": "GPII",
   "bugs": "http://wiki.gpii.net/index.php/Main_Page",
   "homepage": "http://gpii.net/",
   "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-shell": "0.6.4",
+    "grunt-contrib-jshint": "~0.9.0",
+    "grunt-jsonlint": "1.0.4",
+    "grunt-gpii": "git://github.com/GPII/grunt-gpii.git#a4aca06cbaf7523eb1af56ed65ce6bd30b8ec325"
+  },
   "licenses": [
      {
        "type": "BSD-3-Clause",
