@@ -1,4 +1,4 @@
-GPII USB User Listener for Windows
+#GPII USB User Listener for Windows
 
 This folder contains the necessary files for the Windows USB listener (source code and libraries).
 

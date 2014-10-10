@@ -1,3 +1,5 @@
+# Notes
+
 The installer is created using the unicode vesion of Inno Setup and it's preprocessor'
 http://www.jrsoftware.org/isinfo.php
 

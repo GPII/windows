@@ -1,16 +1,16 @@
-+ Listeners
+# Listeners
 
 The GPII listeners for windows are currently USB and RFID (NFC). See individual README.md files for details
 The executables can be found in ./bin/{Debug,Release} though the installer is only in Release
 
-+ Building
+# Building
 
-++ In VisualStudio
+## In VisualStudio
 
 Open listener.sln in VS, right click on Solution in the explorer and build.
 Has been tested in VS2013 (12) express
 
-++ On command line with MSBuild
+## On command line with MSBuild
 
 Open a command window and run
 
