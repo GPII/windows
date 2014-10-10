@@ -97,10 +97,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.txt" />
+    <ResourceCompile Include="src\GPII_USBListener.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="src\GPII_USBListener.rc" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

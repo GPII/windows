@@ -8,9 +8,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="listeners.iss" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="README.txt" />
+    <None Include="README.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{50FB1EFD-9DC6-4F65-B891-8EA29C39C0F5}</ProjectGuid>
