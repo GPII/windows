@@ -13,6 +13,6 @@ https://github.com/gpii/universal/LICENSE.txt
 var fluid = require("universal"),
     gpii = fluid.registerNamespace("gpii");
 
-require("./gpii/index.js");
+require("./index.js");
 
 gpii.start();

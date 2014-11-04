@@ -21,7 +21,7 @@ module.exports = function (grunt) {
     var gpiiGrunt = grunt.config.getRaw("gpiiGruntGlobal");
     grunt.initConfig({
         jshint: {
-            src: ["gpii/**/*.js", "tests/**/*.js"],
+            src: ["gpii/**/*.js", "tests/**/*.js", "index.js", "gpii.js"],
             buildScripts: ["Gruntfile.js"],
             options: {
                 jshintrc: true
