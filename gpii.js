@@ -20,4 +20,12 @@ var fluid = require("universal"),
 
 require("./index.js");
 
-gpii.start();
+console.log("About to load it");
+
+require("./gpii/node_modules/WindowsUtilities/WindowsUtilities.js");
+
+console.log("Loaded it, going to try to kill mspaint. 2");
+
+gpii.windows.killProccessByName("mspaint.exe");
+
+//gpii.start();
