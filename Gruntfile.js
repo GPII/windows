@@ -18,7 +18,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-shell");
     grunt.loadNpmTasks("grunt-gpii");
         
-    var gpiiGrunt = grunt.config.getRaw("gpiiGruntGlobal");
+    grunt.config.getRaw("gpiiGruntGlobal");
     grunt.initConfig({
         jshint: {
             src: ["gpii/**/*.js", "tests/**/*.js", "index.js", "gpii.js"],
@@ -34,12 +34,5 @@ module.exports = function (grunt) {
 
     grunt.registerTask("build", "Build the entire GPII", function () {
         grunt.task.run("gpii-universal");
-    });
-
-    grunt.registerTask("start", "Start the GPII", function () {
-        gpiiGrunt.shellImmediate({
-            name: "start",
-            command: "node gpii.js"
-        });
     });
 };
