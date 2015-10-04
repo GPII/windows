@@ -21,6 +21,8 @@ than 1.4.  If you need to upgrade npm you can issue the following command:
 
 To build the GPII for Windows using grunt, perform the following:
 
+    mkdir gpii
+    cd gpii
     git clone https://github.com/GPII/windows.git
     cd windows
     npm install --ignore-scripts=true
