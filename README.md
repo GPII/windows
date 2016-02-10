@@ -48,5 +48,5 @@ Once the VM has finished booting up you can open a command prompt window and use
 ```
 cd c:\vagrant
 node tests\UnitTests.js
-node AcceptanceTests.js builtIn
+node tests\AcceptanceTests.js builtIn
 ```
