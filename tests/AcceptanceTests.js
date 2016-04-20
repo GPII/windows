@@ -25,7 +25,7 @@ fluid.registerNamespace("gpii.acceptanceTesting.windows");
 
 require("../index.js");
 
-var baseDir = fluid.module.resolvePath("${universal}/tests/");
-var windowsFiles = fluid.require("${universal}/tests/platform/index-windows.js");
+var baseDir = fluid.module.resolvePath("%universal/tests/");
+var windowsFiles = fluid.require("%universal/tests/platform/index-windows.js");
 
 gpii.test.runSuitesWithFiltering(windowsFiles, baseDir, ["gpii.test.acceptance.testCaseHolder"]);
