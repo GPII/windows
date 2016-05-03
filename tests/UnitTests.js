@@ -16,3 +16,4 @@ https://github.com/gpii/universal/LICENSE.txt
 require("../gpii/node_modules/registrySettingsHandler/test/testRegistrySettingsHandler.js");
 require("../gpii/node_modules/spiSettingsHandler/test/testSpiSettingsHandler.js");
 require("../gpii/node_modules/WindowsUtilities/test/testWindowsUtilities.js");
+require("../gpii/node_modules/registryResolver/test/testRegistryResolver.js");
