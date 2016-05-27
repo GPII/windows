@@ -23,7 +23,7 @@ To build the GPII for Windows using grunt, perform the following:
 
     git clone https://github.com/GPII/windows.git
     cd windows
-    npm install --ignore-scripts=true
+    npm install
     grunt build
 
 Note that whenever you run the `npm install` task for this project, you must use the option appearing above.

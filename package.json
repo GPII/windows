@@ -1,29 +1,27 @@
 {
-  "name": "gpii-windows",
-  "description": "Components of the GPII personalization infrastructure for use on Microsoft's \"Windows\" ™",
-  "version": "0.1.0",
-  "author": "GPII",
-  "bugs": "http://wiki.gpii.net/w/Main_Page",
-  "homepage": "http://gpii.net/",
-  "dependencies": {
-    "ref-array": "1.1.0"
-  },
-  "devDependencies": {
-    "grunt": "~0.4.4",
-    "grunt-shell": "0.6.4",
-    "grunt-contrib-jshint": "~0.9.0",
-    "grunt-jsonlint": "1.0.4",
-    "grunt-gpii": "git://github.com/GPII/grunt-gpii.git#ec8412064e107febb120f0b7437d403453b40d2d",
-    "shelljs": "0.3.0"
-  },
-  "licenses": [
-     {
-       "type": "BSD-3-Clause",
-       "url": "http://www.opensource.org/licenses/BSD-3-Clause"
-     }
-  ],
-  "keywords": ["gpii", "accessibility", "settings", "fluid", "IoC", "Inversion of Control", "configuration", "evented"],
-  "repository": "git://github.com/GPII/windows.git",
-  "main": "./gpii.js",
-  "engines": { "node" : ">=0.10.29" }
+    "name": "gpii-windows",
+    "description": "Components of the GPII personalization infrastructure for use on Microsoft's \"Windows\" ™",
+    "version": "0.1.0",
+    "author": "GPII",
+    "bugs": "http://issues.gpii.net/browse/GPII",
+    "homepage": "http://gpii.net/",
+    "dependencies": {
+        "ffi": "2.0.0",
+        "ref": "1",
+        "ref-struct": "1",
+        "ref-array": "1.1.2"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.5",
+        "grunt-shell": "0.6.4",
+        "grunt-contrib-jshint": "~0.9.0",
+        "grunt-jsonlint": "1.0.4",
+        "grunt-gpii": "git://github.com/GPII/grunt-gpii.git#ec8412064e107febb120f0b7437d403453b40d2d",
+        "shelljs": "0.3.0"
+    },
+    "license" : "BSD-3-Clause",
+    "keywords": ["gpii", "accessibility", "settings", "fluid", "IoC", "Inversion of Control", "configuration", "evented"],
+    "repository": "git://github.com/GPII/windows.git",
+    "main": "./gpii.js",
+    "engines": { "node" : ">=4.2.1" }
 }
