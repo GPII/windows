@@ -1,3 +1,3 @@
 cd c:\vagrant
-npm install --ignore-scripts=true
+npm install
 grunt build
