@@ -41,9 +41,11 @@ will be withdrawn soon. You can operate these as follows:
 
 It is possible to provision a Windows VM for testing purposes. Please ensure you have met [these VM requirements](https://github.com/GPII/qi-development-environments/#requirements) before proceeding. After that you can use the ``vagrant up`` command to create an instance of a [Windows 10 Evaluation VM](https://github.com/idi-ops/packer-windows) which will boot an instance of the Windows 10 VM, pull in the GPII Framework's npm dependencies, and then build it. 
 
-If this is your first time creating this VM a 6.5GB download will take place. The downloaded image will be valid for 90 days after which the Windows installation will no longer be useable. To remove an expired image you can use the ``vagrant box remove "inclusivedesign/windows10-eval"`` command.
+If this is your first time creating this VM an 8 GB download will take place. The downloaded image will be valid for 90 days after which the Windows installation will no longer be useable. To remove an expired image you can use the ``vagrant box remove "inclusivedesign/windows10-eval"`` command.
 
-Once the VM has finished booting up you can open a command prompt window and use the following commands to test the framework:
+Once the VM has finished booting up you will need to type the ``vagrant reload`` command to cause it to restart. This is required so changes made to the Windows VM's ``PATH`` environment variable as part of the provisioning process are available in terminal sessions. This step is a temporary workaround and will be removed in the near future. 
+
+Now you can open a command prompt window and use the following commands to test the framework:
 
 ```
 cd c:\vagrant
