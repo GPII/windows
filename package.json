@@ -10,13 +10,12 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "universal": "git://github.com/GPII/universal.git#c7ed823d5a7271e544820593b6b8ed045777b7d8"
+        "universal": "git://github.com/amb26/universal.git#1a97958b6a7669c2c9e11a96ebd6f407357a4f81"
     },
     "devDependencies": {
         "grunt": "1.0.1",
         "fluid-grunt-eslint": "18.1.1",
         "grunt-jsonlint": "1.0.4",
-        "grunt-shell": "1.3.0",
         "shelljs": "0.3.0"
     },
     "license" : "BSD-3-Clause",
