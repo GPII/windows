@@ -37,5 +37,6 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell", path: "provisioning/chocolatey-packages.bat"
   config.vm.provision "shell", path: "provisioning/npm-packages.bat"
   config.vm.provision "shell", path: "provisioning/build.bat"
+  config.vm.provision "shell", path: "provisioning/build-installer.bat"
 
 end
