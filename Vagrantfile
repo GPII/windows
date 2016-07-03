@@ -23,8 +23,8 @@ Vagrant.configure(2) do |config|
     vm.gui = true
     vm.customize ["modifyvm", :id, "--memory", ram]
     vm.customize ["modifyvm", :id, "--cpus", cpus]
-    vm.customize ["modifyvm", :id, "--vram", "128"]
-    vm.customize ["modifyvm", :id, "--accelerate3d", "on"]
+    vm.customize ["modifyvm", :id, "--vram", "256"]
+    vm.customize ["modifyvm", :id, "--accelerate3d", "off"]
     vm.customize ["modifyvm", :id, "--audio", "null", "--audiocontroller", "hda"]
     vm.customize ["modifyvm", :id, "--ioapic", "on"]
     vm.customize ["setextradata", "global", "GUI/SuppressMessages", "all"]
