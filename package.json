@@ -10,7 +10,8 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "universal": "gpii/universal#98561d07c0b49d4d565be9027adebf36c1d1fe82"
+        "edge": "5.9.2",
+        "universal": "klown/universal#93591d8cc27a29a4885ebb9d5471987b655b41b3"
     },
     "devDependencies": {
         "grunt": "1.0.1",
