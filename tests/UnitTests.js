@@ -17,4 +17,4 @@ require("../gpii/node_modules/registrySettingsHandler/test/testRegistrySettingsH
 require("../gpii/node_modules/spiSettingsHandler/test/testSpiSettingsHandler.js");
 require("../gpii/node_modules/killProcess/test/testKillProcess.js");
 require("../gpii/node_modules/registryResolver/test/testRegistryResolver.js");
-require("../gpii/node_modules/processReporter/test/processesBridge_tests.js");
+require("../gpii/node_modules/processReporter/test/sll-tests.js");
