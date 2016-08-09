@@ -22,5 +22,5 @@
     "keywords": ["gpii", "accessibility", "settings", "fluid", "IoC", "Inversion of Control", "configuration", "evented"],
     "repository": "git://github.com/GPII/windows.git",
     "main": "./gpii.js",
-    "engines": { "node" : ">=4.2.1" }
+    "engines": { "node" : ">=6.3.1" }
 }
