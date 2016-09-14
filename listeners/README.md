@@ -8,13 +8,13 @@ The executables can be found in ./bin/{Debug,Release} though the installer is on
 ## In VisualStudio
 
 Open listener.sln in VS, sleect Debug or Release and right click on Solution in the explorer and build.
-Has been tested in VS2013 (12) express
+Has been tested in VS2015
 
 ## On command line with MSBuild
 
 Open a command window and run
 
-"%ProgramFiles(x86)%\MSBuild\12.0\bin\msbuild" listeners.sln /property:Configuration=Release
+"%ProgramFiles(x86)%\MSBuild\14.0\bin\msbuild" listeners.sln /property:Configuration=Release
 
 ## Making a release
 
