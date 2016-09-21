@@ -11,7 +11,7 @@
         "ref-struct": "1",
         "ref-array": "1.1.2",
         "edge": "5.9.2",
-        "universal": "klown/universal#ba1fbb856ff9d7084185b745d149aface60c07d7"
+        "universal": "klown/universal#a83cd1744329a8bfd487c21988f3d98970557ec0"
     },
     "devDependencies": {
         "grunt": "1.0.1",
