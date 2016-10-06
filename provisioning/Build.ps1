@@ -7,7 +7,7 @@ $VerbosePreference = "continue"
 
 # Include main Provisioning module.
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-Import-Module (Join-Path $scriptDir 'Provisioning.psm1') -Force -Verbose
+Import-Module (Join-Path $scriptDir 'Provisioning.psm1') -Force
 Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1" -Force
 
 # Obtain some useful paths.
@@ -25,6 +25,8 @@ Write-Verbose "systemDrive is $($systemDrive)"
 Write-Verbose "mainDir is $($mainDir)"
 
 Invoke-Command "npm" "install" $mainDir
+
+Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools_msbuild.bat"
 
 $msbuild = Get-MSBuild "4.0"
 $listenersDir = Join-Path $mainDir "listeners"
