@@ -7,6 +7,8 @@
     * PowerShell Core
 #>
 
+$VerbosePreference = "continue"
+
 Function Invoke-Command {
   Param (
     [string] $command,
@@ -30,7 +32,9 @@ Function Invoke-Command {
   $p = Start-Process $command -ArgumentList $arguments -PassThru -NoNewWindow -Wait
 
   if (!($p.HasExited)) {
-    Write-Debug "Waiting for `'$command $arguments`' to finish, please wait...."
+    Write-Verbose "Waiting for `'$command $arguments`' to finish, please wait...."
+  } else {
+    Write-Verbose "Process `'$command $arguments`' finished."
   }
   Write-Verbose "`'$command`' exited with $($p.ExitCode)"
 
