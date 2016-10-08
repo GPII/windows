@@ -40,7 +40,7 @@ Vagrant.configure(2) do |config|
     cp $moduleLocation $destinationDir
   SHELL
   
-  config.vm.provision "shell", path: "provisioning/chocolatey-packages.bat"
+  config.vm.provision "shell", path: "provisioning/Chocolatey.ps1"
   config.vm.provision "shell", path: "provisioning/npm-packages.bat"
   config.vm.provision "shell", path: "provisioning/Build.ps1"
 
