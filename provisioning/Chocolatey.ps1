@@ -3,7 +3,7 @@
 #>
 Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Provisioning.psm1') -Force
 
-$chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive;
+$chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive
 
 $nodePath = "C:\Program Files (x86)\nodejs"
 Invoke-Command $chocolatey "install nodejs.install -version 6.3.1 --forcex86 -y"
