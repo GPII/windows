@@ -34,4 +34,4 @@ Invoke-Command $msbuild "listeners.sln /nodeReuse:false /p:Configuration=Release
 Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"
 $testProcessHandlingDir = Join-Path $mainDir "gpii\node_modules\processHandling\test"
 Invoke-Command "cl" "test-window.c" $testProcessHandlingDir
-rm (Join-Path $testProcessHandlingDir "test-windows.obj")
+rm (Join-Path $testProcessHandlingDir "test-window.obj")
