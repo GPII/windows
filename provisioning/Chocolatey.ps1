@@ -5,16 +5,23 @@ Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Prov
 
 $chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive;
 
+$nodePath = "C:\Program Files (x86)\nodejs"
 Invoke-Command $chocolatey "install nodejs.install -version 6.3.1 --forcex86 -y"
-
+# TODO: Correct path and automatically added is this one
+# C:\Users\vagrant\AppData\Roaming\npm review it.
+#Add-Path $nodePath $true
 refreshenv
-Invoke-Command "npm" "install node-gyp@3.4.0" "C:\Program Files (x86)\nodejs\node_modules\npm"
 
+Invoke-Command "npm" "install node-gyp@3.4.0"
+
+$python2Path = "C:\tools\python2"
 Invoke-Command $chocolatey "install python2 -y"
-Invoke-Command $chocolatey "install innosetup -y"
-
+Add-Path $python2Path $true
 refreshenv
-Write-Verbose $env:Path
 
-# TODO: Review that the PATH in this session and others are set.
-setx /M PATH "%PATH%;C:\Program Files\nodejs;C:\tools\python2;C:\Program Files (x86)\Inno Setup 5"
+$innoSetupPath = "C:\Program Files (x86)\Inno Setup 5"
+Invoke-Command $chocolatey "install innosetup -y"
+Add-Path $innoSetupPath $true
+refreshenv
+
+exit 0

@@ -63,7 +63,7 @@ Function Get-MSBuild {
   return $msbuild
 }
 
-function Invoke-Environment {
+Function Invoke-Environment {
   Param (
         [Parameter(Mandatory=$true)]
         [string] $Command
@@ -77,6 +77,36 @@ function Invoke-Environment {
     }}
 }
 
+# TODO: Currently this function is adding the directory location even if this
+# is present in the path. Implement an additional function to check existence.
+Function Add-Path {
+  Param (
+    [Parameter(Mandatory=$true)]
+    [string] $Directory,
+    [bool] $Permanent = $false
+  )
+
+  $regKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+  $normalizedDirectory = [System.IO.Path]::GetFullPath($Directory)
+
+  # Obtain and set local PATH.
+  $currentLocalPath = $env:Path
+  $newLocalPath = "$($currentLocalPath);$($normalizedDirectory)"
+  $env:Path = $newLocalPath
+  Write-Verbose "Add-Path Local $($normalizedDirectory) -> $($newLocalPath)"
+
+  if ($Permanent) {
+    # Obtain and set system PATH.
+    $currentSystemPath = (Get-ItemProperty -Path $regKey -Name PATH).Path
+    $newSystemPath = "$($currentSystemPath);$($normalizedDirectory)"
+    Write-Verbose "Add-Path System $($normalizedDirectory) in the registry: $($newSystemPath)."
+    Set-ItemProperty -Path $regKey -Value $newSystemPath -Name PATH
+  }
+
+  return $newLocalPath
+}
+
 Export-ModuleMember -Function Invoke-Command
 Export-ModuleMember -Function Get-MSBuild
 Export-ModuleMember -Function Invoke-Environment
+Export-ModuleMember -Function Add-Path
