@@ -24,7 +24,7 @@ Write-Verbose "PSModulePath is $($env:PSModulePath)"
 Write-Verbose "systemDrive is $($systemDrive)"
 Write-Verbose "mainDir is $($mainDir)"
 
-Invoke-Command "npm" "install -verbose" $mainDir
+Invoke-Command "npm" "install" $mainDir
 
 Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools_msbuild.bat"
 $msbuild = Get-MSBuild "4.0"

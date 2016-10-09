@@ -12,7 +12,7 @@ Invoke-Command $chocolatey "install nodejs.install -version 6.3.1 --forcex86 -y"
 #Add-Path $nodePath $true
 refreshenv
 
-Invoke-Command "$($nodePath)\npm.cmd" "install node-gyp@3.4.0 -verbose" "$($nodePath)\node_modules\npm"
+Invoke-Command "$($nodePath)\npm.cmd" "install node-gyp@3.4.0" "$($nodePath)\node_modules\npm"
 
 $python2Path = "C:\tools\python2"
 Invoke-Command $chocolatey "install python2 -y"
