@@ -29,19 +29,18 @@ Function Invoke-Command {
     Set-Location -Path $location
   }
 
-  $p = Start-Process $command -ArgumentList $arguments -PassThru -NoNewWindow -Wait
+  $p = Start-Process -FilePath $command -ArgumentList $arguments -PassThru -NoNewWindow
+  $handle = $p.Handle
+  $p.WaitForExit();
 
-  if (!($p.HasExited)) {
-    Write-Verbose "Waiting for `'$command $arguments`' to finish, please wait...."
-  } else {
-    Write-Verbose "Process `'$command $arguments`' finished."
-  }
-  Write-Verbose "`'$command`' exited with $($p.ExitCode)"
+  $exitCode = $p.ExitCode
+
+  Write-Verbose "`'$command`' exited with $($exitCode)"
 
   Set-Location -Path $originalLocation.path
 
-  if($p.ExitCode -ne 0) {
-    throw "Installation process returned error code: $($p.ExitCode)"
+  if($exitCode -ne 0) {
+    throw "Installation process returned error code: $($exitCode)"
   }
 }
 
