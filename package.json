@@ -11,7 +11,8 @@
         "ref-struct": "1",
         "ref-array": "1.1.2",
         "edge": "5.9.2",
-        "universal": "klown/universal#a83cd1744329a8bfd487c21988f3d98970557ec0"
+        "universal": "klown/universal#8120b2e812edb4cb342e30d538ca342585373cef",
+        "nan": "amatas/nan#GPII-1929"
     },
     "devDependencies": {
         "grunt": "1.0.1",
@@ -23,5 +24,5 @@
     "keywords": ["gpii", "accessibility", "settings", "fluid", "IoC", "Inversion of Control", "configuration", "evented"],
     "repository": "git://github.com/GPII/windows.git",
     "main": "./gpii.js",
-    "engines": { "node" : ">=4.2.1" }
+    "engines": { "node" : ">=6.3.1" }
 }
