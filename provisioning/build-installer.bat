@@ -1,28 +1,28 @@
 pushd .
 
-	if not exist C:\installer\\. (
-		git clone https://github.com/gpii/gpii-wix-installer C:\installer
+if not exist C:\installer\\. (
+    git clone https://github.com/gpii/gpii-wix-installer C:\installer
 
-		cd C:\installer
-		git checkout tags/v1.0.1
-	)
-	
-	rmdir /s /q C:\installer\staging\windows
-	
-	cd C:\vagrant\provisioning
-	robocopy /job:windows.rcj
+    cd C:\installer
+    git checkout tags/v1.0.1
+)
 
-	cd C:\installer\staging\windows
-	call npm prune --production
-	
-	cd C:\installer\setup
+rmdir /s /q C:\installer\staging\windows
 
-	pushd ..\
-		if not exist output\\. mkdir output
-		if not exist temp\\. mkdir temp
-	popd
+cd C:\vagrant\provisioning
+robocopy /job:windows.rcj
 
-	call "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools_msbuild.bat"
-	msbuild setup.msbuild
+cd C:\installer\staging\windows
+call npm prune --production
+
+cd C:\installer\setup
+
+pushd ..\
+    if not exist output\\. mkdir output
+    if not exist temp\\. mkdir temp
+popd
+
+call "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools_msbuild.bat"
+msbuild setup.msbuild
 
 popd
