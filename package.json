@@ -10,8 +10,8 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "edge": "5.9.2",
-        "universal": "klown/universal#8120b2e812edb4cb342e30d538ca342585373cef",
+        "edge": "6.5.1",
+        "universal": "klown/universal#9570774f39fbef8f58b3cd2a0623dcdfa8ac5341",
         "nan": "amatas/nan#GPII-1929"
     },
     "devDependencies": {
