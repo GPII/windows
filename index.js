@@ -24,5 +24,6 @@ require("./gpii/node_modules/processHandling/processHandling.js");
 require("./gpii/node_modules/registrySettingsHandler");
 require("./gpii/node_modules/registryResolver");
 require("./gpii/node_modules/spiSettingsHandler");
+require("./gpii/node_modules/registeredAt/registeredAt.js");
 
 module.exports = fluid;
