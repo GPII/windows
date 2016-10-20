@@ -11,7 +11,7 @@ See http://issues.gpii.net/browse/GPII-49 for more details of this issue.
 
 # Building
 
-This package depends on the node 4.x LTS infrastructure - at the time of writing, node 4.4.1 and npm 2.1.14.
+This package depends on node 6.x (LTS).
 
 To build the GPII for Windows, perform the following:
 
