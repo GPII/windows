@@ -4,8 +4,11 @@ if not exist C:\installer\\. (
     git clone https://github.com/gpii/gpii-wix-installer C:\installer
 
     cd C:\installer
-    git checkout tags/v1.0.1
+    git checkout tags/v1.1.0
 )
+
+rem Use local copy of node
+copy "%ProgramFiles(x86)%\nodejs\node.exe" C:\installer\staging /y
 
 rmdir /s /q C:\installer\staging\windows
 
