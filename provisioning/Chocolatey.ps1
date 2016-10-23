@@ -24,4 +24,14 @@ Invoke-Command $chocolatey "install innosetup -y"
 Add-Path $innoSetupPath $true
 refreshenv
 
+# This seems weak. We should track bin path automatically and avoid version
+# declaration in the path.
+$wixSetupPath = "C:\Program Files (x86)\WiX Toolset v3.10\bin"
+Invoke-Command $chocolatey "install wixtoolset -y"
+Add-Path $wixSetupPath $true
+refreshenv
+
+Invoke-Command $chocolatey "install msbuild.extensionpack -y"
+refreshenv
+
 exit 0
