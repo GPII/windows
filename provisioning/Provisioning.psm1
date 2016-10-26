@@ -13,7 +13,8 @@ Function Invoke-Command {
   Param (
     [string] $command,
     [string] $arguments,
-    [string] $location
+    [string] $location,
+    [int] $errorLevel = 0
   )
 
   Write-Verbose "Execute-Command Started ($location : $command $arguments)."
@@ -39,7 +40,7 @@ Function Invoke-Command {
 
   Set-Location -Path $originalLocation.path
 
-  if($exitCode -ne 0) {
+  if ($exitCode -gt $errorLevel) {
     throw "Installation process returned error code: $($exitCode)"
   }
 }
