@@ -2,8 +2,6 @@
   This script create all the installers for Windows GPII.
 #>
 Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Provisioning.psm1') -Force
-$VerbosePreference = "continue"
-
 
 $installerRepo = "https://github.com/gpii/gpii-wix-installer"
 $installerBranch = "v1.1.0"
