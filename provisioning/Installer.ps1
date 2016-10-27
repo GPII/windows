@@ -2,6 +2,8 @@
   This script create all the installers for Windows GPII.
 #>
 Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Provisioning.psm1') -Force
+$VerbosePreference = "continue"
+
 
 $installerRepo = "https://github.com/gpii/gpii-wix-installer"
 $installerBranch = "v1.1.0"
@@ -10,7 +12,7 @@ $mainDir = Join-Path $env:SystemDrive "vagrant"
 $installerDir = Join-Path $env:SystemDrive "installer"
 $npm = "npm" -f $env:SystemDrive
 $git = "git" -f $env:SystemDrive
-$node = "node.exe" -f $env:SystemDrive
+$node = Get-Command "node.exe" | Select -expandproperty Path
 
 if (!(Test-Path -Path $installerDir)){
     Invoke-Command $git "clone --branch $($installerBranch) $($installerRepo) $($installerDir)"
