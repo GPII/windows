@@ -10,10 +10,16 @@ $mainDir = Join-Path $env:SystemDrive "vagrant"
 $installerDir = Join-Path $env:SystemDrive "installer"
 $npm = "npm" -f $env:SystemDrive
 $git = "git" -f $env:SystemDrive
+$node = "node.exe" -f $env:SystemDrive
 
 if (!(Test-Path -Path $installerDir)){
     Invoke-Command $git "clone --branch $($installerBranch) $($installerRepo) $($installerDir)"
 }
+
+# Integrate into installer the current version of Node.js in the host machine.
+$nodeDestinationDir = Join-Path $installerDir "staging"
+Write-Verbose "Copying $($node) to $($nodeDestinationDir) directory for including it into the installer."
+cp $node -Destination $nodeDestinationDir -Force
 
 $stagingWindowsDir = [io.path]::combine($installerDir, "staging", "windows")
 if (Test-Path -Path $stagingWindowsDir) {
