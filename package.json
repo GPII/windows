@@ -11,7 +11,7 @@
         "ref-struct": "1",
         "ref-array": "1.1.2",
         "edge": "6.5.1",
-        "universal": "klown/universal#9570774f39fbef8f58b3cd2a0623dcdfa8ac5341",
+        "universal": "klown/universal#GPII-442",
         "nan": "amatas/nan#GPII-1929"
     },
     "devDependencies": {
