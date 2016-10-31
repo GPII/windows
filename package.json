@@ -10,7 +10,7 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "universal": "javihernandez/universal#ee0f2004a77d114d2febd66ff808611f25e3c2b6",
+        "universal": "GPII/universal#1a3434d970cb484956eb18310683bdfe473123d6",
         "nan": "amatas/nan#GPII-1929"
     },
     "devDependencies": {
