@@ -11,7 +11,7 @@ See http://issues.gpii.net/browse/GPII-49 for more details of this issue.
 
 # Building
 
-This package depends on the node 4.x LTS infrastructure - at the time of writing, node 4.4.1 and npm 2.1.14.
+This package depends on node 6.x (LTS).
 
 To build the GPII for Windows, perform the following:
 
@@ -25,12 +25,14 @@ It is possible to provision a Windows VM for testing purposes. Please ensure you
 
 If this is your first time creating this VM an 8 GB download will take place. The downloaded image will be valid for 90 days after which the Windows installation will no longer be useable. To remove an expired image you can use the ``vagrant box remove "inclusivedesign/windows10-eval"`` command.
 
-Once the VM has finished booting up you will need to type the ``vagrant reload`` command to cause it to restart. This is required so changes made to the Windows VM's ``PATH`` environment variable as part of the provisioning process are available in terminal sessions. This step is a temporary workaround and will be removed in the near future. 
-
 Now you can open a command prompt window and use the following commands to test the framework:
 
 ```
+refreshenv
 cd c:\vagrant
 node tests\UnitTests.js
 node tests\AcceptanceTests.js builtIn
 ```
+
+*Note:* The [refreshenv](https://github.com/chocolatey/chocolatey/blob/a09e15896fbc5e790b17b6699cd6b50bc7eb14e4/src/redirects/RefreshEnv.cmd) command only needs to be used if you are about to issue commands after having just created the VM. If the VM has been restarted since its creation then the command is not required.
+
