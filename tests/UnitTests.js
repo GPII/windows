@@ -3,6 +3,7 @@
 GPII Unit Testing for Windows
 
 Copyright 2014 Lucendo Development Ltd.
+Copyright 2016 Raising the Floor - US
 
 Licensed under the New BSD license. You may not use this file except in
 compliance with this License.
@@ -13,6 +14,7 @@ https://github.com/gpii/universal/LICENSE.txt
 
 "use strict";
 
+require("../gpii/node_modules/displaySettingsHandler/test/testDisplaySettingsHandler.js");
 require("../gpii/node_modules/registrySettingsHandler/test/testRegistrySettingsHandler.js");
 require("../gpii/node_modules/spiSettingsHandler/test/testSpiSettingsHandler.js");
 require("../gpii/node_modules/processHandling/test/testProcessHandling");
