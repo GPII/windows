@@ -19,8 +19,15 @@ var fluid = require("universal");
 
 fluid.module.register("gpii-windows", __dirname, require);
 
+fluid.contextAware.makeChecks({
+    "gpii.contexts.windows": {
+        value: true
+    }
+});
+
 require("./gpii/node_modules/WindowsUtilities/WindowsUtilities.js");
 require("./gpii/node_modules/processHandling/processHandling.js");
+require("./gpii/node_modules/displaySettingsHandler");
 require("./gpii/node_modules/registrySettingsHandler");
 require("./gpii/node_modules/registryResolver");
 require("./gpii/node_modules/spiSettingsHandler");
