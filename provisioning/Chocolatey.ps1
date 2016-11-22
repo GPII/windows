@@ -7,7 +7,7 @@ $chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive
 
 $nodePath = "C:\Program Files (x86)\nodejs"
 $nodeVersion = "6.9.1"
-Invoke-Command $chocolatey "install nodejs.install -version $($nodeVersion) --forcex86 -y"
+Invoke-Command $chocolatey "install nodejs.install --version $($nodeVersion) --forcex86 -y"
 # TODO: Correct path and automatically added is this one
 # C:\Users\vagrant\AppData\Roaming\npm review it.
 #Add-Path $nodePath $true
