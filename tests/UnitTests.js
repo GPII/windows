@@ -19,3 +19,4 @@ require("../gpii/node_modules/registrySettingsHandler/test/testRegistrySettingsH
 require("../gpii/node_modules/spiSettingsHandler/test/testSpiSettingsHandler.js");
 require("../gpii/node_modules/processHandling/test/testProcessHandling");
 require("../gpii/node_modules/registryResolver/test/testRegistryResolver.js");
+require("../gpii/node_modules/registeredAT/test/testRegisteredAT.js");
