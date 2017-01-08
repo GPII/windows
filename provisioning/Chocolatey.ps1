@@ -20,11 +20,6 @@ Invoke-Command $chocolatey "install python2 -y"
 Add-Path $python2Path $true
 refreshenv
 
-$innoSetupPath = "C:\Program Files (x86)\Inno Setup 5"
-Invoke-Command $chocolatey "install innosetup -y"
-Add-Path $innoSetupPath $true
-refreshenv
-
 # This seems weak. We should track bin path automatically and avoid version
 # declaration in the path.
 $wixSetupPath = "C:\Program Files (x86)\WiX Toolset v3.10\bin"
