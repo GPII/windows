@@ -8,7 +8,7 @@
      "provisioning" folder
 #>
 param ( # default to script path if no parameter is given
-    [string]$originalBuildScriptPath = (Split-Path -parent $PSCommandPath)
+    [string]$originalBuildScriptPath = (Split-Path -parent $PSCommandPath),
     [switch]$skipNpm # defaults to false
 )
 
@@ -21,8 +21,7 @@ Import-Module (Join-Path $scriptDir 'Provisioning.psm1') -Force -Verbose
 Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1" -Force -Verbose
 
 # Obtain some useful paths.
-$systemDrive = $env:SystemDrive
-$mainDir = "$systemDrive\vagrant"
+$mainDir = (get-item $originalBuildScriptPath).parent.FullName
 
 # Acquire information about the system and environment.
 $winVersion = [System.Environment]::OSVersion
@@ -31,7 +30,6 @@ $processorBits = Get-ProcessorBits
 
 Write-Verbose "Calling build in $($winVersion.VersionString) - OS $($OSBitness)bits - Processor $($processorBits)bits"
 Write-Verbose "PSModulePath is $($env:PSModulePath)"
-Write-Verbose "systemDrive is $($systemDrive)"
 Write-Verbose "mainDir is $($mainDir)"
 
 if (-Not $skipNpm) {
