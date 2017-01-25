@@ -16,8 +16,7 @@ param ( # default to script path if no parameter is given
 $VerbosePreference = "continue"
 
 # Include main Provisioning module.
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-Import-Module (Join-Path $scriptDir 'Provisioning.psm1') -Force -Verbose
+Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force -Verbose
 Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1" -Force -Verbose
 
 # Obtain some useful paths.
