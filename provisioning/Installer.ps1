@@ -1,12 +1,20 @@
 <#
   This script create all the installers for Windows GPII.
+
+  If the script is copied and run from a temporary folder (like when running via vagrant)
+    the -originalBuildScriptPath parameter should be passed with the path to the original
+    "provisioning" folder
 #>
-Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Provisioning.psm1') -Force
+param ( # default to script path if no parameter is given
+    [string]$originalBuildScriptPath = (Split-Path -parent $PSCommandPath)
+)
+
+Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
 
 $installerRepo = "https://github.com/gpii/gpii-wix-installer"
 $installerBranch = "v1.2.0"
 
-$mainDir = Join-Path $env:SystemDrive "vagrant"
+$mainDir = (get-item $originalBuildScriptPath).parent.FullName
 $installerDir = Join-Path $env:SystemDrive "installer"
 $npm = "npm" -f $env:SystemDrive
 $git = "git" -f $env:SystemDrive
