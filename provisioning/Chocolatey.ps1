@@ -11,9 +11,10 @@ Invoke-Command $chocolatey "install nodejs.install --version $($nodeVersion) --f
 # TODO: Correct path and automatically added is this one
 # C:\Users\vagrant\AppData\Roaming\npm review it.
 #Add-Path $nodePath $true
+# Call nodevars.bat through Invoke-Environment to have available all the environment vars
+# setted by the script in the PS1 environment.
+Invoke-Environment (Join-Path $nodePath "nodevars.bat")
 refreshenv
-
-Invoke-Command "$($nodePath)\npm.cmd" "install node-gyp@3.4.0" "$($nodePath)\node_modules\npm"
 
 $python2Path = "C:\tools\python2"
 Invoke-Command $chocolatey "install python2 -y"
