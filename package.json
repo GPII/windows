@@ -11,8 +11,7 @@
         "ref-struct": "1",
         "ref-array": "1.1.2",
         "universal": "gpii/universal#b58d1859e4d53303a1fdc4d74640e0c43af345e5",
-        "nan": "amatas/nan#GPII-1929",
-        "semver": "1.1.4"
+        "nan": "amatas/nan#GPII-1929"
     },
     "devDependencies": {
         "grunt": "1.0.1",
