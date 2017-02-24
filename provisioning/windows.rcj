@@ -1,14 +1,3 @@
-
-::
-:: Source Directory :
-::
-    /SD:C:\vagrant\    :: Source Directory.
-
-::
-:: Destination Directory :
-::
-    /DD:C:\installer\staging\windows\    :: Destination Directory.
-
 ::
 :: Include These Files :
 ::
@@ -21,9 +10,6 @@
     /XD    :: eXclude Directories matching these names
         .git
         .vagrant
-        C:\vagrant\provisioning
-        C:\vagrant\listeners\GPII_RFIDListener\build
-        C:\vagrant\listeners\GPII_USBListener\build
 ::
 :: Exclude These Files :
 ::
