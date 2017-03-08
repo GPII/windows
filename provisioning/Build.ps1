@@ -40,7 +40,4 @@ $msbuild = Get-MSBuild "4.0"
 $listenersDir = Join-Path $mainDir "listeners"
 Invoke-Command $msbuild "listeners.sln /nodeReuse:false /p:Configuration=Release /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $listenersDir
 
-Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"
-$testProcessHandlingDir = Join-Path $mainDir "gpii\node_modules\processHandling\test"
-Invoke-Command "cl" "test-window.c" $testProcessHandlingDir
-rm (Join-Path $testProcessHandlingDir "test-window.obj")
+Invoke-Expression (Join-Path $originalBuildScriptPath "Tests.ps1")
