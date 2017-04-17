@@ -10,7 +10,7 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "universal": "git+ssh://git@gitlab.com/gpii-demos/windows.git#demo-mainstream",
+        "universal": "git+ssh://git@gitlab.com/gpii-demos/universal.git#demo-mainstream",
         "nan": "amatas/nan#GPII-1929"
     },
     "devDependencies": {
