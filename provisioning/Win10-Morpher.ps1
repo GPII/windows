@@ -19,8 +19,6 @@ function installClassicShell()
     {
         <# Classic-Shell installation #>
         Invoke-Command $chocolatey "install classic-shell --version $($classicShellVers) -y" "" 0
-        <# Install the required script to start stop classic-shell #>
-        Copy-Item $classicShellStopScript $classicShellDir
     }
     catch
     {
@@ -63,10 +61,6 @@ function setClassicShellRegistryKeys() {
     # Disable first run menu selection
     $settingsPath = "$registryPath\ClassicStartMenu"
     $vals = @((newVal "ShowedStyle2" "REG_DWORD" 1))
-
-    foreach($val in $vals) {
-        Write-Verbose ("Setting val: " + $val.name)
-    }
 
     createNewKey $settingsPath $vals
 
