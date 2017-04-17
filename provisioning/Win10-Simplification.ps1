@@ -15,7 +15,7 @@ Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
 $chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive
 
 # Install AutoHotKey package.
-Invoke-Command $chocolatey "install autohotkey -y"
+Invoke-Command $chocolatey "install autohotkey --yes --force"
 refreshenv
 
 exit 0
