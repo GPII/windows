@@ -2,7 +2,6 @@ $VerbosePreference = "continue"
 
 $classicShellProc = "ClassicStartMenu"
 
-# 'Created server side of "\\.\pipe\Wulf"'
 $pipe=new-object System.IO.Pipes.NamedPipeServerStream "Morpher", "In";
 $pipe.WaitForConnection();
 
