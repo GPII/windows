@@ -17,3 +17,5 @@ $chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive
 # Install AutoHotKey package.
 Invoke-Command $chocolatey "install autohotkey -y"
 refreshenv
+
+exit 0
