@@ -118,8 +118,8 @@ if (!(Test-Path $GPII_Demo_Path)) {
     New-Item -Path $GPII_Demo_Path -ItemType 'directory' | Out-Null
 }
 
-$mainDir = (get-item $originalBuildScriptPath).parent.FullName
-$demoDataDir = Join-Path $mainDir "provisioning\demo-data\*"
+$mainDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$demoDataDir = Join-Path $mainDir "demo-data\*"
 
 Copy-Item -Path $demoDataDir -Force -Recurse -Destination $GPII_Demo_Path
 
