@@ -118,6 +118,12 @@ if (!(Test-Path $GPII_Demo_Path)) {
     New-Item -Path $GPII_Demo_Path -ItemType 'directory' | Out-Null
 }
 
-Copy-Item -Path "demo-data\*" -Force -Recurse -Destination $GPII_Demo_Path
+$mainDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$demoDataDir = Join-Path $mainDir "demo-data\*"
+
+Write-Verbose("Deleting $GPII_Demo_Path")
+Remove-Item "$GPII_Demo_Path\*" -Force -Recurse
+Write-Verbose("Copying $demoDataDir to $GPII_Demo_Path")
+Copy-Item -Path $demoDataDir -Force -Recurse -Destination $GPII_Demo_Path
 
 exit 0
