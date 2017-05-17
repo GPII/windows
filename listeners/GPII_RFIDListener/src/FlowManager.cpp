@@ -41,8 +41,9 @@ extern void WINAPI OutputDebugString(
 // Flow Manager Constants
 //---------------------------------------------------------
 const char * const FLOW_MANAGER_URL = "http://localhost:8081/user";
-const char * const FLOW_LOGIN = "login";
 const char * const FLOW_LOGOUT = "logout";
+const char * const FLOW_CARDON = "proximityTriggered";
+const char * const FLOW_CARDOFF = "proximityRemoved";
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -88,16 +89,21 @@ static int _MakeCurlRequest(const char* szUser, const char* szAction)
     return 0;
 }
 
-
-
-void FlowManagerLogin(const char * szToken)
-{
-    _MakeCurlRequest(szToken, FLOW_LOGIN);
-}
-
-void FlowManagerLogout(const char * szToken) // FIXME should we keep state or can we have multiple concurrent logins?
+void FlowManagerLogout(const char *szToken)
 {
     _MakeCurlRequest(szToken, FLOW_LOGOUT);
 }
+
+void FlowManagerCardOn(const char *szToken)
+{
+    _MakeCurlRequest(szToken, FLOW_CARDON);
+}
+
+#ifdef WANT_REMOVE_EVENT
+void FlowManagerCardOff(const char *szToken)
+{
+    _MakeCurlRequest(szToken, FLOW_CARDOFF);
+}
+#endif
 
 // End of file
