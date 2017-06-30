@@ -10,7 +10,7 @@ ram = ENV["VM_RAM"] || 2048
 
 Vagrant.configure(2) do |config|
 
-  config.vm.box = "inclusivedesign/windows10-eval"
+  config.vm.box = "inclusivedesign/windows10-eval-x64-Apps"
   config.vm.guest = :windows
 
   config.vm.communicator = "winrm"
