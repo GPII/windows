@@ -6,7 +6,7 @@
   "bugs": "http://issues.gpii.net/browse/GPII",
   "homepage": "http://gpii.net/",
   "scripts": {
-    "test": "node node_modules/istanbul/lib/cli.js cover tests/all-tests.js --no-default-excludes -x tests -x coverage -x node_modules/** -- builtIn"
+    "test": "node node_modules/istanbul/lib/cli.js cover tests/all-tests.js --no-default-excludes -i gpii/** -x tests -x coverage -x node_modules/** -- builtIn"
   },
   "dependencies": {
     "ffi": "2.0.0",
