@@ -11,8 +11,7 @@
         "ref-struct": "1",
         "ref-array": "1.1.2",
         "edge": "6.5.1",
-        "universal": "klown/universal#GPII-442",
-        "nan": "amatas/nan#GPII-1929"
+        "universal": "klown/universal#GPII-442"
     },
     "devDependencies": {
         "grunt": "1.0.1",
