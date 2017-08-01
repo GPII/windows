@@ -10,8 +10,8 @@
 // You may obtain a copy of the License at
 // https://github.com/gpii/windows/blob/master/LICENSE.txt
 //
-// The research leading to these results has received funding from 
-// the European Union's Seventh Framework Programme (FP7/2007-2013) 
+// The research leading to these results has received funding from
+// the European Union's Seventh Framework Programme (FP7/2007-2013)
 // under grant agreement no. 289016.
 //
 // The GPII RFID listener has the following features
@@ -87,9 +87,6 @@
 #include <Diagnostic.h>
 #include "WinSmartCard.h"
 
-// Display the logout menu item.
-//#define WANT_LOGOUT_MENU
-
 // MinGW doesn't define _countof in stdlib
 /* _countof helper */
 #if !defined (_countof)
@@ -108,7 +105,6 @@ const int    MY_SIZE_Y   = 100;
 #define      MY_SHOWSTATUS (WM_USER + 3)
 #define      MY_SHOWDIAG  (WM_USER + 4)
 #define      MY_EXIT      (WM_USER + 5)
-#define      MY_LOGOUT    (WM_USER + 6)
 #define      MY_TIMER     (WM_USER + 7)
 
 //---------------------------------------------------------
@@ -254,9 +250,6 @@ BOOL MyPopupMenu(HWND hWnd)
     InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING | fStatusChecked, MY_SHOWSTATUS, "View status window");
     const UINT fDiagChecked = (Diagnostic_IsShowing()) ? MF_CHECKED : 0;
     InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING | fDiagChecked, MY_SHOWDIAG, "View Diagnostic Window");
-#ifdef WANT_LOGOUT_MENU
-    InsertMenu(hPopupMenu, 3, MF_BYPOSITION | MF_STRING, MY_LOGOUT, "Logout");
-#endif
     InsertMenu(hPopupMenu, 4, MF_BYPOSITION | MF_STRING, MY_EXIT, "Exit");
     SetMenuItemBitmaps(hPopupMenu, MY_SHOWDIAG, MF_BYCOMMAND, NULL, NULL);
     SetForegroundWindow(hWnd);
@@ -395,7 +388,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     //-----------------------------------------------------------
-    // Tray Icon Menu Commands to Show, Hide, Exit or Logout
+    // Tray Icon Menu Commands to Show, Hide, or Exit
     //-----------------------------------------------------------
     case WM_COMMAND:
     {
@@ -409,23 +402,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             DestroyWindow(hWnd);
         }
-#ifdef WANT_LOGOUT_MENU
-        else if (cmd == MY_LOGOUT)
-        {
-            if (m_nLogin)
-            {
-                wsprintf(m_szStatus,"%s","MENU LOGOUT");
-                FlowManagerLogout(m_szLatestUserID);
-                wsprintf(m_szLatestUserID,"%s","");
-                m_nLogin = 0;
-            }
-            else
-            {
-                wsprintf(m_szStatus,"%s","NO USER TO LOGOUT");
-            }
-            InvalidateRect(hWnd,NULL,TRUE);
-        }
-#endif
         if (cmd == MY_SHOWDIAG)
         {
             Diagnostic_Show(!Diagnostic_IsShowing());
@@ -490,10 +466,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // Destroy the Window and Exit
     //-----------------------------------------------------------
     case WM_DESTROY:
-        if (m_nLogin)
-        {
-            FlowManagerLogout(m_szLatestUserID);
-        }
         KillTimer(hWnd,MY_TIMER);
         Diagnostic_CleanUp();
         PostQuitMessage(0);

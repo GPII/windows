@@ -31,6 +31,5 @@ void FlowManagerCardOn(const char * szToken);
 #ifdef WANT_REMOVE_EVENT
 void FlowManagerCardOff(const char *szToken);
 #endif
-void FlowManagerLogout(const char * szToken);
 
 #endif // _FLOWMANAGER_H_
