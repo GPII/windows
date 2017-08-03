@@ -1,6 +1,6 @@
 # GPII RFIDListener
 
-Windows executable that listens out for NFC RFID tags and invokes URLs to trigger GPII user log on/off. It listens out for RFID tag events and reads the encoded tag data. The listener tracks the login state and generate login and logout events on the GPII RESTful API (e.g http://localhost:8081/user/bert/login).
+Windows executable that listens out for NFC RFID tags and invokes URLs to trigger GPII user log on/off. It listens out for RFID tag events and reads the encoded tag data. The listener does not track the login state and only informs GPII that a tag has been presented, via the GPII RESTful API (e.g http://localhost:8081/user/bert/proximityTriggered).
 
 See the [User listener](http://wiki.gpii.net/index.php/User_Listener) and [NFC](http://wiki.gpii.net/index.php/Using_the_NFC_Listener) pages on the GPII wikifor details of USB and NFC listening and how to encode user IDs.
 

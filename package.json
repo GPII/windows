@@ -10,8 +10,7 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "universal": "klown/universal#GPII-1939",
-        "nan": "amatas/nan#GPII-1929"
+        "universal": "klown/universal#GPII-1939"
     },
     "devDependencies": {
         "grunt": "1.0.1",
