@@ -41,8 +41,8 @@ extern void WINAPI OutputDebugString(
 // Flow Manager Constants
 //---------------------------------------------------------
 const char * const FLOW_MANAGER_URL = "http://localhost:8081/user";
-const char * const FLOW_LOGIN = "login";
-const char * const FLOW_LOGOUT = "logout";
+const char * const FLOW_CARDON = "proximityTriggered";
+const char * const FLOW_CARDOFF = "proximityRemoved";
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -50,11 +50,9 @@ const char * const FLOW_LOGOUT = "logout";
 //
 //  PURPOSE:  Uses libcurl to make a HTTP GET request to a specified URL.
 //
-//  EXAMPLES:
+//  EXAMPLE:
 //
-//            http://localhost:8081/user/123/login
-//
-//            http://localhost:8081/user/123/logout
+//            http://localhost:8081/user/123/proximityTriggered
 //
 ///////////////////////////////////////////////////////////////////////////////
 static int _MakeCurlRequest(const char* szUser, const char* szAction)
@@ -88,16 +86,16 @@ static int _MakeCurlRequest(const char* szUser, const char* szAction)
     return 0;
 }
 
-
-
-void FlowManagerLogin(const char * szToken)
+void FlowManagerCardOn(const char *szToken)
 {
-    _MakeCurlRequest(szToken, FLOW_LOGIN);
+    _MakeCurlRequest(szToken, FLOW_CARDON);
 }
 
-void FlowManagerLogout(const char * szToken) // FIXME should we keep state or can we have multiple concurrent logins?
+#ifdef WANT_REMOVE_EVENT
+void FlowManagerCardOff(const char *szToken)
 {
-    _MakeCurlRequest(szToken, FLOW_LOGOUT);
+    _MakeCurlRequest(szToken, FLOW_CARDOFF);
 }
+#endif
 
 // End of file
