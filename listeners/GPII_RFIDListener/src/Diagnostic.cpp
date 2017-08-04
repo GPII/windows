@@ -173,7 +173,7 @@ LRESULT CALLBACK _WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     //-----------------------------------------------------------
-    // Tray Icon Menu Commands to Show, Hide, Exit or Logout
+    // Tray Icon Menu Commands to Show, Hide, or Exit
     //-----------------------------------------------------------
     case WM_MYLOG:
     {

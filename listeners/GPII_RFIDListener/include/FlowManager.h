@@ -24,7 +24,12 @@
 #ifndef _FLOWMANAGER_H_
 #define _FLOWMANAGER_H_
 
-void FlowManagerLogin(const char * szToken);
-void FlowManagerLogout(const char * szToken);
+// Also emit a "proximityRemoved" request.
+//#define WANT_REMOVE_EVENT
+
+void FlowManagerCardOn(const char * szToken);
+#ifdef WANT_REMOVE_EVENT
+void FlowManagerCardOff(const char *szToken);
+#endif
 
 #endif // _FLOWMANAGER_H_

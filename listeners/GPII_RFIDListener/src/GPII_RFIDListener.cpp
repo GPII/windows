@@ -10,8 +10,8 @@
 // You may obtain a copy of the License at
 // https://github.com/gpii/windows/blob/master/LICENSE.txt
 //
-// The research leading to these results has received funding from 
-// the European Union's Seventh Framework Programme (FP7/2007-2013) 
+// The research leading to these results has received funding from
+// the European Union's Seventh Framework Programme (FP7/2007-2013)
 // under grant agreement no. 289016.
 //
 // The GPII RFID listener has the following features
@@ -105,7 +105,6 @@ const int    MY_SIZE_Y   = 100;
 #define      MY_SHOWSTATUS (WM_USER + 3)
 #define      MY_SHOWDIAG  (WM_USER + 4)
 #define      MY_EXIT      (WM_USER + 5)
-#define      MY_LOGOUT    (WM_USER + 6)
 #define      MY_TIMER     (WM_USER + 7)
 
 //---------------------------------------------------------
@@ -113,7 +112,7 @@ const int    MY_SIZE_Y   = 100;
 //---------------------------------------------------------
 static const int MAX_BUFFER = 256;
 static char m_szStatus[MAX_BUFFER];		// FIXME potential buffer overruns as restricted length string functions not used.
-static char m_szUserID[MAX_BUFFER];
+static char m_szLatestUserID[MAX_BUFFER];
 static char m_szReader[MAX_BUFFER];
 static int  m_nLogin = 0;
 
@@ -149,7 +148,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     //-----------------------------------------------------
     // Initialize global variables
     //-----------------------------------------------------
-    wsprintf(m_szUserID,"%s","");
+    wsprintf(m_szLatestUserID,"%s","");
     wsprintf(m_szReader,"%s",lpCmdLine);
     wsprintf(m_szStatus,"%s","Listening...");
 
@@ -243,18 +242,21 @@ BOOL MyTrayIcon(HWND hWnd)
 BOOL MyPopupMenu(HWND hWnd)
 {
     POINT p;
+    int ret;
+
     GetCursorPos(&p);
     HMENU hPopupMenu = CreatePopupMenu();
     const UINT fStatusChecked = (IsWindowVisible(hWnd)) ? MF_CHECKED : 0;
     InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING | fStatusChecked, MY_SHOWSTATUS, "View status window");
     const UINT fDiagChecked = (Diagnostic_IsShowing()) ? MF_CHECKED : 0;
     InsertMenu(hPopupMenu, 2, MF_BYPOSITION | MF_STRING | fDiagChecked, MY_SHOWDIAG, "View Diagnostic Window");
-    InsertMenu(hPopupMenu, 3, MF_BYPOSITION | MF_STRING, MY_LOGOUT, "Logout");
     InsertMenu(hPopupMenu, 4, MF_BYPOSITION | MF_STRING, MY_EXIT, "Exit");
     SetMenuItemBitmaps(hPopupMenu, MY_SHOWDIAG, MF_BYCOMMAND, NULL, NULL);
     SetForegroundWindow(hWnd);
 
-    return TrackPopupMenu(hPopupMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, p.x,p.y,0,hWnd, NULL);
+    ret = TrackPopupMenu(hPopupMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, p.x,p.y,0,hWnd, NULL);
+    DestroyMenu(hPopupMenu);
+    return ret;
 }
 
 
@@ -341,51 +343,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // Smart Card User Login
     //-----------------------------------------------------------
     case SMART_CARD_ARRIVE:
-        if (m_nLogin == 0)
-        {
-            //-----------------------------------------------
-            // login a new user
-            //-----------------------------------------------
-            WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
-            wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
-            InvalidateRect(hWnd,NULL,TRUE);
-            FlowManagerLogin(m_szUserID);
-            m_nLogin = SMART_CARD_ARRIVE;
-        }
-        else
-        {
-            char szThisUser[MAX_BUFFER];
-            WinSmartCardGetUser(szThisUser,MAX_BUFFER);
-            if (lstrcmp(szThisUser,m_szUserID) == 0)
-            {
-                //-----------------------------------------------
-                // logout the user
-                //-----------------------------------------------
-                wsprintf(m_szStatus,"%s %s","CARD LOGOUT",m_szUserID);
-                FlowManagerLogout(m_szUserID);
-                wsprintf(m_szUserID,"%s","");
-                InvalidateRect(hWnd,NULL,TRUE);
-                m_nLogin = 0;
-            }
-            else
-            {
-                //-----------------------------------------------
-                // logout the old user and login new user
-                //-----------------------------------------------
-                FlowManagerLogout(m_szUserID);
-                WinSmartCardGetUser(m_szUserID,MAX_BUFFER);
-                FlowManagerLogin(m_szUserID);
-                wsprintf(m_szStatus,"%s %s","CARD LOGIN",m_szUserID);
-                InvalidateRect(hWnd,NULL,TRUE);
-            }
-        }
+        WinSmartCardGetUser(m_szLatestUserID, MAX_BUFFER);
+        wsprintf(m_szStatus, "%s %s", "CARD ARRIVE", m_szLatestUserID);
+        InvalidateRect(hWnd, NULL, TRUE);
+        FlowManagerCardOn(m_szLatestUserID);
+        m_nLogin = SMART_CARD_ARRIVE;
         break;
 
     //-----------------------------------------------------------
     // Smart Card Removed
     //-----------------------------------------------------------
     case SMART_CARD_REMOVE:
-        wsprintf(m_szStatus,"%s","Listening...");
+#ifdef WANT_REMOVE_EVENT
+        FlowManagerCardOff(m_szLatestUserID);
+#endif
+        wsprintf(m_szStatus, "%s", "Listening...");
         InvalidateRect(hWnd,NULL,TRUE);
         break;
 
@@ -416,7 +388,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     //-----------------------------------------------------------
-    // Tray Icon Menu Commands to Show, Hide, Exit or Logout
+    // Tray Icon Menu Commands to Show, Hide, or Exit
     //-----------------------------------------------------------
     case WM_COMMAND:
     {
@@ -429,21 +401,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         else if (cmd == MY_EXIT)
         {
             DestroyWindow(hWnd);
-        }
-        else if (cmd == MY_LOGOUT)
-        {
-            if (m_nLogin)
-            {
-                wsprintf(m_szStatus,"%s","MENU LOGOUT");
-                FlowManagerLogout(m_szUserID);
-                wsprintf(m_szUserID,"%s","");
-                m_nLogin = 0;
-            }
-            else
-            {
-                wsprintf(m_szStatus,"%s","NO USER TO LOGOUT");
-            }
-            InvalidateRect(hWnd,NULL,TRUE);
         }
         if (cmd == MY_SHOWDIAG)
         {
@@ -476,8 +433,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                  WinSmartCardPolling() ? "ONLINE": "OFFLINE");
         DrawText(hdc, sReading, (int) strlen(sReading), &rt, DT_CENTER);
         rt.top = rt.bottom*70/100;
-        wsprintf(sCurrent,"%s %s","CURRENT USER:",
-                 lstrlen(m_szUserID) ? m_szUserID : "NONE");
+        wsprintf(sCurrent,"%s %s","LATEST USER:",
+                 lstrlen(m_szLatestUserID) ? m_szLatestUserID : "NONE");
         (void) MultiByteToWideChar(CP_UTF8, 0, sCurrent, -1, wsCurrent, _countof(wsCurrent));
         DrawTextW(hdc, wsCurrent, (int)wcslen(wsCurrent), &rt, DT_CENTER);
 
@@ -509,10 +466,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // Destroy the Window and Exit
     //-----------------------------------------------------------
     case WM_DESTROY:
-        if (m_nLogin)
-        {
-            FlowManagerLogout(m_szUserID);
-        }
         KillTimer(hWnd,MY_TIMER);
         Diagnostic_CleanUp();
         PostQuitMessage(0);
