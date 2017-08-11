@@ -10,7 +10,7 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "universal": "GPII/universal#8d18e5f0c1e731e1e68efaa9b138481887213b22"
+        "universal": "GPII/universal#3967973ed799e85cbe54c3099ebee2190501c352"
     },
     "devDependencies": {
         "grunt": "1.0.1",
