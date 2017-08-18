@@ -27,6 +27,7 @@ fluid.contextAware.makeChecks({
 
 require("./gpii/node_modules/WindowsUtilities/WindowsUtilities.js");
 require("./gpii/node_modules/processHandling/processHandling.js");
+require("./gpii/node_modules/debugLogger/debugLogger.js");
 require("./gpii/node_modules/displaySettingsHandler");
 require("./gpii/node_modules/registrySettingsHandler");
 require("./gpii/node_modules/registryResolver");
