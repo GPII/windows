@@ -38,7 +38,7 @@ if (-Not $skipNpm) {
 Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools_msbuild.bat"
 $msbuild = Get-MSBuild "4.0"
 $listenersDir = Join-Path $mainDir "listeners"
-Invoke-Command $msbuild "listeners.sln /nodeReuse:false /p:Configuration=Release /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $listenersDir
+Invoke-Command $msbuild "listeners.sln /nodeReuse:false /p:Configuration=Release /p:Platform=`"Win32`" /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $listenersDir
 
 
 $msbuild = Get-MSBuild "4.0"
