@@ -1,0 +1,134 @@
+/* Logging.
+ *
+ * Copyright 2017 Raising the Floor - International
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * The R&D leading to these results received funding from the
+ * Department of Education - Grant H421A150005 (GPII-APCP). However,
+ * these results do not necessarily represent the policy of the
+ * Department of Education, and you should not assume endorsement by the
+ * Federal Government.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
+"use strict";
+
+var fs = require("fs");
+
+var logging = {};
+
+logging.logFile = null;
+
+logging.levels = {
+    "FATAL": 0,
+    "ERROR": 10,
+    "WARN": 20,
+    "INFO": 30,
+    "DEBUG": 40
+};
+
+for (var level in logging.levels) {
+    if (logging.levels.hasOwnProperty(level)) {
+        // Create a level object.
+        var levelObj = {
+            isLevel: true,
+            value: logging.levels[level],
+            name: level
+        };
+        // Add a convenience function for that level.
+        logging[level.toLowerCase()] = createLogFunction(levelObj);
+        logging.levels[level] = levelObj;
+    }
+}
+
+// The current logging level
+logging.logLevel = logging.levels.INFO;
+// Default level for Log entries when unspecified.
+logging.defaultLevel = logging.levels.INFO;
+
+/**
+ * Log something.
+ */
+logging.log = function () {
+    var args = argsArray(arguments);
+
+    var level = (args[0] && args[0].isLevel)
+        ? args.shift()
+        : logging.defaultLevel;
+
+    logging.doLog(level, args);
+};
+
+logging.doLog = function (level, args) {
+    if (!level || !level.isLevel) {
+        level = logging.defaultLevel;
+    }
+
+    if (level.value <= logging.logLevel.value) {
+
+        var timestamp = new Date().toISOString();
+        args.unshift(timestamp, level.name);
+        if (logging.logFile) {
+            var text = args.join(" ") + "\n";
+            fs.appendFileSync(logging.logFile, text);
+        } else {
+            console.log.apply(console, args);
+        }
+    }
+};
+
+/**
+ * Sets the log file that stdout/stderr is sent to.
+ *
+ * @param file {String} The file to log to.
+ */
+logging.setFile = function (file) {
+    logging.logFile = file;
+};
+
+function argsArray(args) {
+    var togo;
+    if (Array.isArray(args)) {
+        togo = args;
+    } else {
+        togo = [];
+        for (var n = 0; n < args.length; n++) {
+            togo.push(args[n]);
+        }
+    }
+
+    return togo;
+}
+
+/**
+ * Returns a function that logs to the given log level.
+ * @param level The log level.
+ * @return {Function}
+ */
+function createLogFunction(level) {
+    return function () {
+        logging.doLog(level, argsArray(arguments));
+    };
+}
+
+/** @name logging.fatal
+ *  @function
+ */
+/** @name logging.error
+ *  @function
+ */
+/** @name logging.warn
+ *  @function
+ */
+/** @name logging.info
+ *  @function
+ */
+/** @name logging.debug
+ *  @function
+ */
+
+module.exports = logging;
