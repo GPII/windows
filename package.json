@@ -10,6 +10,7 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
+        "ref-wchar": "1.0.2",
         "universal": "git+https://git@gitlab.com/gpii-demos/universal.git#demo-mainstream",
         "nan": "amatas/nan#GPII-1929"
     },
