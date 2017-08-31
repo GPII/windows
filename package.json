@@ -7,7 +7,7 @@
     "homepage": "http://gpii.net/",
     "dependencies": {
         "ffi": "2.0.0",
-        "ref": "1",
+        "ref": "1.3.4",
         "ref-struct": "1",
         "ref-array": "1.1.2",
         "universal": "GPII/universal#3967973ed799e85cbe54c3099ebee2190501c352"
