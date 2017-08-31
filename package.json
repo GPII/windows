@@ -10,7 +10,9 @@
         "ref": "1",
         "ref-struct": "1",
         "ref-array": "1.1.2",
-        "universal": "GPII/universal#3967973ed799e85cbe54c3099ebee2190501c352"
+        "ref-wchar": "1.0.2",
+        "universal": "git+https://git@gitlab.com/gpii-demos/universal.git#demo-mainstream",
+        "nan": "amatas/nan#GPII-1929"
     },
     "devDependencies": {
         "grunt": "1.0.1",
