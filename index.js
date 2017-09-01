@@ -33,5 +33,6 @@ require("./gpii/node_modules/registryResolver");
 require("./gpii/node_modules/spiSettingsHandler");
 require("./gpii/node_modules/registeredAT/registeredAT.js");
 require("./gpii/node_modules/windowsMetrics");
+require("./gpii/node_modules/processReporter");
 
 module.exports = fluid;
