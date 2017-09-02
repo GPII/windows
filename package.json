@@ -11,7 +11,7 @@
         "ref-struct": "1.1.0",
         "ref-array": "1.1.2",
         "edge": "6.5.1",
-        "universal": "gpii/universal#0a26211506ed4258e451c1fc0df190170ec6ca35"
+        "universal": "klown/universal#GPII-442"
     },
     "devDependencies": {
         "grunt": "1.0.1",
