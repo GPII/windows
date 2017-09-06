@@ -104,6 +104,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)..\GPIIWindowsProximityListener.exe</PostBuildEvent>
+    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)..\bin\$(Configuration)\GPIIWindowsProximityListener.exe</PostBuildEvent>
   </PropertyGroup>
 </Project>
