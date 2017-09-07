@@ -8,9 +8,10 @@
     "dependencies": {
         "ffi": "2.0.0",
         "ref": "1.3.4",
-        "ref-struct": "1",
+        "ref-struct": "1.1.0",
         "ref-array": "1.1.2",
-        "universal": "GPII/universal#8249ee1cff44f979f1cb71efee8d4a5ccc5fefd9"
+        "edge": "6.5.1",
+        "universal": "gpii/universal#c04697e38a2607c029e3cc8ee3c66f1999ca9ed7"
     },
     "devDependencies": {
         "grunt": "1.0.1",
