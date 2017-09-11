@@ -7,9 +7,10 @@
     "homepage": "http://gpii.net/",
     "dependencies": {
         "ffi": "2.0.0",
-        "ref": "1",
-        "ref-struct": "1",
+        "ref": "1.3.4",
+        "ref-struct": "1.1.0",
         "ref-array": "1.1.2",
+        "edge": "6.5.1",
         "universal": "klown/universal#GPII-1939"
     },
     "devDependencies": {
