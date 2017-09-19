@@ -11,7 +11,7 @@
         "ref-struct": "1.1.0",
         "ref-array": "1.1.2",
         "edge": "6.5.1",
-        "universal": "gpii/universal#60daaf849ac8b774a6ce5ede34f82259253b067b"
+        "universal": "stegru/universal#GPII-2583"
     },
     "devDependencies": {
         "grunt": "1.0.1",
