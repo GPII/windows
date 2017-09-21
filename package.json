@@ -11,7 +11,8 @@
         "ref-struct": "1.1.0",
         "ref-array": "1.1.2",
         "edge": "6.5.1",
-        "universal": "gpii/universal#60daaf849ac8b774a6ce5ede34f82259253b067b"
+        "string-argv": "0.0.2",
+        "universal": "gpii/universal#b0557c9dc20bdbfb75a534dd4d24066586fff1d1"
     },
     "devDependencies": {
         "grunt": "1.0.1",
