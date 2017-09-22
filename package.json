@@ -12,7 +12,7 @@
         "ref-array": "1.1.2",
         "ref-wchar": "1.0.2",
         "edge": "6.5.1",
-        "universal": "gpii/universal#60daaf849ac8b774a6ce5ede34f82259253b067b"
+        "universal": "gpii/universal#GPII-2521"
     },
     "devDependencies": {
         "grunt": "1.0.1",
