@@ -12,6 +12,7 @@
         "ref-array": "1.1.2",
         "ref-wchar": "1.0.2",
         "edge": "6.5.1",
+        "string-argv": "0.0.2",
         "universal": "gpii/universal#GPII-2521"
     },
     "devDependencies": {
