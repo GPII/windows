@@ -33,4 +33,7 @@ refreshenv
 Invoke-Command $chocolatey "install msbuild.extensionpack -y"
 refreshenv
 
+Invoke-Expression "$env:SystemDrive\vagrant\provisioning\chocopkgs\ClassicShell.ps1"
+Invoke-Expression "$env:SystemDrive\vagrant\provisioning\chocopkgs\AutoHotkey.ps1"
+
 exit 0

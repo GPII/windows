@@ -2,7 +2,7 @@
     Script that provision the machine for the Windows 10 morpher.
 #>
 
-Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Provisioning.psm1') -Force
+Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '../Provisioning.psm1') -Force
 
 $VerbosePreference = "continue"
 
@@ -67,7 +67,7 @@ function setClassicShellRegistryKeys() {
     $settingsPath = "$registryPath\ClassicStartMenu\Settings"
     $vals = @((newVal "EnableStartButton" "REG_DWORD" 1),
               (newVal "StartButtonType" "REG_SZ" "CustomButton"),
-              (newVal "StartButtonPath" "REG_SZ" "$env:HOMEPATH\AppData\Local\GPII-Demo\logo\win-logo.png"),
+              (newVal "StartButtonPath" "REG_SZ" "$env:LOCALAPPDATA\GPII\logo\win-logo.png"),
               (newVal "StartButtonSize" "REG_DWORD" 42),
               (newVal "SkipMetro" "REG_DWORD" 1),
               (newVal "MenuStyle" "REG_SZ" "Win7"),
@@ -111,19 +111,5 @@ setClassicShellRegistryKeys
 stopClassicShell
 
 refreshenv
-
-$GPII_Demo_Path = "$env:HOMEPATH\AppData\Local\GPII-Demo"
-
-if (!(Test-Path $GPII_Demo_Path)) {
-    New-Item -Path $GPII_Demo_Path -ItemType 'directory' | Out-Null
-}
-
-$mainDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$demoDataDir = Join-Path $mainDir "demo-data\*"
-
-Write-Verbose("Deleting $GPII_Demo_Path")
-Remove-Item "$GPII_Demo_Path\*" -Force -Recurse
-Write-Verbose("Copying $demoDataDir to $GPII_Demo_Path")
-Copy-Item -Path $demoDataDir -Force -Recurse -Destination $GPII_Demo_Path
 
 exit 0

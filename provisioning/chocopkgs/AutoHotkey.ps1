@@ -10,7 +10,11 @@ param ( # default to script path if no parameter is given
     [string]$originalBuildScriptPath = (Split-Path -parent $PSCommandPath)
 )
 
-Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
+if ($originalBuildScriptPath -eq (Split-Path -parent $PSCommandPath)) {
+  Import-Module "$($originalBuildScriptPath)/../Provisioning.psm1" -Force
+} else {
+  Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
+}
 
 $chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive
 
