@@ -37,6 +37,9 @@ Invoke-Command "robocopy" ".. $($stagingWindowsDir) gpii.js index.js package.jso
 
 Invoke-Command $npm "prune --production" $stagingWindowsDir
 
+# Create the dir for holding data for GPII
+Invoke-Expression "$env:SystemDrive\vagrant\provisioning\envChanges\CreateDataDir.ps1"
+
 md (Join-Path $installerDir "output")
 md (Join-Path $installerDir "temp")
 
