@@ -37,6 +37,9 @@ Invoke-Command "robocopy" ".. $($stagingWindowsDir) gpii.js index.js package.jso
 
 Invoke-Command $npm "prune --production" $stagingWindowsDir
 
+$serviceDir = [io.path]::combine($stagingWindowsDir, "gpii\node_modules\windowsService\service\node_modules")
+Invoke-Command $npm "prune --production" $serviceDir
+
 md (Join-Path $installerDir "output")
 md (Join-Path $installerDir "temp")
 

@@ -35,3 +35,7 @@ Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbu
 $testProcessHandlingDir = Join-Path $mainDir "gpii\node_modules\processHandling\test"
 Invoke-Command "cl" "test-window.c" $testProcessHandlingDir
 rm (Join-Path $testProcessHandlingDir "test-window.obj")
+
+# Build the Windows Service
+$serviceDir = "$mainDir\gpii\node_modules\windowsService\service"
+Invoke-Command "npm" "install" $serviceDir
