@@ -1,42 +1,44 @@
 {
-  "name": "gpii-windows",
-  "description": "Components of the GPII personalization infrastructure for use on Microsoft's \"Windows\" ™",
-  "version": "0.3.0",
-  "author": "GPII",
-  "bugs": "http://issues.gpii.net/browse/GPII",
-  "homepage": "http://gpii.net/",
-  "scripts": {
-    "test": "node node_modules/istanbul/lib/cli.js cover tests/all-tests.js --no-default-excludes -i gpii/** -x tests -x coverage -x node_modules/** -- builtIn"
-  },
-  "dependencies": {
-    "ffi": "2.0.0",
-    "ref": "1",
-    "ref-array": "1.1.2",
-    "ref-struct": "1",
-    "universal": "gpii/universal#a9d56aa6dfc67e9430c9175826fe9d3e3bbc6c93"
-  },
-  "devDependencies": {
-    "fluid-grunt-eslint": "18.1.2",
-    "grunt": "1.0.1",
-    "grunt-jsonlint": "1.0.4",
-    "istanbul": "^0.4.5",
-    "nyc": "^11.0.3",
-    "shelljs": "0.3.0"
-  },
-  "license": "BSD-3-Clause",
-  "keywords": [
-    "gpii",
-    "accessibility",
-    "settings",
-    "fluid",
-    "IoC",
-    "Inversion of Control",
-    "configuration",
-    "evented"
-  ],
-  "repository": "git://github.com/GPII/windows.git",
-  "main": "./gpii.js",
-  "engines": {
-    "node": ">=6.3.1"
-  }
+    "name": "gpii-windows",
+    "description": "Components of the GPII personalization infrastructure for use on Microsoft's \"Windows\" ™",
+    "version": "0.3.0",
+    "author": "GPII",
+    "bugs": "http://issues.gpii.net/browse/GPII",
+    "homepage": "http://gpii.net/",
+    "scripts": {
+        "test": "node node_modules/istanbul/lib/cli.js cover tests/all-tests.js --no-default-excludes -i gpii/** -x tests -x coverage -x node_modules/** -- builtIn"
+    },
+    "dependencies": {
+        "edge": "6.5.1",
+        "ffi": "2.0.0",
+        "ref": "1.3.4",
+        "ref-struct": "1.1.0",
+        "ref-array": "1.1.2",
+        "string-argv": "0.0.2",
+        "universal": "GPII/universal#694422fc218ed6fdb31278242e67cf2fec8b8901"
+    },
+    "devDependencies": {
+        "fluid-grunt-eslint": "18.1.2",
+        "grunt": "1.0.1",
+        "grunt-jsonlint": "1.0.4",
+        "istanbul": "0.4.5",
+        "nyc": "11.0.3",
+        "shelljs": "0.3.0"
+    },
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "gpii",
+        "accessibility",
+        "settings",
+        "fluid",
+        "IoC",
+        "Inversion of Control",
+        "configuration",
+        "evented"
+    ],
+    "repository": "git://github.com/GPII/windows.git",
+    "main": "./gpii.js",
+    "engines": {
+        "node": ">=6.3.1"
+    }
 }
