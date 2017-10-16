@@ -6,8 +6,16 @@ Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Prov
 $chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive
 
 $nodePath = "C:\Program Files (x86)\nodejs"
-$nodeVersion = "6.9.1"
-Invoke-Command $chocolatey "install nodejs.install --version $($nodeVersion) --forcex86 -y"
+
+# Define the desired Node.js version (otherwise leave empty for latest LTS version)
+#$nodeVersion = "6.9.2"
+
+if($nodeVersion) {
+  Invoke-Command $chocolatey "install nodejs-lts --version $($nodeVersion) --forcex86 -y"
+} else {
+  Invoke-Command $chocolatey "install nodejs-lts --forcex86 -y"
+}
+
 # TODO: Correct path and automatically added is this one
 # C:\Users\vagrant\AppData\Roaming\npm review it.
 #Add-Path $nodePath $true
