@@ -15,6 +15,8 @@ This package depends on node 6.x (LTS).
 
 To build the GPII for Windows, perform the following:
 
+    mkdir gpii
+    cd gpii
     git clone https://github.com/GPII/windows.git
     cd windows
     npm install
