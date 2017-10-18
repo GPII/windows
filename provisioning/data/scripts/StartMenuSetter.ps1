@@ -2,6 +2,21 @@
   .
 #>
 
+#############################################################################
+#  If Powershell is running the 32-bit version on a 64-bit machine, we
+#           need to force powershell to run in 64-bit mode .
+#############################################################################
+
+if ($env:PROCESSOR_ARCHITEW6432 -eq "AMD64") {
+    write-warning "Not running in 64bits, relaunching script in 64 bit mode"
+    if ($myInvocation.Line) {
+        &"$env:WINDIR\sysnative\windowspowershell\v1.0\powershell.exe" -NonInteractive -NoProfile $myInvocation.Line
+    }else{
+        &"$env:WINDIR\sysnative\windowspowershell\v1.0\powershell.exe" -NonInteractive -NoProfile -file "$($myInvocation.InvocationName)" $args
+    }
+exit $lastexitcode
+}
+
 # Get the ID and security principal of the current user account
 $myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
 $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
@@ -34,6 +49,7 @@ if ($myWindowsPrincipal.IsInRole($adminRole)) {
 }
 
 $VerbosePreference = "continue"
+$ErrorActionPreference = "Stop"
 
 $GPII_Data_Path = Join-Path $env:LOCALAPPDATA "GPII"
 
@@ -41,7 +57,15 @@ Write-Verbose("Starting $PSCommandPath and set GPII_Data_Path : $GPII_Data_Path 
 
 Write-Verbose("Exporting current layout.")
 $CurrentLayout = Join-Path $GPII_Data_Path "menuLayouts\current_layout.xml"
-Export-StartLayout -Path $CurrentLayout
+$CrrError = Join-Path $GPII_Data_Path "menuLayouts\Error.txt"
+
+Try {
+    Export-StartLayout -Path $CurrentLayout -ErrorAction Stop
+} Catch {
+    $ErrorMessage = $_.Exception.Message
+    New-Item -Path $CrrError -type file -force -value $ErrorMessage
+    Break
+}
 
 $NewLayout = Join-Path $GPII_Data_Path "menuLayouts\StartMenuLayout.xml"
 Write-Verbose("Writing layout from $NewLayout")
