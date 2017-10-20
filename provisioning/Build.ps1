@@ -37,5 +37,5 @@ Invoke-Command "cl" "test-window.c" $testProcessHandlingDir
 rm (Join-Path $testProcessHandlingDir "test-window.obj")
 
 # Build the Windows Service
-$serviceDir = "$mainDir\gpii\service"
+$serviceDir = "$mainDir\service"
 Invoke-Command "npm" "install" $serviceDir
