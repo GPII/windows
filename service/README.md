@@ -82,7 +82,7 @@ To specify another config, use the `--config` option when running or installing 
 
 ### Config options
 
-```json
+```javascript
 {
     "processes": {
         /* A process block */
