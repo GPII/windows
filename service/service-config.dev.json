@@ -1,7 +1,7 @@
 {
     "processes": {
         "gpii": {
-            "command": "node ../../../../gpii.js",
+            "command": "node ../gpii.js",
             "ipc": "gpii",
             "autoRestart": true
         }

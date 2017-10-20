@@ -28,13 +28,7 @@ Should be ran as Administrator in order to manipulate services.
 ### Install the service
 
 ```
-node index.js --install
-```
-
-or:
-
-```
-node c:/vagrant/gpii/node_modules/windowsService/service/index.js --install
+node service/index.js --install
 ```
 
 This will make the service start when the computer restarts.
@@ -122,7 +116,7 @@ To specify another config, use the `--config` option when running or installing 
 
 ## Installation
 
-During the build process, [Installer.ps1](../../../../provisioning/Installer.ps1) will bundle the service into a
+During the build process, [Installer.ps1](../provisioning/Installer.ps1) will bundle the service into a
 standalone executable, and the installer will put it in the same place as gpii-app.exe.
 
 The installer will install and start the service. (TODO) 
