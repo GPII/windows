@@ -356,7 +356,7 @@ jqUnit.asyncTest("Test startChildProcess", function () {
                     jqUnit.fail("child process didn't terminate" + messageSuffix);
                 } else {
                     // See if the new process was restarted, by waiting for the mutex it creates.
-                    processHandlingTests.waitForMutex(mutexName).then(function (value) {
+                    processHandlingTests.waitForMutex(mutexName, 2000).then(function (value) {
                         if (test.expect.restart) {
                             jqUnit.assertNotEquals("process should restart" + messageSuffix, "timeout", value);
                         } else {
