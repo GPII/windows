@@ -14,9 +14,34 @@
  * You may obtain a copy of the License at
  * https://github.com/GPII/universal/blob/master/LICENSE.txt
  */
-
 "use strict";
 
-require("./windows-tests.js");
-require("./gpii-ipc-tests.js");
-require("./processHandling-tests.js");
+// The service tests are ran in a separate process to the rest of GPII. This not only ensures it's isolated from GPII,
+// but also prevents having to re-build to be ran under electron for the gpii-app tests.
+
+if (!global.fluid) {
+    require("./windows-tests.js");
+    require("./gpii-ipc-tests.js");
+    require("./processHandling-tests.js");
+    return;
+}
+
+var jqUnit = require("node-jqunit"),
+    child_process = require("child_process");
+
+jqUnit.module("GPII service tests");
+
+jqUnit.asyncTest("Test window service", function () {
+    console.log("Starting service tests");
+
+    var child = child_process.spawn("node", [__filename]);
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
+
+    child.on("close", function (code) {
+        console.log("Service tests ended:", code);
+        jqUnit.assertEquals("Service tests should pass", 0, code);
+        jqUnit.start();
+    });
+});
+
