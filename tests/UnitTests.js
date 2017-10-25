@@ -22,3 +22,4 @@ require("../gpii/node_modules/registryResolver/test/testRegistryResolver.js");
 require("../gpii/node_modules/registeredAT/test/testRegisteredAT.js");
 require("../gpii/node_modules/windowsMetrics/test/WindowsMetricsTests.js");
 require("../gpii/node_modules/processReporter/test/all-tests.js");
+require("../gpii/node_modules/wmiSettingsHandler/test/testWmiSettingsHandler.js");
