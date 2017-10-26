@@ -222,7 +222,7 @@ windows.waitForProcessTermination = function (pid, timeout) {
 
     return new Promise(function (resolve, reject) {
         var hProcess = winapi.kernel32.OpenProcess(winapi.constants.SYNCHRONIZE, 0, pid);
-        if (hProcess === winapi.NULL) {
+        if (!hProcess) {
             reject(windows.win32Error("OpenProcess"));
         } else {
             if (!timeout && timeout !== 0) {

@@ -76,7 +76,6 @@ ipc.startProcess = function (command, options) {
  */
 ipc.generatePipeName = function () {
     var pipeName = "\\\\.\\pipe\\gpii-" + crypto.randomBytes(18).toString("base64").replace(/[\\/]/g, ".");
-    logging.debug("Pipe name:", pipeName);
     return pipeName;
 };
 
