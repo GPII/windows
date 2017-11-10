@@ -4,10 +4,10 @@
       <defaultlayout:StartLayout GroupCellWidth="6" xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout">
         <start:Group Name="Communication" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout">
           <start:Tile Size="4x4" Column="0" Row="0" AppUserModelID="microsoft.windowscommunicationsapps_8wekyb3d8bbwe!microsoft.windowslive.mail" />
-		  <start:DesktopApplicationTile Size="4x4" Column="0" Row="4" DesktopApplicationLinkPath="%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Mozilla Firefox.lnk" />
+          <start:Tile Size="4x4" Column="0" Row="4" AppUserModelID="Microsoft.BingNews_8wekyb3d8bbwe!AppexNews" />
         </start:Group>
         <start:Group Name="Entertainment" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout">
-		  <start:Tile Size="4x4" Column="0" Row="0" AppUserModelID="Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge" />
+          <start:Tile Size="4x4" Column="0" Row="0" AppUserModelID="Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge" />
           <start:Tile Size="4x4" Column="0" Row="4" AppUserModelID="Microsoft.MicrosoftSolitaireCollection_8wekyb3d8bbwe!App" />
         </start:Group>
       </defaultlayout:StartLayout>
