@@ -12,6 +12,10 @@
         "usb-listener": {
             "command": "../listeners/GPII_USBListener.exe",
             "autoRestart": true
+        },
+        "proximity-listener": {
+            "command": "../listeners/GPIIWindowsProximityListener.exe",
+            "autoRestart": true
         }
     },
     "logging": {
