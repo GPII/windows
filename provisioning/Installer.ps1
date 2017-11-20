@@ -3,8 +3,10 @@
 #>
 Import-Module (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'Provisioning.psm1') -Force
 
-$installerRepo = "https://github.com/gpii/gpii-wix-installer"
-$installerBranch = "v1.2.0"
+#$installerRepo = "https://github.com/gpii/gpii-wix-installer"
+#$installerBranch = "v1.2.0"
+$installerRepo = "https://github.com/stegru/gpii-wix-installer"
+$installerBranch = "GPII-2294"
 
 $mainDir = Join-Path $env:SystemDrive "vagrant"
 $installerDir = Join-Path $env:SystemDrive "installer"
