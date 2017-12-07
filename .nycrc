@@ -1,0 +1,14 @@
+{
+    "include": [
+  	  "*.js",
+	  "gpii/**/*.js"
+    ],
+    "exclude": [
+	  "!**/node_modules/"
+    ],
+    "temp-directory": "coverage",
+    "report-dir": "reports",
+    "reporter": ["none"],
+    "clean": false,
+    "all": true
+}
