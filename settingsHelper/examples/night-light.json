@@ -1,0 +1,14 @@
+[
+    {
+        "settingID": "SystemSettings_Display_BlueLight_ManualToggleQuickAction",
+        "method": "GetValue"
+    },
+    {
+        "settingID": "SystemSettings_Display_BlueLight_ManualToggleOff",
+        "method": "Invoke"
+    },
+    {
+        "settingID": "SystemSettings_Display_BlueLight_ManualToggleQuickAction",
+        "method": "GetValue"
+    }
+]

@@ -31,6 +31,10 @@ $msbuild = Get-MSBuild "4.0"
 $listenersDir = Join-Path $mainDir "listeners"
 Invoke-Command $msbuild "listeners.sln /nodeReuse:false /p:Configuration=Release /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $listenersDir
 
+# Build the settings helper
+$settingsHelperDir = Join-Path $mainDir "SettingsHelper"
+Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $settingsHelperDir
+
 Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"
 $testProcessHandlingDir = Join-Path $mainDir "gpii\node_modules\processHandling\test"
 Invoke-Command "cl" "test-window.c" $testProcessHandlingDir

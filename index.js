@@ -15,7 +15,8 @@ https://github.com/gpii/universal/LICENSE.txt
 
 "use strict";
 
-var fluid = require("universal");
+var fluid = require("universal"),
+    path = require("path");
 
 fluid.module.register("gpii-windows", __dirname, require);
 
@@ -24,6 +25,10 @@ fluid.contextAware.makeChecks({
         value: true
     }
 });
+
+// Add ./bin to the path.
+var binPath = path.join(__dirname, "bin");
+process.env.path = binPath + ";" + process.env.path;
 
 require("./gpii/node_modules/WindowsUtilities/WindowsUtilities.js");
 require("./gpii/node_modules/processHandling/processHandling.js");
