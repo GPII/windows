@@ -1,0 +1,11 @@
+[
+    {
+        "settingID": "SystemSettings_Taskbar_Location",
+        "method": "GetValue"
+    },
+    {
+        "settingID": "SystemSettings_Taskbar_Location",
+        "method": "SetValue",
+        "parameters": [ 1 ]
+    }
+]
