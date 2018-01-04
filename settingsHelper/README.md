@@ -6,11 +6,11 @@ Small utility that sets Windows settings via the back-end used by the Windows 10
 
 Reads a JSON array of payloads from stdin:
 
-    WindowsSettings < payload.json
+    SettingsHelper < payload.json
 
 List all possible settings for the current system:
 
-    WindowsSettings -list
+    SettingsHelper -list
 
 
 ## Payload JSON
