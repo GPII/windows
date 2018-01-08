@@ -1,7 +1,21 @@
-﻿
-namespace WindowsSettings
+﻿/*
+ * Handles a setting - a wrapper for ISettingItem.
+ *
+ * Copyright 2018 Raising the Floor - International
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * The research leading to these results has received funding from the European Union's
+ * Seventh Framework Programme (FP7/2007-2013)
+ * under grant agreement no. 289016.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
+namespace SettingsHelper
 {
-    using Microsoft.Win32;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -9,6 +23,7 @@ namespace WindowsSettings
     using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Runtime.InteropServices.WindowsRuntime;
+    using Microsoft.Win32;
 
     /// <summary>
     /// Handles a setting (a wrapper for ISettingItem).
@@ -22,7 +37,10 @@ namespace WindowsSettings
         private const string GetSettingExport = "GetSetting";
 
         /// <summary>An ISettingItem class that this class is wrapping.</summary>
-        protected ISettingItem settingItem;
+        private ISettingItem settingItem;
+
+        /// <summary>True to make SetValue and Invoke do nothing.</summary>
+        private bool dryRun;
 
         /// <see cref="https://msdn.microsoft.com/library/ms684175.aspx"/>
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -50,9 +68,11 @@ namespace WindowsSettings
         /// Initializes a new instance of the SettingItem class.
         /// </summary>
         /// <param name="settingId">The setting ID.</param>
-        public SettingItem(string settingId)
+        /// <param name="dryRun">true to make Invoke and SetValue methods do nothing.</param>
+        public SettingItem(string settingId, bool dryRun = false)
         {
-            string dllPath = GetSettingDll(settingId);
+            this.dryRun = dryRun;
+            string dllPath = this.GetSettingDll(settingId);
             if (dllPath == null)
             {
                 throw new SettingFailedException("No such setting");
@@ -63,6 +83,7 @@ namespace WindowsSettings
         }
 
         /// <summary>Gets the setting's value.</summary>
+        /// <returns>The value.</returns>
         [Expose]
         public object GetValue()
         {
@@ -71,6 +92,7 @@ namespace WindowsSettings
 
         /// <summary>Gets the setting's value.</summary>
         /// <param name="valueName">Value name (normally "Value")</param>
+        /// <returns>The value.</returns>
         [Expose]
         public object GetValue(string valueName)
         {
@@ -87,14 +109,14 @@ namespace WindowsSettings
         }
 
         /// <summary>Sets the setting's value.</summary>
-        /// <param name="newValue">The new value.</param>
         /// <param name="valueName">Value name (normally "Value")</param>
+        /// <param name="newValue">The new value.</param>
         /// <returns>The previous value.</returns>
         [Expose]
         public object SetValue(string valueName, object newValue)
         {
             object old = this.GetValue(valueName);
-            if (newValue != old)
+            if (newValue != old && !this.dryRun)
             {
                 this.settingItem.SetValue(valueName, newValue);
             }
@@ -102,8 +124,9 @@ namespace WindowsSettings
             return old;
         }
 
-        [Expose]
         /// <summary>Gets a list of possible values.</summary>
+        /// <returns>An enumeration of possible values.</returns>
+        [Expose]
         public IEnumerable<object> GetPossibleValues()
         {
             IList<object> values;
@@ -112,6 +135,7 @@ namespace WindowsSettings
         }
 
         /// <summary>Invokes an Action setting.</summary>
+        /// <returns>The return value of the action function.</returns>
         [Expose]
         public long Invoke()
         {
@@ -119,6 +143,7 @@ namespace WindowsSettings
         }
 
         /// <summary>Invokes an Action setting.</summary>
+        /// <returns>The return value of the action function.</returns>
         [Expose]
         public long Invoke(long n)
         {
@@ -126,6 +151,7 @@ namespace WindowsSettings
         }
 
         /// <summary>Invokes an Action setting.</summary>
+        /// <returns>The return value of the action function.</returns>
         [Expose]
         public long Invoke(string s)
         {
@@ -141,12 +167,21 @@ namespace WindowsSettings
         }
 
         /// <summary>Invokes an Action setting.</summary>
+        /// <returns>The return value of the action function.</returns>
         public long Invoke(IntPtr n)
         {
-            return this.settingItem.Invoke(n, new Rect()).ToInt64();
+            if (this.dryRun)
+            {
+                return 0;
+            }
+            else
+            {
+                return this.settingItem.Invoke(n, new Rect()).ToInt64();
+            }
         }
 
         /// <summary>Gets the "IsEnabled" value.</summary>
+        /// <returns>The value of "IsEnabled".</returns>
         [Expose]
         public bool IsEnabled()
         {
@@ -154,6 +189,7 @@ namespace WindowsSettings
         }
 
         /// <summary>Gets the "IsApplicable" value.</summary>
+        /// <returns>The value of "IsApplicable".</returns>
         [Expose]
         public bool IsApplicable()
         {
@@ -166,7 +202,7 @@ namespace WindowsSettings
         public bool WaitForCompletion(int timeout)
         {
             const int interval = 100;
-            timeout *= (1000 / interval);
+            timeout *= 1000 / interval;
             while (this.settingItem.IsUpdating)
             {
                 if (--timeout < 0)
@@ -191,6 +227,7 @@ namespace WindowsSettings
                 string path = Path.Combine(RegistryPath, settingId);
                 value = Registry.GetValue(path, "DllPath", null);
             }
+
             return value == null ? null : value.ToString();
         }
 
@@ -251,7 +288,7 @@ namespace WindowsSettings
             int lastError = Marshal.GetLastWin32Error();
             return (lastError == 0)
                 ? message
-                : String.Format("{0} (win32 error {1})", message, lastError);
+                : string.Format("{0} (win32 error {1})", message, lastError);
         }
     }
 
@@ -259,7 +296,7 @@ namespace WindowsSettings
     /// A method with this attribute is exposed for use by the payload JSON.
     /// </summary>
     [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-    sealed class ExposeAttribute : Attribute
+    sealed public class ExposeAttribute : Attribute
     {
     }
 
@@ -276,5 +313,3 @@ namespace WindowsSettings
         }
     }
 }
-
-

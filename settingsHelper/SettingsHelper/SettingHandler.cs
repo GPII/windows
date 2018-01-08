@@ -1,4 +1,20 @@
-﻿namespace WindowsSettings
+﻿/*
+ * Helper for the System Settings Handler.
+ *
+ * Copyright 2018 Raising the Floor - International
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * The research leading to these results has received funding from the European Union's
+ * Seventh Framework Programme (FP7/2007-2013)
+ * under grant agreement no. 289016.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
+namespace SettingsHelper
 {
     using System;
     using System.Collections.Generic;
@@ -12,6 +28,9 @@
     public class SettingHandler
     {
         private static Dictionary<string, SettingItem> settingCache = new Dictionary<string, SettingItem>();
+
+        /// <summary>If true, don't apply any settings (but still do everything else).</summary>
+        public static bool DryRun { get; set; }
 
         /// <summary>
         /// Applies a payload, by invoking the method identified in <c>payload</c>.
@@ -29,7 +48,7 @@
                 // Cache the instance, incase it's re-used.
                 if (!settingCache.TryGetValue(payload.SettingId, out settingItem))
                 {
-                    settingItem = new SettingItem(payload.SettingId);
+                    settingItem = new SettingItem(payload.SettingId, SettingHandler.DryRun);
                     settingCache[payload.SettingId] = settingItem;
                 }
 
@@ -71,9 +90,9 @@
                         settingItem.WaitForCompletion(5);
                     }
                 }
-                // Catching general exceptions is ok with .NET 4 because corrupted state exceptions aren't caught.
                 catch (Exception e)
                 {
+                    // Catching general exceptions is ok with .NET 4 because corrupted state exceptions aren't caught.
                     throw new SettingFailedException(null, e.InnerException ?? e);
                 }
             }

@@ -1,29 +1,56 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
+﻿/*
+ * Helper for the System Settings Handler.
+ *
+ * Copyright 2018 Raising the Floor - International
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * The research leading to these results has received funding from the European Union's
+ * Seventh Framework Programme (FP7/2007-2013)
+ * under grant agreement no. 289016.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
 
-namespace WindowsSettings
+namespace SettingsHelper
 {
-    class Program
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Runtime.Serialization;
+    using Microsoft.Win32;
+
+    /// <summary>
+    /// Defines the <see cref="Program" />
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>Entry point</summary>
+        /// <param name="args">The <see cref="string[]"/></param>
+        internal static void Main(string[] args)
         {
             string inputFile = null;
 
             if (args != null && args.Length > 0)
             {
+                bool proceed = false;
                 switch (args[0])
                 {
+                    case "-test":
+                        SettingHandler.DryRun = true;
+                        proceed = true;
+                        break;
+
                     case "-list-all":
                     case "-list":
                         bool listAll = args[0] == "-list-all";
-                        string path = SettingItem.RegistryPath.Replace("HKEY_LOCAL_MACHINE\\", "");
+                        string path = SettingItem.RegistryPath.Replace("HKEY_LOCAL_MACHINE\\", string.Empty);
 
                         using (RegistryKey regKey = Registry.LocalMachine.OpenSubKey(path, false))
                         {
@@ -53,10 +80,9 @@ namespace WindowsSettings
                             {
                                 IEnumerable<string> paras = method.GetParameters().Select(p =>
                                 {
-                                    return string.Format(CultureInfo.InvariantCulture, "{1}: {0}",
-                                        p.ParameterType.Name, p.Name);
+                                    return string.Format(CultureInfo.InvariantCulture, "{1}: {0}", p.ParameterType.Name, p.Name);
                                 });
-                                Console.WriteLine("{1}({2}): {0}", method.ReturnType.Name, method.Name, String.Join(", ", paras));
+                                Console.WriteLine("{1}({2}): {0}", method.ReturnType.Name, method.Name, string.Join(", ", paras));
                             }
                         }
 
@@ -64,6 +90,7 @@ namespace WindowsSettings
 
                     case "-file":
                         inputFile = string.Join(" ", args.Skip(1));
+                        proceed = true;
                         break;
 
                     default:
@@ -71,7 +98,7 @@ namespace WindowsSettings
                         break;
                 }
 
-                if (inputFile == null)
+                if (proceed)
                 {
                     return;
                 }
@@ -118,25 +145,23 @@ namespace WindowsSettings
                 Result result = SettingHandler.Apply(payload);
                 Console.Write(result.ToString());
             }
+
             Console.Write("]");
 
             // Wait for them all to complete.
-            const long timeout = 5000;
+            const long Timeout = 5000;
             Stopwatch timer = new Stopwatch();
             timer.Start();
             foreach (Payload payload in payloads)
             {
-                int t = (int)(timeout - timer.ElapsedMilliseconds);
+                int t = (int)(Timeout - timer.ElapsedMilliseconds);
                 if (t <= 0)
                 {
                     break;
                 }
+
                 payload.SettingItem.WaitForCompletion(t);
             }
-
         }
-
-
     }
-
 }
