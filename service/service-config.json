@@ -4,18 +4,6 @@
             "command": "gpii-app.exe",
             "ipc": "gpii",
             "autoRestart": true
-        },
-        "rfid-listener": {
-            "command": "../listeners/GPII_RFIDListener.exe",
-            "autoRestart": true
-        },
-        "usb-listener": {
-            "command": "../listeners/GPII_USBListener.exe",
-            "autoRestart": true
-        },
-        "proximity-listener": {
-            "command": "../listeners/GPIIWindowsProximityListener.exe",
-            "autoRestart": true
         }
     },
     "logging": {

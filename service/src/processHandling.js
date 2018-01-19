@@ -60,17 +60,20 @@ processHandling.startChildProcesses = function () {
 /**
  * Starts a process.
  *
- * @param procConfig {Object} The process configuration.
+ * @param procConfig {Object} The process configuration (from service-config.json).
  * @param procConfig.command {String} The command.
  * @param procConfig.key {String} Identifier.
  * @param procConfig.autoRestart {boolean} [Optional] true to re-start the process if terminates.
  * @param procConfig.ipc {String} [Optional] IPC channel name.
+ * @param procConfig.env {Object} [Optional] Environment variables to set.
+ * @param procConfig.currentDir {String} [Optional] The current dir.
  * @return {Promise} Resolves (with the pid) when the process has started.
  */
 processHandling.startChildProcess = function (procConfig) {
     var childProcess = processHandling.childProcesses[procConfig.key];
     return new Promise(function (resolve, reject) {
         service.log("Starting " + procConfig.key + ": " + procConfig.command);
+        service.logDebug("Process config: ", JSON.stringify(procConfig));
 
         if (childProcess) {
             if (processHandling.isProcessRunning(childProcess.pid, childProcess.creationTime)) {
@@ -89,8 +92,13 @@ processHandling.startChildProcess = function (procConfig) {
         childProcess.lastStart = process.hrtime();
         childProcess.shutdown = false;
 
+        var startOptions = {
+            env: procConfig.env,
+            currentDir: procConfig.currentDir
+        };
+
         if (procConfig.ipc) {
-            ipc.startProcess(procConfig.command).then(function (p) {
+            ipc.startProcess(procConfig.command, startOptions).then(function (p) {
                 childProcess.pid = p.pid;
                 childProcess.pipe = p.pipe;
                 childProcess.creationTime = processHandling.getProcessCreationTime(childProcess.pid);
@@ -102,7 +110,7 @@ processHandling.startChildProcess = function (procConfig) {
             }, reject);
         } else {
             try {
-                childProcess.pid = ipc.execute(procConfig.command);
+                childProcess.pid = ipc.execute(procConfig.command, startOptions);
                 childProcess.creationTime = processHandling.getProcessCreationTime(childProcess.pid);
 
                 if (procConfig.autoRestart) {

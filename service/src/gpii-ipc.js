@@ -179,14 +179,21 @@ ipc.execute = function (command, options) {
 
     try {
 
-        // Create a user-specific environment block. Without this, the new process will take the environment variables
-        // of this process, causing GPII to use the incorrect data directory.
+        // Get a user-specific environment block. Without this, the new process will take the environment variables
+        // of the service, causing GPII to use the incorrect data directory.
         var env = windows.getEnv(userToken);
         if (options.env) {
+            // Add some extra values.
             for (var name in options.env) {
-                if (options.env.hasOwnProperty(name)) {
-                    var value = options.env[name];
-                    env.push(name + "=" + value);
+                var newValue = name + "=" + options.env[name];
+
+                // If there's already a variable with that name, replace it.
+                var re = new RegExp("^" + name + "=");
+                var index = env.findIndex(re.test, re);
+                if (index >= 0) {
+                    env.splice(index, 1, newValue);
+                } else {
+                    env.push(newValue);
                 }
             }
         }

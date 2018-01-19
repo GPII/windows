@@ -114,12 +114,13 @@ To specify another config, use the `--config` option when running or installing 
 }
 ```
 
+
 ## Installation
 
-During the build process, [Installer.ps1](../provisioning/Installer.ps1) will bundle the service into a
+During the build process, gpii-app's Installer.ps1 will bundle the service into a
 standalone executable, and the installer will put it in the same place as gpii-app.exe.
 
-The installer will install and start the service. (TODO) 
+The installer will install and start the service.
 
 ## Notes
 

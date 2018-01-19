@@ -19,6 +19,7 @@
 
 var os_service = require("os-service"),
     path = require("path"),
+    fs = require("fs"),
     events = require("events"),
     logging = require("./logging.js"),
     windows = require("./windows.js"),
@@ -46,7 +47,20 @@ if (process.versions.pkg) {
 process.chdir(dir);
 
 // Load the config file.
-var configFile = service.args.config || (service.isService ? "../service-config.json" : "../service-config.dev.json");
+var configFile = service.args.config;
+if (!configFile) {
+    if (service.isService) {
+        // Check if there's a config file next to the service executable.
+        var tryFile = path.join(dir, "service-config.json");
+        if (fs.existsSync(tryFile)) {
+            configFile = tryFile;
+        }
+    }
+    if (!configFile) {
+        // Use the built-in config file.
+        configFile = (service.isService ? "../service-config.json" : "../service-config.dev.json");
+    }
+}
 service.config = require(configFile);
 
 // Change to the configured log level (if it's not passed via command line)
