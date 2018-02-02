@@ -47,10 +47,7 @@ var ipc = exports;
  * Starts a process as the current desktop user, with an open pipe inherited.
  *
  * @param command {String} The command to execute.
- * @param options {Object} [optional] Options
- * @param options.alwaysRun {boolean} true to run as the current user, if the console user token could not be received.
- * @param options.env {object} Additional environment key-value pairs.
- * @param options.currentDir {string} Current directory for the new process.
+ * @param options {Object} [optional] Options (see {this}.execute()).
  * @return {Promise} Resolves with a value containing the pipe and pid.
  */
 ipc.startProcess = function (command, options) {
@@ -60,6 +57,10 @@ ipc.startProcess = function (command, options) {
     // Create the pipe, and pass it to a new process.
     return ipc.createPipe(pipeName).then(function (pipePair) {
         options.inheritHandles = [pipePair.clientHandle];
+        options.env = Object.assign({}, options.env);
+        // Tell the child how to connect to the pipe. '3' is the 1st inherited handle after the 3 standard streams.
+        options.env.GPII_SERVICE_IPC = "fd://3";
+
         var pid = ipc.execute(command, options);
 
         return {
@@ -131,10 +132,8 @@ ipc.createPipe = function (pipeName) {
 ipc.connectToPipe = function (pipeName) {
     return new Promise(function (resolve, reject) {
         var pipeNameBuf = winapi.stringToWideChar(pipeName);
-        // This flag makes the pipe non-blocking.
-        var FILE_FLAG_OVERLAPPED = 0x40000000;
         winapi.kernel32.CreateFileW.async(pipeNameBuf, winapi.constants.GENERIC_READWRITE, 0, ref.NULL,
-            winapi.constants.OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0,
+            winapi.constants.OPEN_EXISTING, winapi.constants.FILE_FLAG_OVERLAPPED, 0,
             function (err, pipeHandle) {
                 if (err) {
                     reject(err);
@@ -218,7 +217,7 @@ ipc.execute = function (command, options) {
         startupInfo.cb = winapi.STARTUPINFOEX.size;
         startupInfo.lpDesktop = winapi.stringToWideChar("winsta0\\default");
 
-        if (options.inheritHandles) {
+        if (options.standardHandles || options.inheritHandles) {
             var STARTF_USESTDHANDLES = 0x00000100;
             startupInfo.dwFlags = STARTF_USESTDHANDLES;
 
@@ -233,7 +232,9 @@ ipc.execute = function (command, options) {
             // child starts it is able to use the file as a normal file descriptor.
             // Node uses this same technique: https://github.com/nodejs/node/blob/master/deps/uv/src/win/process.c#L1048
             var allHandles = [startupInfo.hStdInput, startupInfo.hStdOutput, startupInfo.hStdError];
-            allHandles.push.apply(allHandles, options.inheritHandles);
+            if (options.inheritHandles) {
+                allHandles.push.apply(allHandles, options.inheritHandles);
+            }
 
             var handles = winapi.createHandleInheritStruct(allHandles.length);
             handles.ref().fill(0);

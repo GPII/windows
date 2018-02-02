@@ -46,11 +46,6 @@ winapi.constants = {
 
     INVALID_HANDLE_VALUE: 0xFFFFFFFF, // Really (uint)-1
 
-    // https://msdn.microsoft.com/library/ms683231
-    STD_INPUT_HANDLE: -10 >>> 0,
-    STD_OUTPUT_HANDLE: -11 >>> 0,
-    STD_ERROR_HANDLE: -12 >>> 0,
-
     HANDLE_FLAG_INHERIT: 1,
 
     // https://msdn.microsoft.com/library/aa446632
@@ -58,6 +53,7 @@ winapi.constants = {
     GENERIC_READWRITE: 0xC0000000, // GENERIC_READ | GENERIC_WRITE
     // https://msdn.microsoft.com/library/aa363858
     OPEN_EXISTING: 3,
+    FILE_FLAG_OVERLAPPED: 0x40000000,
     // https://msdn.microsoft.com/library/ms684880
     SYNCHRONIZE: 0x00100000,
     PROCESS_QUERY_LIMITED_INFORMATION: 0x1000,
