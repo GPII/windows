@@ -335,6 +335,9 @@ jqUnit.asyncTest("Test startProcess", function () {
     var command = ["node", script, "inherited-pipe"].join(" ");
     console.log("Starting", command);
 
+    // 1: child sends expected[0]
+    // 2: parent sends sendData
+    // 3: child sends expected[1]
     var sendData = "FROM PARENT";
     var expected = [
         // Test reading, child sends this first.
@@ -362,6 +365,7 @@ jqUnit.asyncTest("Test startProcess", function () {
         });
 
         p.pipe.setEncoding("utf8");
+
         p.pipe.on("data", function (data) {
             allData += data;
             if (allData.indexOf("\n") >= 0) {
@@ -372,12 +376,14 @@ jqUnit.asyncTest("Test startProcess", function () {
                 if (expectedIndex >= expected.length) {
                     p.pipe.end();
                 } else {
+                    console.log("send: " + sendData);
                     p.pipe.write(sendData + "\n");
                 }
             }
         });
 
         p.pipe.on("end", function () {
+            console.log("pipe end");
             jqUnit.start();
         });
 

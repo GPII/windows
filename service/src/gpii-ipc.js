@@ -131,8 +131,10 @@ ipc.createPipe = function (pipeName) {
 ipc.connectToPipe = function (pipeName) {
     return new Promise(function (resolve, reject) {
         var pipeNameBuf = winapi.stringToWideChar(pipeName);
-        winapi.kernel32.CreateFileW.async(
-            pipeNameBuf, winapi.constants.GENERIC_READWRITE, 0, ref.NULL, winapi.constants.OPEN_EXISTING, 0, 0,
+        // This flag makes the pipe non-blocking.
+        var FILE_FLAG_OVERLAPPED = 0x40000000;
+        winapi.kernel32.CreateFileW.async(pipeNameBuf, winapi.constants.GENERIC_READWRITE, 0, ref.NULL,
+            winapi.constants.OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0,
             function (err, pipeHandle) {
                 if (err) {
                     reject(err);
@@ -157,6 +159,8 @@ ipc.connectToPipe = function (pipeName) {
  * @param options.env {object} Additional environment key-value pairs.
  * @param options.currentDir {string} Current directory for the new process.
  * @param options.inheritHandles {Number[]} An array of win32 file handles for the child to inherit.
+ * @param options.keepHandles {boolean} True to keep the handles in inheritHandles open (default: false to close).
+ * @param options.standardHandles {Number[]} Standard handles (stdin, stdout, and stderr) to pass to the child.
  *
  * @return {Number} The pid of the new process.
  */
@@ -218,10 +222,12 @@ ipc.execute = function (command, options) {
             var STARTF_USESTDHANDLES = 0x00000100;
             startupInfo.dwFlags = STARTF_USESTDHANDLES;
 
-            // Get the standard handles.
-            startupInfo.hStdInput = winapi.kernel32.GetStdHandle(winapi.constants.STD_INPUT_HANDLE);
-            startupInfo.hStdOutput = winapi.kernel32.GetStdHandle(winapi.constants.STD_OUTPUT_HANDLE);
-            startupInfo.hStdError = winapi.kernel32.GetStdHandle(winapi.constants.STD_ERROR_HANDLE);
+            // Provide the standard handles.
+            if (options.standardHandles) {
+                startupInfo.hStdInput = options.standardHandles[0] || 0;
+                startupInfo.hStdOutput = options.standardHandles[1] || 0;
+                startupInfo.hStdError = options.standardHandles[2] || 0;
+            }
 
             // Add the handles to the lpReserved2 structure. This is how the CRT passes handles to a child. When the
             // child starts it is able to use the file as a normal file descriptor.
@@ -258,6 +264,13 @@ ipc.execute = function (command, options) {
 
         winapi.kernel32.CloseHandle(processInfoBuf.hThread);
         winapi.kernel32.CloseHandle(processInfoBuf.hProcess);
+
+        if (options.keepHandles && options.inheritHandles) {
+            // Close the handles that where inherited
+            options.inheritHandles.forEach(function (handle) {
+                winapi.kernel32.CloseHandle(handle);
+            });
+        }
 
     } finally {
         if (userToken) {

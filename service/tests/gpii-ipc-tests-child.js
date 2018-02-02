@@ -38,23 +38,24 @@ var actions = {
      * For the gpii-ipc.startProcess test: Read to and from an inherited pipe (FD 3)
      */
     "inherited-pipe": function () {
-        // : A pipe should be at FD 3.
-        var fs = require("fs");
+        var net = require("net");
 
+        // A pipe should be at FD 3.
         var pipeFD = 3;
-        var input = fs.createReadStream(null, {fd: pipeFD});
-        var output = fs.createWriteStream(null, {fd: pipeFD});
-        output.write("FROM CHILD\n");
+        var pipe = new net.Socket({fd: pipeFD});
+
+        pipe.write("FROM CHILD\n");
 
         var allData = "";
-        input.on("data", function (data) {
+        pipe.on("data", function (data) {
             allData += data;
             if (allData.indexOf("\n") >= 0) {
-                output.write("received: " + allData);
+                console.log("client got: ", allData);
+                pipe.write("received: " + allData);
             }
         });
 
-        input.on("error", function (err) {
+        pipe.on("error", function (err) {
             if (err.code === "EOF") {
                 process.nextTick(process.exit);
             } else {
