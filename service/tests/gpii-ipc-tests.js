@@ -311,7 +311,7 @@ jqUnit.asyncTest("Test validateClient", function () {
         }
 
         var test = tests[testIndex];
-        var endCalled = true;
+        var endCalled = false;
 
         // A mock pipe.
         var pipe = {
