@@ -51,15 +51,15 @@ winapi.constants = {
     // https://msdn.microsoft.com/library/aa446632
     GENERIC_READ: 0x80000000,
     GENERIC_READWRITE: 0xC0000000, // GENERIC_READ | GENERIC_WRITE
+    // https://msdn.microsoft.com/library/aa379607
+    WRITE_DAC: 0x00040000,
     // https://msdn.microsoft.com/library/aa363858
     OPEN_EXISTING: 3,
     FILE_FLAG_OVERLAPPED: 0x40000000,
     // https://msdn.microsoft.com/library/ms684880
     SYNCHRONIZE: 0x00100000,
     PROCESS_QUERY_LIMITED_INFORMATION: 0x1000,
-
-    // file handle open (from CRT)
-    FOPEN: 0x1,
+    PROCESS_DUP_HANDLE: 0x0040,
 
     // https://msdn.microsoft.com/library/ms687025
     INFINITE: 0xFFFFFFFF,
@@ -78,6 +78,7 @@ winapi.errorCodes = {
 };
 
 winapi.types = {
+    BYTE: "uint8",
     BOOL: "int",
     UINT: "uint",
     HANDLE: "uint",
@@ -169,30 +170,32 @@ winapi.FILETIME = new Struct([
     [t.DWORD, "dwHighDateTime"]
 ]);
 
-/**
- * Creates a struct for use with STARTUPINFO.lpReserved2, which is passed to the child's C runtime in order to use
- * them as file descriptors.
- *
- *   int number_of_fds
- *   unsigned char crt_flags[number_of_fds]
- *   HANDLE os_handle[number_of_fds]
- * https://github.com/nodejs/node/blob/master/deps/uv/src/win/process-stdio.c#L33
- *
- * @param handleCount {Number} The number of handles the structure is to contain.
- * @return {Struct}
- */
-winapi.createHandleInheritStruct = function (handleCount) {
+// https://msdn.microsoft.com/library/aa374931
+winapi.ACL = new Struct([
+    [t.BYTE, "AclRevision"],
+    [t.BYTE, "Sbz1"],
+    [t.WORD, "AclSize"],
+    [t.WORD, "AceCount"],
+    [t.WORD, "Sbz2"]
+]);
+winapi.PACL = ref.refType(winapi.ACL);
 
-    var HandleStruct = new Struct([
-        ["int", "length"],
-        [arrayType("char", handleCount), "flags"],
-        [arrayType(t.HANDLE, handleCount), "handle"]
-    ], {
-        packed: true
-    });
+// https://msdn.microsoft.com/library/aa379636
+winapi.TRUSTEE = new Struct([
+    [t.LP, "pMultipleTrustee"],
+    [t.UINT, "MultipleTrusteeOperation"],
+    [t.UINT, "TrusteeForm"],
+    [t.UINT, "TrusteeType"],
+    [ref.refType(t.LP), "ptstrName"]
+]);
 
-    return new HandleStruct();
-};
+// https://msdn.microsoft.com/library/aa446627
+winapi.EXPLICIT_ACCESS = new Struct([
+    [ t.DWORD, "grfAccessPermissions"],
+    [ t.UINT, "grfAccessMode"],
+    [ t.DWORD, "grfInheritance"],
+    [ winapi.TRUSTEE, "Trustee"]
+]);
 
 winapi.kernel32 = ffi.Library("kernel32", {
     // https://msdn.microsoft.com/library/aa383835
@@ -280,12 +283,16 @@ winapi.kernel32 = ffi.Library("kernel32", {
     // https://msdn.microsoft.com/library/ms683223
     "GetProcessTimes": [
         t.BOOL, [ t.HANDLE, t.LP, t.LP, t.LP, t.LP ]
+    ],
+    // https://msdn.microsoft.com/library/ms724251
+    "DuplicateHandle": [
+        t.BOOL, [ t.HANDLE, t.HANDLE, t.HANDLE, t.PHANDLE, t.DWORD, t.BOOL, t.DWORD ]
     ]
+
 });
 
 winapi.advapi32 = ffi.Library("advapi32", {
     // https://msdn.microsoft.com/library/ms682429
-    // ANSI version used due to laziness
     "CreateProcessAsUserW": [
         t.BOOL, [
             t.HANDLE,  // HANDLE                hToken,
@@ -303,7 +310,46 @@ winapi.advapi32 = ffi.Library("advapi32", {
     ],
     // https://msdn.microsoft.com/library/aa379295
     "OpenProcessToken": [
-        t.BOOL, [ t.HANDLE, t.DWORD, t.PHANDLE ]
+        t.BOOL, [t.HANDLE, t.DWORD, t.PHANDLE]
+    ],
+    // https://msdn.microsoft.com/library/aa446654
+    "GetSecurityInfo": [
+        t.DWORD, [
+            t.HANDLE,          // HANDLE               handle,
+            t.UINT,            // SE_OBJECT_TYPE       ObjectType,
+            t.UINT,            // SECURITY_INFORMATION SecurityInfo,
+            t.LP,              // PSID                 *ppsidOwner,
+            t.LP,              // PSID                 *ppsidGroup,
+            //winapi.PACL,       // PACL                 *ppDacl,
+            t.LP,       // PACL                 *ppDacl,
+            t.LP,              // PACL                 *ppSacl,
+            t.LP               // PSECURITY_DESCRIPTOR *ppSecurityDescriptor
+        ]
+    ],
+    // https://msdn.microsoft.com/library/aa379588
+    "SetSecurityInfo": [
+        t.DWORD, [
+            t.HANDLE,          // HANDLE               handle,
+            t.UINT,            // SE_OBJECT_TYPE       ObjectType,
+            t.UINT,            // SECURITY_INFORMATION SecurityInfo,
+            t.LP,              // PSID                 psidOwner,
+            t.LP,              // PSID                 psidGroup,
+            t.LP,              // PACL                 pDacl,
+            t.LP               // PACL                 pSacl,
+        ]
+    ],
+    // https://msdn.microsoft.com/library/aa446671
+    "GetTokenInformation": [
+        t.BOOL, [ t.HANDLE, t.UINT, t.LP, t.DWORD, t.LPDWORD]
+    ],
+    // https://msdn.microsoft.com/library/aa379576
+    "SetEntriesInAclW": [
+        //t.DWORD, [ t.ULONG, t.LP, winapi.ACL, winapi.PACL ]
+        t.DWORD, [ t.ULONG, t.LP, t.LP, t.LP ]
+    ],
+    // https://msdn.microsoft.com/library/aa376404
+    "CopySid": [
+        t.BOOL, [ t.DWORD, t.LP,  t.LP ]
     ]
 });
 

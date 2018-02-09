@@ -43,28 +43,39 @@ var ref = require("ref"),
 var winapi = windows.winapi;
 var ipc = exports;
 
+ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
+ipc.pipes = {};
+
 /**
- * Starts a process as the current desktop user, with an open pipe inherited.
+ * Starts a process as the current desktop user, passing the name of a pipe to connect to.
  *
  * @param command {String} The command to execute.
+ * @param ipcName {String} [optional] The IPC channel name.
  * @param options {Object} [optional] Options (see {this}.execute()).
- * @return {Promise} Resolves with a value containing the pipe and pid.
+ * @return {Promise} Resolves with a value containing the pipe server and pid.
  */
-ipc.startProcess = function (command, options) {
+ipc.startProcess = function (command, ipcName, options) {
+    if (options === undefined && typeof(ipcName) !== "string") {
+        options = ipcName;
+        ipcName = undefined;
+    }
     options = Object.assign({}, options);
     var pipeName = ipc.generatePipeName();
 
     // Create the pipe, and pass it to a new process.
-    return ipc.createPipe(pipeName).then(function (pipePair) {
-        options.inheritHandles = [pipePair.clientHandle];
+    return ipc.createPipe(pipeName, ipcName).then(function (pipeServer) {
         options.env = Object.assign({}, options.env);
-        // Tell the child how to connect to the pipe. '3' is the 1st inherited handle after the 3 standard streams.
-        options.env.GPII_SERVICE_IPC = "fd://3";
+        options.env.GPII_SERVICE_PIPE = "pipe:" + pipeName.substr(ipc.pipePrefix.length);
 
         var pid = ipc.execute(command, options);
 
+        var channel = ipcName && ipc.pipes[ipcName];
+        if (channel) {
+            channel.pid = pid;
+        }
+
         return {
-            pipe: pipePair.serverConnection,
+            pipeServer: pipeServer,
             pid: pid
         };
     });
@@ -76,74 +87,171 @@ ipc.startProcess = function (command, options) {
  * @return {string} The name of the pipe.
  */
 ipc.generatePipeName = function () {
-    var pipeName = "\\\\.\\pipe\\gpii-" + crypto.randomBytes(18).toString("base64").replace(/[\\/]/g, ".");
+    var pipeName = ipc.pipePrefix + crypto.randomBytes(18).toString("base64").replace(/[\\/]/g, ".");
     return pipeName;
 };
 
 /**
- * Open a named pipe, and connect to it.
+ * Open a named pipe, set the permissions, and start serving.
  *
  * @param pipeName {String} Name of the pipe.
- * @return {Promise} A promise resolving when the pipe has been connected to, with an object containing both ends to the
- * pipe.
+ * @param ipcName {String} Name of the IPC channel.
+ * @return {Promise} A promise resolving with the pipe server when the pipe is ready to receive a connection.
  */
-ipc.createPipe = function (pipeName) {
+ipc.createPipe = function (pipeName, ipcName) {
     return new Promise(function (resolve, reject) {
-        var pipe = {
-            serverConnection: null,
-            clientHandle: null
-        };
+        if (pipeName) {
+            var pipeServer = net.createServer();
+            pipeServer.maxConnections = 1;
 
-        var server = net.createServer();
+            pipeServer.on("error", function (err) {
+                logging.debug("ipc server error", err);
+                reject(err);
+            });
 
-        server.maxConnections = 1;
-        server.on("connection", function (connection) {
+            pipeServer.listen(pipeName, function () {
+                logging.debug("pipe listening");
+
+                ipc.setPipeAccess(pipeServer, pipeName).then(function () {
+                    if (ipcName) {
+                        ipc.pipes[ipcName] = {
+                            name: ipcName
+                        };
+
+                        ipc.servePipe(ipcName, pipeServer);
+                    }
+
+                    resolve(pipeServer);
+                });
+            });
+        } else {
+            reject({
+                isError: true,
+                message: "pipeName was null"
+            });
+        }
+    });
+};
+
+/**
+ * Allows the desktop user to access the pipe.
+ *
+ * When running as a service, a normal user does not have enough permissions to open it.
+ *
+ * @param pipeServer {net.Server} The pipe server. All listeners of the "connection" event will be removed.
+ * @param pipeName {string} Name of the pipe.
+ * @return {Promise} Resolves when complete.
+ */
+ipc.setPipeAccess = function (pipeServer, pipeName) {
+    return new Promise(function (resolve) {
+        // setPipePermissions will connect to the pipe (and close it). This connection cna be ignored, however the
+        // connection event needs to be swallowed before any more listeners are added.
+        pipeServer.removeAllListeners("connection");
+        pipeServer.on("connection", function (pipe) {
+            pipeServer.removeAllListeners("connection");
+            pipe.end();
+            resolve();
+        });
+
+        windows.setPipePermissions(pipeName);
+    });
+};
+
+/**
+ * Start serving the pipe.
+ *
+ * @param ipcName {String} Name of the IPC channel.
+ * @param pipeServer {net.Server} The pipe server.
+ * @return {Promise} Resolves when the client has been validated, rejects if failed.
+ */
+ipc.servePipe = function (ipcName, pipeServer) {
+    return new Promise(function (resolve, reject) {
+        var channel = ipc.pipes[ipcName];
+        pipeServer.on("connection", function (pipe) {
             logging.debug("ipc got connection");
-            pipe.serverConnection = connection;
-            server.close();
-            if (pipe.clientHandle) {
-                resolve(pipe);
-            }
-        });
 
-        server.on("error", function (err) {
-            //logging.log("ipc server error", err);
-            reject(err);
-        });
+            pipeServer.close();
 
-        server.listen(pipeName, function () {
-            ipc.connectToPipe(pipeName).then(function (pipeHandle) {
-                logging.debug("ipc connected to pipe");
-                pipe.clientHandle = pipeHandle;
-                if (pipe.serverConnection) {
-                    resolve(pipe);
-                }
-            }, reject);
+            ipc.validateClient(pipe, channel.pid).then(function () {
+                channel.pipe = pipe;
+
+                channel.pipe.on("error", function (err) {
+                    logging.log("Pipe error", ipcName, err);
+                });
+                channel.pipe.on("data", function (data) {
+                    logging.log("Pipe data", ipcName, data);
+                });
+                channel.pipe.on("end", function () {
+                    logging.log("Pipe end", ipcName);
+                });
+            }).then(resolve, function (err) {
+                logging.error("validateClient rejected the client", err);
+                reject(err);
+            });
         });
     });
 };
 
 /**
- * Connect to a named pipe.
+ * Validates the client connection of a pipe.
  *
- * @param pipeName {String} Name of the pipe.
- * @return {Promise} Resolves when the connection is made, with the win32 handle of the pipe.
+ * @param pipe {net.Socket} The pipe to the client.
+ * @param pid {number} The pid of the expected client.
+ * @param timeout {number} Seconds to wait for the event (default 30).
+ * @return {Promise} Resolves when successful, rejects on failure.
  */
-ipc.connectToPipe = function (pipeName) {
-    return new Promise(function (resolve, reject) {
-        var pipeNameBuf = winapi.stringToWideChar(pipeName);
-        winapi.kernel32.CreateFileW.async(pipeNameBuf, winapi.constants.GENERIC_READWRITE, 0, ref.NULL,
-            winapi.constants.OPEN_EXISTING, winapi.constants.FILE_FLAG_OVERLAPPED, 0,
-            function (err, pipeHandle) {
-                if (err) {
-                    reject(err);
-                } else if (pipeHandle === winapi.constants.INVALID_HANDLE_VALUE || !pipeHandle) {
-                    reject(winapi.error("CreateFile"));
-                } else {
-                    resolve(pipeHandle);
-                }
-            });
-    });
+ipc.validateClient = function (pipe, pid, timeout) {
+    if (!pid) {
+        return Promise.reject({
+            isError: true,
+            message: "Received connection before the child started"
+        });
+    }
+
+    var processHandle = null;
+    var childEventHandle = null;
+    try {
+        // Open the child process.
+        processHandle = winapi.kernel32.OpenProcess(winapi.constants.PROCESS_DUP_HANDLE, 0, pid);
+        if (!processHandle) {
+            throw winapi.error("OpenProcess", processHandle);
+        }
+
+        // Create the event.
+        var eventHandle = winapi.kernel32.CreateEventW(winapi.NULL, false, false, ref.NULL);
+        if (!eventHandle) {
+            throw winapi.error("CreateEvent", eventHandle);
+        }
+
+        // Duplicate the event handle for the child.
+        var eventHandleBuf = ref.alloc(winapi.types.HANDLE);
+        var ownProcess = -1 >>> 0;
+        var success =
+            winapi.kernel32.DuplicateHandle(ownProcess, eventHandle, processHandle, eventHandleBuf, ref.NULL, false, 2);
+        if (!success) {
+            throw winapi.error("DuplicateHandle", success);
+        }
+        childEventHandle = eventHandleBuf.deref();
+
+        // Give the handle to the child.
+        process.nextTick(function () {
+            pipe.write("event:" + childEventHandle + "\n");
+        });
+
+        return windows.waitForMultipleObjects([eventHandle], (timeout || 30) * 1000, false).then(function (handle) {
+            if (handle !== eventHandle) {
+                pipe.end();
+                throw new Error("waitForMultipleObjects resolved with " + handle);
+            }
+            pipe.write("OK\n");
+            return Promise.resolve("success");
+        });
+
+    } finally {
+        if (processHandle) {
+            winapi.kernel32.CloseHandle(processHandle);
+        }
+    }
 };
 
 /**
@@ -157,9 +265,6 @@ ipc.connectToPipe = function (pipeName) {
  * user token could not be received. Should only be true if not running as a service.
  * @param options.env {object} Additional environment key-value pairs.
  * @param options.currentDir {string} Current directory for the new process.
- * @param options.inheritHandles {Number[]} An array of win32 file handles for the child to inherit.
- * @param options.keepHandles {boolean} True to keep the handles in inheritHandles open (default: false to close).
- * @param options.standardHandles {Number[]} Standard handles (stdin, stdout, and stderr) to pass to the child.
  *
  * @return {Number} The pid of the new process.
  */
@@ -217,40 +322,6 @@ ipc.execute = function (command, options) {
         startupInfo.cb = winapi.STARTUPINFOEX.size;
         startupInfo.lpDesktop = winapi.stringToWideChar("winsta0\\default");
 
-        if (options.standardHandles || options.inheritHandles) {
-            var STARTF_USESTDHANDLES = 0x00000100;
-            startupInfo.dwFlags = STARTF_USESTDHANDLES;
-
-            // Provide the standard handles.
-            if (options.standardHandles) {
-                startupInfo.hStdInput = options.standardHandles[0] || 0;
-                startupInfo.hStdOutput = options.standardHandles[1] || 0;
-                startupInfo.hStdError = options.standardHandles[2] || 0;
-            }
-
-            // Add the handles to the lpReserved2 structure. This is how the CRT passes handles to a child. When the
-            // child starts it is able to use the file as a normal file descriptor.
-            // Node uses this same technique: https://github.com/nodejs/node/blob/master/deps/uv/src/win/process.c#L1048
-            var allHandles = [startupInfo.hStdInput, startupInfo.hStdOutput, startupInfo.hStdError];
-            if (options.inheritHandles) {
-                allHandles.push.apply(allHandles, options.inheritHandles);
-            }
-
-            var handles = winapi.createHandleInheritStruct(allHandles.length);
-            handles.ref().fill(0);
-            handles.length = allHandles.length;
-
-            for (var n = 0; n < allHandles.length; n++) {
-                handles.flags[n] = winapi.constants.FOPEN;
-                handles.handle[n] = allHandles[n];
-                // Mark the handle as inheritable.
-                winapi.kernel32.SetHandleInformation(
-                    allHandles[n], winapi.constants.HANDLE_FLAG_INHERIT, winapi.constants.HANDLE_FLAG_INHERIT);
-            }
-
-            startupInfo.cbReserved2 = handles["ref.buffer"].byteLength;
-            startupInfo.lpReserved2 = handles.ref();
-        }
         var processInfoBuf = new winapi.PROCESS_INFORMATION();
         processInfoBuf.ref().fill(0);
 
@@ -265,13 +336,6 @@ ipc.execute = function (command, options) {
 
         winapi.kernel32.CloseHandle(processInfoBuf.hThread);
         winapi.kernel32.CloseHandle(processInfoBuf.hProcess);
-
-        if (options.keepHandles && options.inheritHandles) {
-            // Close the handles that where inherited
-            options.inheritHandles.forEach(function (handle) {
-                winapi.kernel32.CloseHandle(handle);
-            });
-        }
 
     } finally {
         if (userToken) {

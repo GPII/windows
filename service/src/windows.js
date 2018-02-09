@@ -61,7 +61,7 @@ windows.win32Error = function (message, returnCode, errorCode) {
  *
  * This token must be closed with closeToken when no longer needed.
  *
- * @return {Number} The token.
+ * @return {Number} The token handle.
  */
 windows.getOwnUserToken = function () {
     // It's possible to just call GetCurrentProcessToken, but that returns a pseudo handle that doesn't have the
@@ -314,6 +314,128 @@ windows.waitForMultipleObjects = function (handles, timeout, waitAll) {
                 }
             });
     });
+};
+
+/**
+ * Gets the security identifier (SID) from a user token.
+ *
+ * @param token {integer} The user token.
+ * @return {*} The SID of the user.
+ */
+windows.getSidFromToken = function (token) {
+    // winnt.h:
+    var TokenUser = 1;
+
+    var lengthBuffer = ref.alloc(winapi.types.DWORD);
+    // // Get the length
+    var success = winapi.advapi32.GetTokenInformation(token, TokenUser, ref.NULL, 0, lengthBuffer);
+    if (!success) {
+        var err = winapi.kernel32.GetLastError();
+        // ERROR_INSUFFICIENT_BUFFER is expected.
+        if (err !== winapi.errorCodes.ERROR_INSUFFICIENT_BUFFER) {
+            throw winapi.error("GetTokenInformation", success);
+        }
+    }
+
+    // GetTokenInformation fills a TOKEN_USER structure, which contains another struct containing a pointer to the SID
+    // and a dword. The sid pointer points to a chunk of data, which is located after the struct.
+    var length = lengthBuffer.deref();
+    var tokenUserBuffer = Buffer.alloc(length);
+    // Get the sid data.
+    success = winapi.advapi32.GetTokenInformation(token, TokenUser, tokenUserBuffer, length, lengthBuffer);
+    if (!success) {
+        throw winapi.error("GetTokenInformation", success);
+    }
+
+    // Take the SID from the buffer.
+    var TokenUserHeader = 2 * ref.types["int"].size;
+    var sid = tokenUserBuffer.slice(TokenUserHeader);
+
+    return sid;
+};
+
+/**
+ * Set the permissions of the pipe so the logged in user can access it.
+ *
+ * This connects to the pipe, modifies the ACL to include the desktop user's security descriptor, then closes the pipe.
+ *
+ * @param pipeName {String} Name of the pipe.
+ */
+windows.setPipePermissions = function (pipeName) {
+    // winnt.h
+    var FILE_GENERIC_READ = 0x120089;
+    var FILE_GENERIC_WRITE = 0x120116;
+    var DACL_SECURITY_INFORMATION = 0x4;
+    // AccCtl.h
+    var SE_KERNEL_OBJECT = 0x6;
+    var GRANT_ACCESS = 1;
+    var TRUSTEE_IS_SID = 0;
+    var TRUSTEE_IS_USER = 1;
+
+    var token = windows.getDesktopUser();
+    var sid;
+    try {
+        sid = windows.getSidFromToken(token);
+    } finally {
+        windows.closeToken(token);
+    }
+
+    var pipeHandle = null;
+
+    try {
+        // Open the pipe.
+        var pipeNameBuf = winapi.stringToWideChar(pipeName);
+        pipeHandle = winapi.kernel32.CreateFileW(
+            pipeNameBuf, (winapi.constants.GENERIC_READ | winapi.constants.WRITE_DAC) >>> 0, 0,
+            ref.NULL, winapi.constants.OPEN_EXISTING, ref.NULL, ref.NULL);
+
+        if (pipeHandle === winapi.constants.INVALID_HANDLE_VALUE) {
+            throw winapi.error("CreateFile", pipeHandle);
+        }
+
+        // Get the ACL.
+        var daclP = ref.alloc(winapi.PACL);
+        daclP.ref().fill(0);
+        var result = winapi.advapi32.GetSecurityInfo(pipeHandle, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION,
+            ref.NULL, ref.NULL, daclP, ref.NULL, ref.NULL);
+
+        var dacl = daclP.deref();
+        if (result) {
+            throw winapi.error("GetSecurityInfo", result);
+        }
+
+        // Add the user to the ACL.
+        var access = new winapi.EXPLICIT_ACCESS();
+        access.ref().fill(0);
+        access.grfAccessMode = GRANT_ACCESS;
+        access.grfAccessPermissions = (FILE_GENERIC_READ | FILE_GENERIC_WRITE);
+        access.grfInheritance = 0;
+
+        access.Trustee.pMultipleTrustee = ref.NULL;
+        access.Trustee.MultipleTrusteeOperation = 0;
+        access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+        access.Trustee.TrusteeType = TRUSTEE_IS_USER;
+        access.Trustee.ptstrName = sid;
+
+        var newDacl = ref.alloc(winapi.PACL);
+        newDacl.ref().fill(0);
+        result = winapi.advapi32.SetEntriesInAclW(1, access.ref(), dacl, newDacl);
+        if (result) {
+            throw winapi.error("SetEntriesInAclW", result);
+        }
+
+        // Set the ACL.
+        result = winapi.advapi32.SetSecurityInfo(pipeHandle, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION,
+            ref.NULL, ref.NULL, newDacl.deref(), ref.NULL);
+
+        if (result) {
+            throw winapi.error("SetSecurityInfo", result);
+        }
+    } finally {
+        if (pipeHandle) {
+            winapi.kernel32.CloseHandle(pipeHandle);
+        }
+    }
 };
 
 module.exports = windows;

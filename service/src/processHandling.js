@@ -98,9 +98,9 @@ processHandling.startChildProcess = function (procConfig) {
         };
 
         if (procConfig.ipc) {
-            ipc.startProcess(procConfig.command, startOptions).then(function (p) {
+            ipc.startProcess(procConfig.command, procConfig.ipc, startOptions).then(function (p) {
                 childProcess.pid = p.pid;
-                childProcess.pipe = p.pipe;
+                childProcess.pipe = null;
                 childProcess.creationTime = processHandling.getProcessCreationTime(childProcess.pid);
 
                 if (procConfig.autoRestart) {

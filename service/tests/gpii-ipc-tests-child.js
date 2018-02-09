@@ -26,45 +26,113 @@
 
 "use strict";
 
+var logFile = null;
+var fs = require("fs");
+
+function log() {
+    var items = Array.from(arguments);
+    if (logFile) {
+        fs.appendFileSync(logFile, items.join(" ") + "\n");
+    } else {
+        console.log.apply(console, items);
+    }
+}
+
+function fail() {
+    var args = Array.from(arguments);
+    args.unshift("FAIL:");
+    log.apply(log, args);
+    process.exit(1);
+}
+
 process.on("uncaughtException", function (e) {
-    setTimeout(process.exit, 3000);
-    console.error(e);
+    fail(e);
+    process.exit(1);
 });
 
-console.log("child started");
+log("child started");
+
+function setEvent(eventHandle) {
+    var ffi = require("ffi");
+    var kernel32 = ffi.Library("kernel32", {
+        "SetEvent": [
+            "int", [ "uint" ]
+        ]
+    });
+    log("Calling SetEvent:", eventHandle);
+    var ret = kernel32.SetEvent(eventHandle);
+    log("SetEvent returned ", ret);
+    return ret;
+}
 
 var actions = {
     /**
-     * For the gpii-ipc.startProcess test: Read to and from an inherited pipe (FD 3)
+     * For the gpii-ipc.startProcess test: Read to and from a pipe.
      */
     "inherited-pipe": function () {
+        // Standard output isn't available to this process, so write output to a file.
+        logFile =  process.argv[3];
+        log("child started");
+
         var net = require("net");
 
-        // A pipe should be at FD 3.
-        var pipeFD = 3;
-        var pipe = new net.Socket({fd: pipeFD});
+        // Get the pipe name.
+        var pipeId = process.env.GPII_SERVICE_PIPE;
+        if (!pipeId) {
+            fail("GPII_SERVICE_PIPE not set.");
+            process.exit(1);
+        } else {
+            log("GPII_SERVICE_PIPE:", pipeId);
+        }
 
-        pipe.write("FROM CHILD\n");
+        // expecting pipe:id
+        var prefix = "pipe:";
+        if (!pipeId.startsWith(prefix)) {
+            fail("GPII_SERVICE_PIPE is badly formed");
+        }
 
-        var allData = "";
-        pipe.on("data", function (data) {
-            allData += data;
-            if (allData.indexOf("\n") >= 0) {
-                console.log("client got: ", allData);
-                pipe.write("received: " + allData);
-            }
+        var pipeName = "\\\\.\\pipe\\gpii-" + pipeId.substr(prefix.length);
+
+        var pipe = net.connect(pipeName, function () {
+            log("client: connected to server");
+
+            var authenticated = false;
+
+            var allData = "";
+            pipe.on("data", function (data) {
+                allData += data;
+                if (allData.indexOf("\n") >= 0) {
+                    log("Got data:", allData);
+                    if (authenticated) {
+                        // Echo what was received.
+                        pipe.write("received: " + allData);
+                    } else {
+                        var match = allData.match(/^event:([0-9]+)\n$/);
+                        if (!match || !match[1]) {
+                            fail("Invalid authentication challenge: '" + allData + "'");
+                        }
+                        var eventHandle = parseInt(match[1]);
+                        setEvent(eventHandle);
+                        authenticated = true;
+                    }
+                    allData = "";
+                }
+            });
         });
-
         pipe.on("error", function (err) {
             if (err.code === "EOF") {
                 process.nextTick(process.exit);
             } else {
-                console.log("input error", err);
+                log("input error", err);
                 throw err;
             }
         });
     },
 
+    "validate-client": function () {
+        var eventHandle = parseInt(process.argv[3]);
+        setEvent(eventHandle);
+    },
     /**
      * For the gpii-ipc.execute test: send some information to the pipe named on the command line.
      */
@@ -78,7 +146,7 @@ var actions = {
 
         var pipeName = process.argv[3];
         var connection = net.createConnection(pipeName, function () {
-            console.log("connected");
+            log("connected");
             connection.write(JSON.stringify(info));
             connection.end();
         });
@@ -102,7 +170,7 @@ var actions = {
         }, 10000);
 
         mutex = winapi.kernel32.CreateMutexW(winapi.NULL, true, mutexName);
-        console.log("mutex", winapi.stringFromWideChar(mutexName), mutex);
+        log("mutex", winapi.stringFromWideChar(mutexName), mutex);
 
     }
 };
@@ -111,6 +179,6 @@ var option = process.argv[2];
 if (actions[option]) {
     actions[option]();
 } else {
-    console.error("Unrecognised command line");
+    log("Unrecognised command line");
     process.exit(1);
 }

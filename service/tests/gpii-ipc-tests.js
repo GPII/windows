@@ -20,6 +20,9 @@
 var jqUnit = require("node-jqunit"),
     net = require("net"),
     path = require("path"),
+    fs = require("fs"),
+    os = require("os"),
+    child_process = require("child_process"),
     gpiiIPC = require("../src/gpii-ipc.js"),
     windows = require("../src/windows.js"),
     winapi = require("../src/winapi.js");
@@ -33,6 +36,21 @@ jqUnit.module("GPII pipe tests", {
         }
     }
 });
+
+var createLogFile = function () {
+    // The child process will write to this file (stdout isn't captured)
+    var logFile = os.tmpdir() + "/gpii-test-output" + Date.now();
+    console.log("logfile:", logFile);
+    fs.writeFileSync(logFile, "");
+    teardowns.push(function () {
+        try {
+            fs.unlinkSync(logFile);
+        } catch (e) {
+            // Ignored
+        }
+    });
+    return logFile;
+};
 
 // Tests generatePipeName
 jqUnit.test("Test generatePipeName", function () {
@@ -64,85 +82,8 @@ jqUnit.test("Test generatePipeName", function () {
     }
 });
 
-// Tests a successful connectToPipe.
-jqUnit.asyncTest("Test connectToPipe", function () {
-    jqUnit.expect(6);
-
-    var pipeName = gpiiIPC.generatePipeName();
-
-    // The invocation order of the callbacks for client or server connection varies.
-    var serverConnected = false,
-        clientConnected = false;
-    var connected = function () {
-        if (serverConnected && clientConnected) {
-            jqUnit.start();
-        }
-    };
-
-    // Create a server to listen for the connection.
-    var server = net.createServer();
-    server.on("connection", function () {
-        jqUnit.assert("Got connection");
-        serverConnected = true;
-        connected();
-    });
-
-    server.listen(pipeName, function () {
-        var promise = gpiiIPC.connectToPipe(pipeName);
-
-        jqUnit.assertNotNull("connectToPipe must return non-null", promise);
-        jqUnit.assertEquals("connectToPipe must return a promise", "function", typeof(promise.then));
-
-        promise.then(function (pipeHandle) {
-            jqUnit.assert("connectToPipe promise resolved (connection worked)");
-            jqUnit.assertTrue("pipeHandle must be something", !!pipeHandle);
-            jqUnit.assertFalse("pipeHandle must be a number", isNaN(pipeHandle));
-            clientConnected = true;
-            connected();
-        });
-    });
-});
-
-// Make connectToPipe fail.
-jqUnit.asyncTest("Test connectToPipe failures", function () {
-
-    var pipeNames = [
-        // A pipe that doesn't exist.
-        gpiiIPC.generatePipeName(),
-        // A pipe with a bad name.
-        gpiiIPC.generatePipeName() + "\\",
-        // Badly formed name
-        "invalid",
-        null
-    ];
-
-    jqUnit.expect(pipeNames.length * 3);
-
-    var testPipes = function (pipeNames) {
-        var pipeName = pipeNames.shift();
-        console.log("Checking bad pipe name:", pipeName);
-        var promise = gpiiIPC.connectToPipe(pipeName);
-        jqUnit.assertNotNull("connectToPipe must return non-null", promise);
-        jqUnit.assertEquals("connectToPipe must return a promise", "function", typeof(promise.then));
-
-        promise.then(function () {
-            jqUnit.fail("connectToPipe promise resolved (connection should not have worked)");
-        }, function () {
-            jqUnit.assert("connectToPipe promise should reject");
-
-            if (pipeNames.length > 0) {
-                testPipes(pipeNames);
-            } else {
-                jqUnit.start();
-            }
-        });
-    };
-
-    testPipes(Array.from(pipeNames));
-});
-
 jqUnit.asyncTest("Test createPipe", function () {
-    jqUnit.expect(8);
+    jqUnit.expect(4);
 
     var pipeName = gpiiIPC.generatePipeName();
 
@@ -150,16 +91,11 @@ jqUnit.asyncTest("Test createPipe", function () {
     jqUnit.assertNotNull("createPipe must return non-null", promise);
     jqUnit.assertEquals("createPipe must return a promise", "function", typeof(promise.then));
 
-    promise.then(function (pipePair) {
-        jqUnit.assertTrue("createPipe should have resolved with a value", !!pipePair);
+    promise.then(function (pipeServer) {
+        jqUnit.assertTrue("createPipe should have resolved with a value", !!pipeServer);
 
-        jqUnit.assertTrue("serverConnection should be set", !!pipePair.serverConnection);
-        jqUnit.assertTrue("clientHandle should be set", !!pipePair.clientHandle);
-
-        jqUnit.assertTrue("serverConnection should be a Socket", pipePair.serverConnection instanceof net.Socket);
-        jqUnit.assertFalse("clientHandle should be a number", isNaN(pipePair.clientHandle));
-        jqUnit.assertNotEquals("clientHandle should be a valid handle",
-            pipePair.clientHandle, winapi.constants.INVALID_HANDLE_VALUE);
+        jqUnit.assertTrue("createPipe resolved value should be a net.Server instance",
+            pipeServer instanceof net.Server);
 
         jqUnit.start();
     }, function (err) {
@@ -244,7 +180,7 @@ function readPipe(pipeName, callback) {
     });
 }
 
-// Tests the execution of a child process with gpiiIPC.execute (file handle inheritance is not tested here).
+// Tests the execution of a child process with gpiiIPC.execute
 jqUnit.asyncTest("Test execute", function () {
 
     jqUnit.expect(4);
@@ -329,68 +265,206 @@ jqUnit.asyncTest("Test execute", function () {
 
 });
 
-// Tests startProcess - creates a child process with an inherited open pipe.
+// Tests validateClient
+jqUnit.asyncTest("Test validateClient", function () {
+
+    var tests = [
+        {
+            // SetEvent is called by this process.
+            id: "successful",
+            startChildProcess: false,
+            setEvent: true,
+            timeout: 20,
+            expect: {
+                end: false,
+                resolve: true
+            }
+        },
+        {
+            // SetEvent is not called.
+            id: "timeout",
+            startChildProcess: false,
+            setEvent: false,
+            timeout: 2,
+            expect: {
+                end: true,
+                resolve: false
+            }
+        },
+        {
+            // SetEvent is called by another process (that hasn't been granted the handle).
+            id: "other-process",
+            startChildProcess: true,
+            setEvent: false,
+            timeout: 2,
+            expect: {
+                end: true,
+                resolve: false
+            }
+        }
+    ];
+
+    var runTest = function (testIndex) {
+        if (testIndex >= tests.length) {
+            jqUnit.start();
+            return;
+        }
+
+        var test = tests[testIndex];
+        var endCalled = true;
+
+        // A mock pipe.
+        var pipe = {
+            write: function (data) {
+                var eventHandleText = data.substr("event:".length).trim();
+                jqUnit.assertFalse("event handle must be numeric", isNaN(eventHandleText));
+
+                if (test.startChildProcess) {
+                    var script = path.join(__dirname, "gpii-ipc-tests-child.js");
+                    var command = ["node", script, "validate-client"].join(" ");
+                    console.log("starting", command);
+                    child_process.exec(command, function (err, stdout, stderr) {
+                        console.log("child stdout:", stdout);
+                        console.log("child stderr:", stderr);
+                        if (err) {
+                            jqUnit.fail(err);
+                        } else {
+                            jqUnit.assertTrue("child should have called SetEvent",
+                                stdout.indexOf("SetEvent returned") > -1);
+                        }
+                    });
+
+                }
+
+                if (test.setEvent) {
+                    var eventHandle = parseInt(eventHandleText);
+                    winapi.kernel32.SetEvent(eventHandle);
+                }
+            },
+            end: function () {
+                endCalled = true;
+            }
+        };
+
+        var pid = process.pid;
+        gpiiIPC.validateClient(pipe, pid, test.timeout).then(function () {
+            jqUnit.assertTrue("validateClient resolved", test.expect.resolve);
+        }, function (e) {
+            console.log(e);
+            jqUnit.assertFalse("validateClient rejected", test.expect.resolve);
+        }).then(function () {
+            jqUnit.assertEquals("end should be called (if expected)", test.expect.end, endCalled);
+            runTest(testIndex + 1);
+        });
+    };
+    runTest(0);
+
+});
+
+// Tests startProcess - creates a child process using startProcess.
 jqUnit.asyncTest("Test startProcess", function () {
+    var logFile = createLogFile();
+    var getLog = function () {
+        return fs.readFileSync(logFile, {encoding: "utf8"});
+    };
+
     var script = path.join(__dirname, "gpii-ipc-tests-child.js");
-    var command = ["node", script, "inherited-pipe"].join(" ");
+    var command = ["node", script, "inherited-pipe", logFile].join(" ");
     console.log("Starting", command);
 
+    // 0: server sends challenge, client performs it, server sends "OK"
     // 1: child sends expected[0]
     // 2: parent sends sendData
     // 3: child sends expected[1]
-    var sendData = "FROM PARENT";
+    var sendData = "FROM PARENT" + Math.random();
     var expected = [
-        // Test reading, child sends this first.
-        "FROM CHILD\n",
-        // Test writing; child responds with what was sent.
+        // Child responds with what was sent (from the authentication).
+        "received: OK\n",
+        // Child responds with what was sent (after authentication).
         "received: " + sendData + "\n"
     ];
 
     var expectedIndex = 0;
-
+    var complete = false;
     var allData = "";
     var pid = null;
 
-    gpiiIPC.startProcess(command).then(function (p) {
+    var promise = gpiiIPC.startProcess(command, "test-startProcess");
+
+    jqUnit.assertNotNull("startProcess must return non-null", promise);
+    jqUnit.assertEquals("startProcess must return a promise", "function", typeof(promise.then));
+
+    promise.then(function (p) {
+        jqUnit.assertNotNull("startProcess must return resolve with a value", p);
+        jqUnit.assertFalse("startProcess resolved value pid field must be numeric", isNaN(p.pid));
+        jqUnit.assertTrue("startProcess resolved value pipeServer field must be a net.Server instance",
+            p.pipeServer instanceof net.Server);
+
         pid = p.pid;
 
         // Set a timeout.
         windows.waitForProcessTermination(pid, 5000).then(function (value) {
+            var logContent = getLog();
             if (value === "timeout") {
+                console.log(logContent);
                 jqUnit.fail("Child process took too long.");
+            } else {
+                if (!complete) {
+                    console.log(logContent);
+                    jqUnit.fail("child should not terminate until completed");
+                } else if (logContent.indexOf("FAIL") >= 0) {
+                    console.log(logContent);
+                    jqUnit.fail("Child process failed");
+                }
             }
         }, function (err) {
             console.error(err);
             jqUnit.fail("Unable to wait for child process.");
         });
 
-        p.pipe.setEncoding("utf8");
+        p.pipeServer.on("error", function (err) {
+            console.error("Pipe server error:", err);
+            jqUnit.fail("Pipe server failed");
+        });
 
-        p.pipe.on("data", function (data) {
-            allData += data;
-            if (allData.indexOf("\n") >= 0) {
-                console.log("from pipe:", allData);
-                jqUnit.assertEquals("Expected input from pipe", expected[expectedIndex], allData);
-                allData = "";
-                expectedIndex++;
-                if (expectedIndex >= expected.length) {
-                    p.pipe.end();
-                } else {
-                    console.log("send: " + sendData);
-                    p.pipe.write(sendData + "\n");
+        // Wait for the child to connect to the pipe
+        p.pipeServer.on("connection", function (pipe) {
+            console.log("connection from child");
+
+            pipe.on("data", function (data) {
+                allData += data;
+                if (allData.indexOf("\n") >= 0) {
+                    console.log("from pipe:", allData);
+                    jqUnit.assertEquals("Expected input from pipe", expected[expectedIndex], allData);
+                    allData = "";
+                    expectedIndex++;
+                    if (expectedIndex >= expected.length) {
+                        complete = true;
+                        pipe.end();
+                    } else {
+                        console.log("send: " + sendData);
+                        pipe.write(sendData + "\n");
+                    }
                 }
-            }
+            });
+
+            pipe.on("end", function () {
+                console.log("pipe end");
+                if (complete) {
+                    jqUnit.start();
+                } else {
+                    console.log(getLog());
+                    jqUnit.fail("child should not terminate until completed");
+                }
+            });
+
+            pipe.on("error", function (err) {
+                console.error("Pipe error:", err);
+                jqUnit.fail("Pipe failed.");
+            });
         });
 
-        p.pipe.on("end", function () {
-            console.log("pipe end");
-            jqUnit.start();
-        });
 
-        p.pipe.on("error", function (err) {
-            console.error("Pipe error:", err);
-            jqUnit.fail("Pipe failed.");
-        });
 
     }, jqUnit.fail);
 
