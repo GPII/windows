@@ -1,0 +1,11 @@
+{
+    "processes": {
+        "gpii": {
+            "ipc": "gpii",
+            "noAuth": true
+        }
+    },
+    "logging": {
+        "level": "DEBUG"
+    }
+}

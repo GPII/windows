@@ -36,5 +36,6 @@ require("./gpii/node_modules/windowsMetrics");
 require("./gpii/node_modules/processReporter");
 require("./gpii/node_modules/windowMessages");
 require("./gpii/node_modules/userListeners");
+require("./gpii/node_modules/serviceHandler");
 
 module.exports = fluid;

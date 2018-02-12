@@ -33,10 +33,19 @@ service.args = parseArgs(process.argv.slice(2));
 
 // true if the process running as a Windows Service, otherwise a normal user process.
 service.isService = !!service.args.service;
+// true if the service is an exe file (rather than node)
+service.isExe = !!process.versions.pkg;
+
+/** Log something */
+service.log = logging.log;
+service.logFatal = logging.fatal;
+service.logError = logging.error;
+service.logWarn = logging.warn;
+service.logDebug = logging.debug;
 
 // Change directory to a sane location, allowing relative paths in the config file.
 var dir = null;
-if (process.versions.pkg) {
+if (service.isExe) {
     // The path of gpii-app.exe
     dir = path.dirname(process.execPath);
 } else {
@@ -51,16 +60,21 @@ var configFile = service.args.config;
 if (!configFile) {
     if (service.isService) {
         // Check if there's a config file next to the service executable.
-        var tryFile = path.join(dir, "service-config.json");
+        var tryFile = path.join(dir, "service.json");
         if (fs.existsSync(tryFile)) {
             configFile = tryFile;
         }
     }
     if (!configFile) {
         // Use the built-in config file.
-        configFile = (service.isService ? "../service-config.json" : "../service-config.dev.json");
+        configFile = (service.isService ? "../config/service.json" : "../config/service.dev.json");
     }
 }
+if ((configFile.indexOf("/") === -1) && (configFile.indexOf("\\") === -1)) {
+    configFile = path.join(dir, "config", configFile);
+}
+
+service.log("Loading config file", configFile);
 service.config = require(configFile);
 
 // Change to the configured log level (if it's not passed via command line)
@@ -96,15 +110,6 @@ service.stop = function () {
     service.event("stop");
     os_service.stop();
 };
-
-/**
- * Log something
- */
-service.log = logging.log;
-service.logFatal = logging.fatal;
-service.logError = logging.error;
-service.logWarn = logging.warn;
-service.logDebug = logging.debug;
 
 /**
  * Called when the service receives a control code. This is what's used to detect a shutdown, service stop, or Windows

@@ -23,6 +23,6 @@
     "targets": [
       "node6-win-x86"
     ],
-    "scripts": "service-config.json"
+    "scripts": "config/service.json"
   }
 }

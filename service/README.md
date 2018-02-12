@@ -20,7 +20,7 @@ node index.js
          Comma separated arguments to pass to the service (use with --install).
  --uninstall   Uninstall the Windows Service.
  --service     Only used when running as a service.
- --config=FILE Specify the config file to use (default: service-config.json).
+ --config=FILE Specify the config file to use (default: service.json).
 ```
 
 Should be ran as Administrator in order to manipulate services.
@@ -71,14 +71,22 @@ normal user.
 
 ## Configuration
 
-The command that the service uses to start GPII is specified in [service-config.json](service-config.json). This file
-is used when the service has been used when GPII is installed on the users computer, where the service executable is
-in `<GPII Dir>\windows`, and starts `gpii-app.exe` (and the listeners).
+### [service.json](config/service.json)
 
-When running the service from the source directory, [service-config.dev.json](service-config.dev.json) is used, which
-runs gpii-windows.
+Production config, used when being ran as `gpii-service.exe`. Starts `./gpii-app.exe` and accepts a connection from only
+that child process.
 
-To specify another config, use the `--config` option when running or installing the service.
+### [service.dev.json](config/service.dev.json)
+
+Default development configuration, used when running the service from the source directory. This doesn't start a child
+gpii process, but allows any process to connect to the pipe using a known name.
+
+### [service.dev.child.json](config/service.dev.child.json)
+
+Starts GPII, via `node ../gpii.js` and accepts a connection only that child process.
+
+
+To specify the config file, use the `--config` option when running or installing the service.
 
 ### Config options
 
@@ -87,15 +95,21 @@ To specify another config, use the `--config` option when running or installing 
     "processes": {
         /* A process block */
         "gpii": { // key doesn't matter
-            /* The command to invoke */
+            /* The command to invoke. Can be undefined, to just open a pipe. */
             "command": "gpii-app.exe", // Starts gpii
-            
+
             /* Provide a pipe to the process. */
             "ipc": "gpii", // The value will be used to determine internally what the pipe does (nothing special at the moment)
-            
+
             /* Restart the process if it terminates. */
-            "autoRestart": true
+            "autoRestart": true,
         },
+        
+        /* Opens a pipe (\\.\pipe\gpii-gpii), without any authentication. */
+        "gpii-dev": {
+            "ipc": "gpii",
+            "noAuth": true
+        }
 
         /* More processes */
         "rfid-listener": {
@@ -148,10 +162,22 @@ sc start gpii-service
 
 Then quickly attach to the service, before Windows thinks it didn't start.
 
-
 ## IPC
 
-Initial research: [stegru/service-poc](https://github.com/stegru/service-poc/blob/master/README.md)
+### Client authentication
 
-The service creates a named pipe, and connects to both ends. One end is kept, and the other is inherited by the child process
-and will be available as FD 3. Currently, the service and GPII do nothing with this.
+Initial research in [GPII-2399](https://issues.gpii.net/browse/GPII-2399).
+
+* Service creates pipe and listens
+* Service starts Child, passing pipe name in `GPII_SERVICE_PIPE` environment variable.
+    * pipe name isn't a secret - other processes see open pipes.
+* Child connects to pipe
+* Service creates an event
+    * [CreateEvent](https://msdn.microsoft.com/library/ms682396) (unnamed, so only the handle can be used to access it)
+    * [DuplicateHandle](https://msdn.microsoft.com/library/ms724251) creates another handle to the event that's tied to Child's process
+* Service sends the Child's handle to the event through the pipe
+    * The handle isn't a secret - it's a number that's meaningless to any process other than Child.
+* Client calls [SetEvent](https://msdn.microsoft.com/library/ms686211) on the handle.
+    * Only Child can signal that event
+* Service detects the event's signal, access is granted.
+

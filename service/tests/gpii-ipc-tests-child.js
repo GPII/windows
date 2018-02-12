@@ -107,7 +107,7 @@ var actions = {
                         // Echo what was received.
                         pipe.write("received: " + allData);
                     } else {
-                        var match = allData.match(/^event:([0-9]+)\n$/);
+                        var match = allData.match(/^challenge:([0-9]+)\n$/);
                         if (!match || !match[1]) {
                             fail("Invalid authentication challenge: '" + allData + "'");
                         }

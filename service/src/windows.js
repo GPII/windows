@@ -247,6 +247,7 @@ windows.waitForProcessTermination = function (pid, timeout) {
         }
     });
 };
+
 /**
  * Waits until one of the Win32 objects in an array are in the signalled state, resolving with that handle (or
  * "timeout").

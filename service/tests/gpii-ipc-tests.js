@@ -22,6 +22,7 @@ var jqUnit = require("node-jqunit"),
     path = require("path"),
     fs = require("fs"),
     os = require("os"),
+    EventEmitter = require("events"),
     child_process = require("child_process"),
     gpiiIPC = require("../src/gpii-ipc.js"),
     windows = require("../src/windows.js"),
@@ -314,36 +315,35 @@ jqUnit.asyncTest("Test validateClient", function () {
         var endCalled = false;
 
         // A mock pipe.
-        var pipe = {
-            write: function (data) {
-                var eventHandleText = data.substr("event:".length).trim();
-                jqUnit.assertFalse("event handle must be numeric", isNaN(eventHandleText));
+        var pipe = new EventEmitter();
+        pipe.write = function (data) {
+            var challenge = data.substr("challenge:".length).trim();
+            jqUnit.assertFalse("challenge must be numeric", isNaN(challenge));
 
-                if (test.startChildProcess) {
-                    var script = path.join(__dirname, "gpii-ipc-tests-child.js");
-                    var command = ["node", script, "validate-client"].join(" ");
-                    console.log("starting", command);
-                    child_process.exec(command, function (err, stdout, stderr) {
-                        console.log("child stdout:", stdout);
-                        console.log("child stderr:", stderr);
-                        if (err) {
-                            jqUnit.fail(err);
-                        } else {
-                            jqUnit.assertTrue("child should have called SetEvent",
-                                stdout.indexOf("SetEvent returned") > -1);
-                        }
-                    });
+            if (test.startChildProcess) {
+                var script = path.join(__dirname, "gpii-ipc-tests-child.js");
+                var command = ["node", script, "validate-client"].join(" ");
+                console.log("starting", command);
+                child_process.exec(command, function (err, stdout, stderr) {
+                    console.log("child stdout:", stdout);
+                    console.log("child stderr:", stderr);
+                    if (err) {
+                        jqUnit.fail(err);
+                    } else {
+                        jqUnit.assertTrue("child should have called SetEvent",
+                            stdout.indexOf("SetEvent returned") > -1);
+                    }
+                });
 
-                }
-
-                if (test.setEvent) {
-                    var eventHandle = parseInt(eventHandleText);
-                    winapi.kernel32.SetEvent(eventHandle);
-                }
-            },
-            end: function () {
-                endCalled = true;
             }
+
+            if (test.setEvent) {
+                var eventHandle = parseInt(challenge);
+                winapi.kernel32.SetEvent(eventHandle);
+            }
+        };
+        pipe.end = function () {
+            endCalled = true;
         };
 
         var pid = process.pid;
@@ -357,8 +357,8 @@ jqUnit.asyncTest("Test validateClient", function () {
             runTest(testIndex + 1);
         });
     };
-    runTest(0);
 
+    runTest(0);
 });
 
 // Tests startProcess - creates a child process using startProcess.

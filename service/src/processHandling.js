@@ -46,12 +46,15 @@ processHandling.sessionChange = function (eventType) {
  */
 processHandling.startChildProcesses = function () {
     var processes = Object.keys(service.config.processes);
-    // Start each child process sequentially, ignoring failures.
+    // Start each child process sequentially.
     var startNext = function () {
         var key = processes.shift();
         if (key) {
             var proc = Object.assign({key: key}, service.config.processes[key]);
-            processHandling.startChildProcess(proc).then(startNext, startNext);
+            processHandling.startChildProcess(proc).then(startNext, function (err) {
+                service.logError("startChildProcess failed for " + key, err);
+                startNext();
+            });
         }
     };
     startNext();
@@ -71,56 +74,58 @@ processHandling.startChildProcesses = function () {
  */
 processHandling.startChildProcess = function (procConfig) {
     var childProcess = processHandling.childProcesses[procConfig.key];
-    return new Promise(function (resolve, reject) {
-        service.log("Starting " + procConfig.key + ": " + procConfig.command);
-        service.logDebug("Process config: ", JSON.stringify(procConfig));
 
-        if (childProcess) {
-            if (processHandling.isProcessRunning(childProcess.pid, childProcess.creationTime)) {
-                service.logWarn("Process " + procConfig.key + " is already running");
-                reject();
-                return;
-            }
-        } else {
-            childProcess = {
-                procConfig: procConfig
-            };
-            processHandling.childProcesses[procConfig.key] = childProcess;
+    service.log("Starting " + procConfig.key + ": " + (procConfig.command || "pipe only"));
+    service.logDebug("Process config: ", JSON.stringify(procConfig));
+
+    if (childProcess) {
+        if (processHandling.isProcessRunning(childProcess.pid, childProcess.creationTime)) {
+            service.logWarn("Process " + procConfig.key + " is already running");
+            return Promise.reject();
         }
-        childProcess.pid = 0;
-        childProcess.pipe = null;
-        childProcess.lastStart = process.hrtime();
-        childProcess.shutdown = false;
-
-        var startOptions = {
-            env: procConfig.env,
-            currentDir: procConfig.currentDir
+    } else {
+        childProcess = {
+            procConfig: procConfig
         };
+        processHandling.childProcesses[procConfig.key] = childProcess;
+    }
 
-        if (procConfig.ipc) {
-            ipc.startProcess(procConfig.command, procConfig.ipc, startOptions).then(function (p) {
+    childProcess.pid = 0;
+    childProcess.pipe = null;
+    childProcess.lastStart = process.hrtime();
+    childProcess.shutdown = false;
+
+    var startOptions = {
+        env: procConfig.env,
+        currentDir: procConfig.currentDir,
+        authenticate: !procConfig.noAuth,
+        admin: procConfig.admin
+    };
+
+    var processPromise = null;
+
+    if (procConfig.ipc) {
+        // Start the process with a pipe.
+        processPromise = ipc.startProcess(procConfig.command, procConfig.ipc, startOptions).then(function (p) {
+            if (procConfig.command) {
                 childProcess.pid = p.pid;
                 childProcess.pipe = null;
                 childProcess.creationTime = processHandling.getProcessCreationTime(childProcess.pid);
-
-                if (procConfig.autoRestart) {
-                    processHandling.autoRestartProcess(procConfig.key);
-                }
-                resolve(childProcess.pid);
-            }, reject);
-        } else {
-            try {
-                childProcess.pid = ipc.execute(procConfig.command, startOptions);
-                childProcess.creationTime = processHandling.getProcessCreationTime(childProcess.pid);
-
-                if (procConfig.autoRestart) {
-                    processHandling.autoRestartProcess(procConfig.key);
-                }
-                resolve(childProcess.pid);
-            } catch (e) {
-                reject(e);
             }
+            return p.pid;
+        });
+    } else if (procConfig.command) {
+        // Start the process without a pipe.
+        childProcess.pid = ipc.execute(procConfig.command, startOptions);
+        childProcess.creationTime = processHandling.getProcessCreationTime(childProcess.pid);
+        processPromise = Promise.resolve(childProcess.pid);
+    }
+
+    return processPromise.then(function (pid) {
+        if (procConfig.command && procConfig.autoRestart) {
+            processHandling.autoRestartProcess(procConfig.key);
         }
+        return pid;
     });
 };
 

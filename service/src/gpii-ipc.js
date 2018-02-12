@@ -37,11 +37,14 @@ var ref = require("ref"),
     net = require("net"),
     crypto = require("crypto"),
     Promise = require("bluebird"),
+    service = require("./service.js"),
     windows = require("./windows.js"),
     logging = require("./logging.js");
 
 var winapi = windows.winapi;
-var ipc = exports;
+
+var ipc = service.module("gpiiIPC");
+module.exports = ipc;
 
 ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
 ipc.pipes = {};
@@ -51,7 +54,9 @@ ipc.pipes = {};
  *
  * @param command {String} The command to execute.
  * @param ipcName {String} [optional] The IPC channel name.
- * @param options {Object} [optional] Options (see {this}.execute()).
+ * @param options {Object} [optional] Options (see also {this}.execute()).
+ * @param options.authenticate {boolean} Child must authenticate to pipe (default is true, if undefined).
+ * @param options.admin {boolean} true to keep pipe access to admin-only.
  * @return {Promise} Resolves with a value containing the pipe server and pid.
  */
 ipc.startProcess = function (command, ipcName, options) {
@@ -60,18 +65,40 @@ ipc.startProcess = function (command, ipcName, options) {
         ipcName = undefined;
     }
     options = Object.assign({}, options);
-    var pipeName = ipc.generatePipeName();
+    options.authenticate = options.authenticate || options.authenticate === undefined;
+
+    var pipeName;
+    if (command) {
+        pipeName = ipc.generatePipeName();
+    } else if (ipcName) {
+        pipeName = ipc.pipePrefix + ipcName;
+    } else {
+        return Promise.reject("startProcess must be called with command and/or ipcName.");
+    }
+
+    var ipcChannel = null;
+    if (ipcName) {
+        ipcChannel = ipc.pipes[ipcName];
+        if (!ipcChannel) {
+            ipcChannel = ipc.pipes[ipcName] = {
+                name: ipcName
+            };
+        }
+        ipcChannel.authenticate = options.authenticate;
+        ipcChannel.admin = options.admin;
+        ipcChannel.pid = null;
+    }
 
     // Create the pipe, and pass it to a new process.
-    return ipc.createPipe(pipeName, ipcName).then(function (pipeServer) {
-        options.env = Object.assign({}, options.env);
-        options.env.GPII_SERVICE_PIPE = "pipe:" + pipeName.substr(ipc.pipePrefix.length);
-
-        var pid = ipc.execute(command, options);
-
-        var channel = ipcName && ipc.pipes[ipcName];
-        if (channel) {
-            channel.pid = pid;
+    return ipc.createPipe(pipeName, ipcChannel).then(function (pipeServer) {
+        var pid = null;
+        if (command) {
+            options.env = Object.assign({}, options.env);
+            options.env.GPII_SERVICE_PIPE = "pipe:" + pipeName.substr(ipc.pipePrefix.length);
+            pid = ipc.execute(command, options);
+            if (ipcChannel) {
+                ipcChannel.pid = pid;
+            }
         }
 
         return {
@@ -95,10 +122,10 @@ ipc.generatePipeName = function () {
  * Open a named pipe, set the permissions, and start serving.
  *
  * @param pipeName {String} Name of the pipe.
- * @param ipcName {String} Name of the IPC channel.
+ * @param ipcChannel {Object} The IPC channel.
  * @return {Promise} A promise resolving with the pipe server when the pipe is ready to receive a connection.
  */
-ipc.createPipe = function (pipeName, ipcName) {
+ipc.createPipe = function (pipeName, ipcChannel) {
     return new Promise(function (resolve, reject) {
         if (pipeName) {
             var pipeServer = net.createServer();
@@ -110,15 +137,15 @@ ipc.createPipe = function (pipeName, ipcName) {
             });
 
             pipeServer.listen(pipeName, function () {
-                logging.debug("pipe listening");
+                logging.debug("pipe listening", pipeName);
 
-                ipc.setPipeAccess(pipeServer, pipeName).then(function () {
-                    if (ipcName) {
-                        ipc.pipes[ipcName] = {
-                            name: ipcName
-                        };
+                var p = ipcChannel.admin
+                    ? Promise.resolve()
+                    : ipc.setPipeAccess(pipeServer, pipeName);
 
-                        ipc.servePipe(ipcName, pipeServer);
+                p.then(function () {
+                    if (ipcChannel) {
+                        ipc.servePipe(ipcChannel, pipeServer);
                     }
 
                     resolve(pipeServer);
@@ -164,28 +191,42 @@ ipc.setPipeAccess = function (pipeServer, pipeName) {
  * @param pipeServer {net.Server} The pipe server.
  * @return {Promise} Resolves when the client has been validated, rejects if failed.
  */
-ipc.servePipe = function (ipcName, pipeServer) {
+ipc.servePipe = function (ipcChannel, pipeServer) {
     return new Promise(function (resolve, reject) {
-        var channel = ipc.pipes[ipcName];
         pipeServer.on("connection", function (pipe) {
             logging.debug("ipc got connection");
 
-            pipeServer.close();
+            if (ipcChannel.authenticate) {
+                pipeServer.close();
+                if (!ipcChannel.pid) {
+                    throw new Error("Got pipe connection before client was started.");
+                }
+            }
 
-            ipc.validateClient(pipe, channel.pid).then(function () {
-                channel.pipe = pipe;
+            pipe.on("error", function (err) {
+                logging.log("Pipe error", ipcChannel.name, err);
+            });
+            pipe.on("end", function () {
+                logging.log("Pipe end", ipcChannel.name);
+            });
 
-                channel.pipe.on("error", function (err) {
-                    logging.log("Pipe error", ipcName, err);
-                });
-                channel.pipe.on("data", function (data) {
-                    logging.log("Pipe data", ipcName, data);
-                });
-                channel.pipe.on("end", function () {
-                    logging.log("Pipe end", ipcName);
+            var promise;
+            if (ipcChannel.authenticate) {
+                promise = ipc.validateClient(pipe, ipcChannel.pid);
+            } else {
+                pipe.write("challenge:none\n");
+                promise = Promise.resolve();
+            }
+
+            promise.then(function () {
+                logging.log("Pipe client authenticated:", ipcChannel.name);
+                ipcChannel.pipe = pipe;
+
+                ipcChannel.pipe.on("data", function (data) {
+                    logging.log("Pipe data", ipcChannel.name, data);
                 });
             }).then(resolve, function (err) {
-                logging.error("validateClient rejected the client", err);
+                logging.error("validateClient rejected the client:", err);
                 reject(err);
             });
         });
@@ -201,12 +242,18 @@ ipc.servePipe = function (ipcName, pipeServer) {
  * @return {Promise} Resolves when successful, rejects on failure.
  */
 ipc.validateClient = function (pipe, pid, timeout) {
-    if (!pid) {
-        return Promise.reject({
-            isError: true,
-            message: "Received connection before the child started"
-        });
+
+    // Create an event that's used to cancel waiting for the authentication event.
+    var cancelEventHandle = winapi.kernel32.CreateEventW(winapi.NULL, false, false, ref.NULL);
+    if (!cancelEventHandle) {
+        throw winapi.error("CreateEvent", cancelEventHandle);
     }
+
+    // Cancel waiting when the pipe was closed.
+    var onPipeClose = function () {
+        winapi.kernel32.SetEvent(cancelEventHandle);
+    };
+    pipe.on("close", onPipeClose);
 
     var processHandle = null;
     var childEventHandle = null;
@@ -235,16 +282,20 @@ ipc.validateClient = function (pipe, pid, timeout) {
 
         // Give the handle to the child.
         process.nextTick(function () {
-            pipe.write("event:" + childEventHandle + "\n");
+            pipe.write("challenge:" + childEventHandle + "\n");
+            service.logDebug("validateClient: send challenge");
         });
 
-        return windows.waitForMultipleObjects([eventHandle], (timeout || 30) * 1000, false).then(function (handle) {
-            if (handle !== eventHandle) {
+        // Wait for the cancel or child process event.
+        return windows.waitForMultipleObjects([cancelEventHandle, eventHandle], (timeout || 30) * 1000, false).then(function (handle) {
+            pipe.removeListener("close", onPipeClose);
+            if (handle === eventHandle) {
+                pipe.write("OK\n");
+                return Promise.resolve("success");
+            } else {
                 pipe.end();
-                throw new Error("waitForMultipleObjects resolved with " + handle);
+                return Promise.reject("failed");
             }
-            pipe.write("OK\n");
-            return Promise.resolve("success");
         });
 
     } finally {
