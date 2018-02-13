@@ -139,7 +139,7 @@ ipc.createPipe = function (pipeName, ipcChannel) {
             pipeServer.listen(pipeName, function () {
                 logging.debug("pipe listening", pipeName);
 
-                var p = ipcChannel.admin
+                var p = (ipcChannel && ipcChannel.admin)
                     ? Promise.resolve()
                     : ipc.setPipeAccess(pipeServer, pipeName);
 
