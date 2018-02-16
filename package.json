@@ -12,7 +12,7 @@
         "ref-array": "1.1.2",
         "edge": "6.5.1",
         "string-argv": "0.0.2",
-        "gpii-universal": "javihernandez/universal#GPII-2568"
+        "gpii-universal": "GPII/universal#36433633d01e59028ffefe0b4fcc59ef7d3886b2"
     },
     "devDependencies": {
         "grunt": "1.0.1",
