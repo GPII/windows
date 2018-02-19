@@ -19,7 +19,7 @@ module.exports = function (grunt) {
             src: ["./gpii/**/*.js", "./tests/**/*.js", "./*.js"]
         },
         jsonlint: {
-            src: ["gpii/**/*.json", "tests/**/*.json", "examples/**/*.json"]
+            src: ["gpii/**/*.json", "tests/**/*.json", "examples/**/*.json", "./*.json"]
         }
     });
 
