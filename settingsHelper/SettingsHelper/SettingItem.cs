@@ -241,7 +241,7 @@ namespace SettingsHelper
             IntPtr lib = LoadLibrary(dllPath);
             if (lib == IntPtr.Zero)
             {
-                throw new SettingFailedException("Unable to load library " + dllPath);
+                throw new SettingFailedException("Unable to load library " + dllPath, true);
             }
 
             // Get the address of the function within the dll.
@@ -249,7 +249,7 @@ namespace SettingsHelper
             if (proc == IntPtr.Zero)
             {
                 throw new SettingFailedException(
-                    string.Format("Unable get address of {0}!{1}", dllPath, GetSettingExport));
+                    string.Format("Unable get address of {0}!{1}", dllPath, GetSettingExport), true);
             }
 
             // Create a function from the address.
@@ -260,7 +260,7 @@ namespace SettingsHelper
             IntPtr result = getSetting(settingId, out item, IntPtr.Zero);
             if (result != IntPtr.Zero || item == null)
             {
-                throw new SettingFailedException("Unable to instantiate setting class");
+                throw new SettingFailedException("Unable to instantiate setting class", true);
             }
 
             return item;
@@ -275,6 +275,9 @@ namespace SettingsHelper
         public SettingFailedException(string message)
             : base(FormatMessage(message)) { }
 
+        public SettingFailedException(string message, bool win32)
+            : base(FormatMessage(message, win32)) { }
+
         public SettingFailedException(string message, Exception inner)
             : base(FormatMessage(message ?? inner.Message), inner) { }
 
@@ -283,9 +286,9 @@ namespace SettingsHelper
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
 
-        private static string FormatMessage(string message)
+        private static string FormatMessage(string message, bool win32 = false)
         {
-            int lastError = Marshal.GetLastWin32Error();
+            int lastError = win32 ? Marshal.GetLastWin32Error() : 0;
             return (lastError == 0)
                 ? message
                 : string.Format("{0} (win32 error {1})", message, lastError);

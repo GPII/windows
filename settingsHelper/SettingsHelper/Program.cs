@@ -98,7 +98,7 @@ namespace SettingsHelper
                         break;
                 }
 
-                if (proceed)
+                if (!proceed)
                 {
                     return;
                 }
@@ -152,7 +152,7 @@ namespace SettingsHelper
             const long Timeout = 5000;
             Stopwatch timer = new Stopwatch();
             timer.Start();
-            foreach (Payload payload in payloads)
+            foreach (Payload payload in payloads.Where(p => p != null && p.SettingItem != null))
             {
                 int t = (int)(Timeout - timer.ElapsedMilliseconds);
                 if (t <= 0)

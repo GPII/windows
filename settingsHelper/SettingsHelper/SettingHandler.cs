@@ -40,11 +40,20 @@ namespace SettingsHelper
         public static Result Apply(Payload payload)
         {
             Result result = new Result(payload);
-
-            SettingItem settingItem;
-
             try
             {
+                if (string.IsNullOrEmpty(payload.SettingId))
+                {
+                    throw new SettingFailedException("settingID is required.");
+                }
+
+                if (string.IsNullOrEmpty(payload.Method))
+                {
+                    throw new SettingFailedException("method is required.");
+                }
+
+                SettingItem settingItem;
+
                 // Cache the instance, incase it's re-used.
                 if (!settingCache.TryGetValue(payload.SettingId, out settingItem))
                 {
