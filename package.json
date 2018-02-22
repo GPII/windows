@@ -6,24 +6,35 @@
     "bugs": "http://issues.gpii.net/browse/GPII",
     "homepage": "http://gpii.net/",
     "dependencies": {
-        "ffi": "2.0.0",
-        "ref": "1.3.4",
+        "ffi": "2.2.0",
+        "ref": "1.3.5",
         "ref-struct": "1.1.0",
-        "ref-array": "1.1.2",
+        "ref-array": "1.2.0",
         "edge": "6.5.1",
         "string-argv": "0.0.2",
-        "gpii-universal": "0.3.0-dev.20180221T093422Z.50833c1"
+        "gpii-universal": "0.3.0-dev.20180222T171713Z.7fe2b3b"
     },
     "devDependencies": {
-        "grunt": "1.0.1",
+        "grunt": "1.0.2",
         "eslint-config-fluid": "1.2.0",
         "fluid-grunt-eslint": "18.1.2",
-        "grunt-jsonlint": "1.0.4",
-        "shelljs": "0.3.0"
+        "grunt-jsonlint": "1.1.0",
+        "shelljs": "0.8.1"
     },
     "license": "BSD-3-Clause",
-    "keywords": ["gpii", "accessibility", "settings", "fluid", "IoC", "Inversion of Control", "configuration", "evented"],
+    "keywords": [
+        "gpii",
+        "accessibility",
+        "settings",
+        "fluid",
+        "IoC",
+        "Inversion of Control",
+        "configuration",
+        "evented"
+    ],
     "repository": "git://github.com/GPII/windows.git",
     "main": "./gpii.js",
-    "engines": { "node" : ">=6.3.1" }
+    "engines": {
+        "node": ">=6.3.1"
+    }
 }
