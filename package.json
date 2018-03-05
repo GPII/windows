@@ -12,7 +12,7 @@
         "ref-array": "1.1.2",
         "edge": "6.5.1",
         "string-argv": "0.0.2",
-        "universal": "klown/universal#GPII-1230"
+        "gpii-universal": "klown/universal#GPII-1230-2"
     },
     "devDependencies": {
         "grunt": "1.0.1",
