@@ -78,7 +78,15 @@ namespace SettingsHelper
                 {
                     // Method can't be found matching the parameter types, get any method with the same name
                     // and let .Invoke worry about the parameters.
-                    method = settingItem.GetType().GetMethod(payload.Method, bindingFlags);
+                    try
+                    {
+                        method = settingItem.GetType().GetMethod(payload.Method, bindingFlags);
+                    }
+                    catch (AmbiguousMatchException)
+                    {
+                        method = null;
+                    }
+
                     if (method == null)
                     {
                         throw new SettingFailedException("Unknown method " + payload.Method);

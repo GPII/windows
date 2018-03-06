@@ -68,9 +68,10 @@
         IntPtr Invoke(IntPtr a, Rect b);
 
         // SettingChanged event
-        int add_SettingChanged(int v);
-        int remove_SettingChanged();
-        int unregister();
+        event EventHandler<string> SettingChanged;
+        //int add_SettingChanged(int v);
+        //int remove_SettingChanged();
+        //int unregister();
 
         // Unknown - setter for IsUpdating
         bool IsUpdating2 { set; }
@@ -82,15 +83,17 @@
         int SetSkipConcurrentOperations(bool flag);
 
         // These appear to be base implementations overridden by the above.
-        IntPtr unknown_GetValue();
+        bool GetValue2 { get; }
+        //IntPtr unknown_GetValue();
         IntPtr unknown_SetValue1();
         IntPtr unknown_SetValue2();
         IntPtr unknown_SetValue3();
 
         // ?
         IntPtr GetNamedValue(
-            [MarshalAs(UnmanagedType.HString)] string name,
-            [MarshalAs(UnmanagedType.IInspectable)] object unknown);
+            [MarshalAs(UnmanagedType.HString)] string name
+            //[MarshalAs(UnmanagedType.IInspectable)] object unknown
+            );
 
         IntPtr SetNullValue();
 

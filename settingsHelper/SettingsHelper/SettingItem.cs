@@ -24,6 +24,7 @@ namespace SettingsHelper
     using System.Runtime.InteropServices;
     using System.Runtime.InteropServices.WindowsRuntime;
     using Microsoft.Win32;
+    using System.Threading;
 
     /// <summary>
     /// Handles a setting (a wrapper for ISettingItem).
@@ -41,6 +42,7 @@ namespace SettingsHelper
 
         /// <summary>True to make SetValue and Invoke do nothing.</summary>
         private bool dryRun;
+        private bool gotValue;
 
         /// <see cref="https://msdn.microsoft.com/library/ms684175.aspx"/>
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -96,7 +98,26 @@ namespace SettingsHelper
         [Expose]
         public object GetValue(string valueName)
         {
-            return this.settingItem.GetValue(valueName);
+            int timer = 5000, delay = 200;
+
+            do
+            {
+                if (this.gotValue)
+                {
+                    return this.settingItem.GetValue(valueName);
+                }
+                Thread.Sleep(delay);
+            } while ((timer -= delay) > 0);
+
+            return null;
+        }
+
+        private void SettingItem_SettingChanged(object sender, string s)
+        {
+            if (s == "Value")
+            {
+                this.gotValue = true;
+            }
         }
 
         /// <summary>Sets the setting's value.</summary>
@@ -262,6 +283,7 @@ namespace SettingsHelper
             {
                 throw new SettingFailedException("Unable to instantiate setting class", true);
             }
+            item.SettingChanged += SettingItem_SettingChanged;
 
             return item;
         }
