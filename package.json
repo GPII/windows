@@ -13,7 +13,7 @@
         "ref-wchar": "1.0.2",
         "edge-js": "8.8.1",
         "string-argv": "0.0.2",
-        "universal": "JavierJF/universal#GPII-2521"
+        "gpii-universal": "JavierJF/universal#GPII-2521"
     },
     "devDependencies": {
         "grunt": "1.0.2",
