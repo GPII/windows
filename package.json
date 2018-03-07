@@ -12,7 +12,7 @@
         "ref-array": "1.1.2",
         "edge-js": "8.8.1",
         "string-argv": "0.0.2",
-        "gpii-universal": "stegru#GPII-2772"
+        "gpii-universal": "0.3.0-dev.20180222T171713Z.7fe2b3b"
     },
     "devDependencies": {
         "grunt": "1.0.2",
