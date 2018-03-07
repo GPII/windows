@@ -15,7 +15,7 @@ https://github.com/gpii/universal/LICENSE.txt
 
 "use strict";
 
-var fluid = require("universal"),
+var fluid = require("gpii-universal"),
     path = require("path");
 
 fluid.module.register("gpii-windows", __dirname, require);
