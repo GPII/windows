@@ -42,7 +42,7 @@ namespace SettingsHelper
 
         /// <summary>True to make SetValue and Invoke do nothing.</summary>
         private bool dryRun;
-        private bool gotValue;
+        private bool gotValue = false;
 
         /// <see cref="https://msdn.microsoft.com/library/ms684175.aspx"/>
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -100,20 +100,17 @@ namespace SettingsHelper
         {
             int timer = 5000, delay = 200;
 
-            do
+            while (!this.gotValue && (timer -= delay) > 0)
             {
-                if (this.gotValue)
-                {
-                    return this.settingItem.GetValue(valueName);
-                }
                 Thread.Sleep(delay);
-            } while ((timer -= delay) > 0);
+            }
 
-            return null;
+            return this.settingItem.GetValue(valueName);
         }
 
         private void SettingItem_SettingChanged(object sender, string s)
         {
+            //Console.WriteLine(s);
             if (s == "Value")
             {
                 this.gotValue = true;

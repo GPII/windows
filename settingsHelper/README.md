@@ -94,7 +94,6 @@ Each payload item yields a response:
 ## Limitations
 
 * Relies heavily on undocumented behaviour.
-* Various settings are applied asynchronously, with no apparent completion callback.
 * Some settings crash.
 * The availability of settings depends on the exact Windows version.
 
