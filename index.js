@@ -35,5 +35,6 @@ require("./gpii/node_modules/registeredAT/registeredAT.js");
 require("./gpii/node_modules/windowsMetrics");
 require("./gpii/node_modules/processReporter");
 require("./gpii/node_modules/tabletMode");
+require("./gpii/node_modules/startMenuLayout");
 
 module.exports = fluid;
