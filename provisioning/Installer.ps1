@@ -46,3 +46,18 @@ Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbu
 $setupDir = Join-Path $installerDir "setup"
 $msbuild = Get-MSBuild "4.0"
 Invoke-Command $msbuild "setup.msbuild" $setupDir
+
+# Install MSVC common tools for VC++ development
+$tempDir = Join-Path $installerDir "temp"
+$msvcInstaller = Join-Path $tempDir "msvc-inst.exe"
+wget "https://download.microsoft.com/download/0/B/C/0BC321A4-013F-479C-84E6-4A2F90B11269/vs_community.exe" -OutFile $msvcInstaller
+
+# Visual studio parameters
+$select = '/InstallSelectableItems'
+$quiet = '/quiet'
+
+# Visual studio components
+$ATL = 'NativeLanguageSupport_VCV1'
+$ATLMF = 'NativeLanguageSupport_MFCV1'
+
+Invoke-Command $msvcInstaller "$select `"$ATL;$ATLMF`" $quiet"
