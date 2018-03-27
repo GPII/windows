@@ -3,4 +3,5 @@
 **/test/*.exe
 coverage
 instrumented
+listeners
 reports
