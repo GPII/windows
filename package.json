@@ -40,6 +40,6 @@
         "node": ">=6.3.1"
     },
     "scripts": {
-        "install": "powershell provisioning/NpmInstall.ps1"
+        "install": "powershell  –ExecutionPolicy Bypass provisioning/NpmInstall.ps1"
     }
 }
