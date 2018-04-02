@@ -12,7 +12,8 @@
         "ref-array": "1.1.2",
         "edge-js": "8.8.1",
         "string-argv": "0.0.2",
-        "gpii-universal": "0.3.0-dev.20180222T171713Z.7fe2b3b"
+        "@pokusew/pcsclite": "0.4.18",
+        "gpii-universal": "0.3.0-dev.20180314T153442Z.bcc35970"
     },
     "devDependencies": {
         "grunt": "1.0.2",
