@@ -35,4 +35,3 @@ node tests\AcceptanceTests.js builtIn
 ```
 
 *Note:* The [refreshenv](https://github.com/chocolatey/chocolatey/blob/a09e15896fbc5e790b17b6699cd6b50bc7eb14e4/src/redirects/RefreshEnv.cmd) command only needs to be used if you are about to issue commands after having just created the VM. If the VM has been restarted since its creation then the command is not required.
-
