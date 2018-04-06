@@ -13,7 +13,7 @@
         "edge-js": "8.8.1",
         "string-argv": "0.0.2",
         "@pokusew/pcsclite": "0.4.18",
-        "gpii-universal": "klown/universal#GPII-1939"
+        "gpii-universal": "klown/universal#f0e0cba9423054378e809d8b9dca27a57ee9ec6c"
     },
     "devDependencies": {
         "grunt": "1.0.2",
