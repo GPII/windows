@@ -16,7 +16,7 @@
 
 "use strict";
 
-var fluid = require("universal"),
+var fluid = require("gpii-universal"),
     gpii = fluid.registerNamespace("gpii");
 
 require("./index.js");
