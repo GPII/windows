@@ -1,4 +1,8 @@
 /node_modules/
 .vagrant
 **/test/*.exe
+coverage
+instrumented
+listeners
+reports
 /bin
