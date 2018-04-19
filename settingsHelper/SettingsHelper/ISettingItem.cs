@@ -27,7 +27,11 @@
     /// Most of the information was taken from the debug symbols (PDB) for the relevent DLLs. The symbols
     /// don't describe the interface, just the classes that implement it (the "vtable"). This contains the
     /// method names (and order), and vague information on the parameters (no names, and, er, de-macro'd types).
-    /// The binding of methods isn't by name, but by order.
+    ///
+    /// Visual Studio was used to obtain the names by first creating a method with any name, then stepping into the
+    /// native code from the call with the debugger where the function name will be displayed in the disassembled code.
+    ///
+    /// The binding of methods isn't by name, but by order, which is why the "unknown" methods must remain.
     /// Not all methods work for some type of setting.
     /// </remarks>
     [ComImport, Guid("40C037CC-D8BF-489E-8697-D66BAA3221BF"), InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
@@ -60,7 +64,7 @@
             [MarshalAs(UnmanagedType.HString)] string name,
             [MarshalAs(UnmanagedType.IInspectable)] object value);
 
-        // ?
+        // Unknown usage
         int GetProperty(string name);
         int SetProperty(string name, object value);
 
@@ -69,9 +73,6 @@
 
         // SettingChanged event
         event EventHandler<string> SettingChanged;
-        //int add_SettingChanged(int v);
-        //int remove_SettingChanged();
-        //int unregister();
 
         // Unknown - setter for IsUpdating
         bool IsUpdating2 { set; }
@@ -84,12 +85,11 @@
 
         // These appear to be base implementations overridden by the above.
         bool GetValue2 { get; }
-        //IntPtr unknown_GetValue();
         IntPtr unknown_SetValue1();
         IntPtr unknown_SetValue2();
         IntPtr unknown_SetValue3();
 
-        // ?
+        // Unknown usage
         IntPtr GetNamedValue(
             [MarshalAs(UnmanagedType.HString)] string name
             //[MarshalAs(UnmanagedType.IInspectable)] object unknown

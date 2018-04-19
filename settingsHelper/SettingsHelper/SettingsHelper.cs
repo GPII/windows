@@ -27,9 +27,9 @@ namespace SettingsHelper
     using Microsoft.Win32;
 
     /// <summary>
-    /// Defines the <see cref="Program" />
+    /// Defines the <see cref="SettingsHelper" />
     /// </summary>
-    public class Program
+    public class SettingsHelper
     {
         /// <summary>Entry point</summary>
         /// <param name="args">The <see cref="string[]"/></param>
@@ -148,7 +148,7 @@ namespace SettingsHelper
 
             Console.Write("]");
 
-            // Wait for them all to complete.
+            // Wait for them all to complete - 5 seconds should be plenty of time.
             const long Timeout = 5000;
             Stopwatch timer = new Stopwatch();
             timer.Start();

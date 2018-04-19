@@ -110,7 +110,6 @@ namespace SettingsHelper
 
         private void SettingItem_SettingChanged(object sender, string s)
         {
-            //Console.WriteLine(s);
             if (s == "Value")
             {
                 this.gotValue = true;
