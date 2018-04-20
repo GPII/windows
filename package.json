@@ -14,7 +14,6 @@
         "posttest": "node_modules/.bin/nyc report -r html -r text-summary"
     },
     "dependencies": {
-        "edge": "6.5.1",
         "edge-js": "8.8.1",
         "ffi": "2.0.0",
         "gpii-universal": "0.3.0-dev.20180314T153442Z.bcc35970",
