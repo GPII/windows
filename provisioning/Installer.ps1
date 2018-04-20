@@ -11,8 +11,8 @@ param ( # default to script path if no parameter is given
 
 Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
 
-$installerRepo = "https://github.com/gpii/gpii-wix-installer"
-$installerBranch = "v1.2.0"
+$installerRepo = "https://github.com/GPII/gpii-wix-installer"
+$installerBranch = "master"
 
 $mainDir = (get-item $originalBuildScriptPath).parent.FullName
 $installerDir = Join-Path $env:SystemDrive "installer"
@@ -38,10 +38,9 @@ md $stagingWindowsDir
 # We are exiting with as a successful value if robocopy error is less or equal to 3
 # to avoid interruption. http://ss64.com/nt/robocopy-exit.html
 Invoke-Command "robocopy" "..\gpii         $(Join-Path $stagingWindowsDir "gpii")         /job:windows.rcj *.*" (Join-Path $mainDir "provisioning") -errorLevel 3
-Invoke-Command "robocopy" "..\listeners    $(Join-Path $stagingWindowsDir "listeners")    /job:windows.rcj *.*" (Join-Path $mainDir "provisioning") -errorLevel 3
 Invoke-Command "robocopy" "..\node_modules $(Join-Path $stagingWindowsDir "node_modules") /job:windows.rcj *.*" (Join-Path $mainDir "provisioning") -errorLevel 3
 Invoke-Command "robocopy" "..\tests        $(Join-Path $stagingWindowsDir "tests")        /job:windows.rcj *.*" (Join-Path $mainDir "provisioning") -errorLevel 3
-Invoke-Command "robocopy" ".. $($stagingWindowsDir) gpii.js index.js package.json README.md LICENSE.txt /NFL /NDL" (Join-Path $mainDir "provisioning") -errorLevel 3
+Invoke-Command "robocopy" ".. $($stagingWindowsDir) gpii.js index.js package.json package-lock.json README.md LICENSE.txt /NFL /NDL" (Join-Path $mainDir "provisioning") -errorLevel 3
 
 Invoke-Command $npm "prune --production" $stagingWindowsDir
 
