@@ -17,7 +17,6 @@ $settingsHelperDir = Join-Path $rootDir "settingsHelper"
 Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $settingsHelperDir
 
 # Build the process test helper
-Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"
 $testProcessHandlingDir = Join-Path $rootDir "gpii\node_modules\processHandling\test"
-Invoke-Command "cl" "test-window.c" $testProcessHandlingDir
-rm (Join-Path $testProcessHandlingDir "test-window.obj")
+$csc = Join-Path -Path (Split-Path -Parent $msbuild) csc.exe
+Invoke-Command $csc "/target:exe /out:test-window.exe test-window.cs" $testProcessHandlingDir
