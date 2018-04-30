@@ -214,7 +214,7 @@ ipc.servePipe = function (ipcChannel, pipeServer) {
             if (ipcChannel.authenticate) {
                 promise = ipc.validateClient(pipe, ipcChannel.pid);
             } else {
-                pipe.write("challenge:none\n");
+                pipe.write("challenge:none\nOK\n");
                 promise = Promise.resolve();
             }
 
