@@ -11,7 +11,8 @@
         "test:refreshenv": "refreshenv",
         "test:acceptance": "node_modules/.bin/nyc node.exe ./tests/AcceptanceTests.js builtIn",
         "test:unit": "node_modules/.bin/nyc node.exe ./tests/UnitTests.js",
-        "posttest": "node_modules/.bin/nyc report -r html -r text-summary"
+        "posttest": "node_modules/.bin/nyc report -r html -r text-summary",
+        "install": "powershell -ExecutionPolicy Bypass provisioning/NpmInstall.ps1"
     },
     "dependencies": {
         "edge": "6.5.1",
