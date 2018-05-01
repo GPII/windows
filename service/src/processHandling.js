@@ -105,6 +105,7 @@ processHandling.startChildProcess = function (procConfig) {
     var processPromise = null;
 
     if (procConfig.ipc) {
+        startOptions.messaging = true;
         // Start the process with a pipe.
         processPromise = ipc.startProcess(procConfig.command, procConfig.ipc, startOptions).then(function (p) {
             if (procConfig.command) {

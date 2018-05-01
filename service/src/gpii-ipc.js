@@ -72,6 +72,7 @@ ipc.ipcConnections = {};
  * @param options {Object} [optional] Options (see also {this}.execute()).
  * @param options.authenticate {boolean} Child must authenticate to pipe (default is true, if undefined).
  * @param options.admin {boolean} true to keep pipe access to admin-only.
+ * @param options.messaging {boolean} true to use the messaging wrapper.
  * @return {Promise} Resolves with a value containing the pipe server and pid.
  */
 ipc.startProcess = function (command, ipcName, options) {
@@ -101,6 +102,7 @@ ipc.startProcess = function (command, ipcName, options) {
         ipcConnection.authenticate = options.authenticate;
         ipcConnection.admin = options.admin;
         ipcConnection.pid = null;
+        ipcConnection.messaging = options.messaging ? undefined : false;
     }
 
     // Create the pipe, and pass it to a new process.
@@ -240,10 +242,12 @@ ipc.servePipe = function (ipcConnection, pipeServer) {
                     ipc.handleRequest(ipcConnection, request);
                 };
 
-                ipcConnection.messaging = messaging.createSession(ipcConnection.pipe, ipcConnection.name, handleRequest);
-                ipcConnection.messaging.on("ready", function () {
-                    ipc.event("connected", ipcConnection.name, ipcConnection);
-                });
+                if (ipcConnection.messaging !== false) {
+                    ipcConnection.messaging = messaging.createSession(ipcConnection.pipe, ipcConnection.name, handleRequest);
+                    ipcConnection.messaging.on("ready", function () {
+                        ipc.event("connected", ipcConnection.name, ipcConnection);
+                    });
+                }
             }).then(resolve, function (err) {
                 logging.error("validateClient rejected the client:", err);
                 reject(err);
