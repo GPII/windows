@@ -1,4 +1,4 @@
-/* Manages the GPII user process.
+/* Manages the child processes.
  *
  * Copyright 2017 Raising the Floor - International
  *
@@ -23,7 +23,7 @@ var Promise = require("bluebird"),
     windows = require("./windows.js"),
     winapi = require("./winapi.js");
 
-var processHandling = service.module("gpiiProcess");
+var processHandling = service.module("processHandling");
 
 processHandling.childProcesses = {};
 
@@ -355,7 +355,7 @@ processHandling.monitorProcess = function (pid) {
 /**
  * Stops a monitored process from being monitored. The promises for the process will resolve with "removed".
  *
- * @param process {Number|Object}  The process ID, or the object in gpiiProcess.monitoredProcesses.
+ * @param process {Number|Object}  The process ID, or the object in processHandling.monitoredProcesses.
  * @param removeOnly {boolean} true to only remove it from the list of monitored processes.
  */
 processHandling.unmonitorProcess = function (process, removeOnly) {
@@ -388,7 +388,7 @@ processHandling.unmonitorProcess = function (process, removeOnly) {
 
 /**
  * Performs the actual monitoring of the processes added by monitorProcess().
- * Explained in gpiiProcess.monitorProcess().
+ * Explained in processHandling.monitorProcess().
  */
 processHandling.startWait = function () {
     var handles = Object.keys(processHandling.monitoredProcesses).map(function (key) {

@@ -24,7 +24,7 @@ var jqUnit = require("node-jqunit"),
     os = require("os"),
     EventEmitter = require("events"),
     child_process = require("child_process"),
-    gpiiIPC = require("../src/gpii-ipc.js"),
+    ipc = require("../src/gpii-ipc.js"),
     windows = require("../src/windows.js"),
     winapi = require("../src/winapi.js");
 
@@ -61,7 +61,7 @@ jqUnit.test("Test generatePipeName", function () {
     var sampleSize = 300;
     var pipeNames = [];
     for (var n = 0; n < sampleSize; n++) {
-        pipeNames.push(gpiiIPC.generatePipeName());
+        pipeNames.push(ipc.generatePipeName());
     }
 
     for (var pipeIndex = 0; pipeIndex < sampleSize; pipeIndex++) {
@@ -86,9 +86,9 @@ jqUnit.test("Test generatePipeName", function () {
 jqUnit.asyncTest("Test createPipe", function () {
     jqUnit.expect(4);
 
-    var pipeName = gpiiIPC.generatePipeName();
+    var pipeName = ipc.generatePipeName();
 
-    var promise = gpiiIPC.createPipe(pipeName);
+    var promise = ipc.createPipe(pipeName);
     jqUnit.assertNotNull("createPipe must return non-null", promise);
     jqUnit.assertEquals("createPipe must return a promise", "function", typeof(promise.then));
 
@@ -107,7 +107,7 @@ jqUnit.asyncTest("Test createPipe", function () {
 
 jqUnit.asyncTest("Test createPipe failures", function () {
 
-    var existingPipe = gpiiIPC.generatePipeName();
+    var existingPipe = ipc.generatePipeName();
 
     var pipeNames = [
         // A pipe that exists.
@@ -123,7 +123,7 @@ jqUnit.asyncTest("Test createPipe failures", function () {
         var pipeName = pipeNames.shift();
         console.log("Checking bad pipe name:", pipeName);
 
-        var promise = gpiiIPC.createPipe(pipeName);
+        var promise = ipc.createPipe(pipeName);
         jqUnit.assertNotNull("createPipe must return non-null", promise);
         jqUnit.assertEquals("createPipe must return a promise", "function", typeof(promise.then));
 
@@ -141,7 +141,7 @@ jqUnit.asyncTest("Test createPipe failures", function () {
     };
 
     // Create a pipe to see what happens if another pipe is created with the same name.
-    gpiiIPC.createPipe(existingPipe).then(function () {
+    ipc.createPipe(existingPipe).then(function () {
         // run the tests.
         testPipes(Array.from(pipeNames));
     }, function (err) {
@@ -181,7 +181,7 @@ function readPipe(pipeName, callback) {
     });
 }
 
-// Tests the execution of a child process with gpiiIPC.execute
+// Tests the execution of a child process with ipc.execute
 jqUnit.asyncTest("Test execute", function () {
 
     jqUnit.expect(4);
@@ -196,8 +196,8 @@ jqUnit.asyncTest("Test execute", function () {
         }
     };
 
-    // Create a pipe so the child process can talk back (gpiiIPC.execute doesn't capture the child's stdout).
-    var pipeName = gpiiIPC.generatePipeName();
+    // Create a pipe so the child process can talk back (ipc.execute doesn't capture the child's stdout).
+    var pipeName = ipc.generatePipeName();
     readPipe(pipeName, checkReturn);
 
     var options = Object.assign({}, testData.execOptions);
@@ -209,7 +209,7 @@ jqUnit.asyncTest("Test execute", function () {
     var script = path.join(__dirname, "gpii-ipc-tests-child.js");
     var command = ["node", script, "named-pipe", pipeName].join(" ");
     console.log("Executing", command);
-    var pid = gpiiIPC.execute(command, options);
+    var pid = ipc.execute(command, options);
 
     jqUnit.assertEquals("execute should return a number", "number", typeof(pid));
 
@@ -347,7 +347,7 @@ jqUnit.asyncTest("Test validateClient", function () {
         };
 
         var pid = process.pid;
-        gpiiIPC.validateClient(pipe, pid, test.timeout).then(function () {
+        ipc.validateClient(pipe, pid, test.timeout).then(function () {
             jqUnit.assertTrue("validateClient resolved", test.expect.resolve);
         }, function (e) {
             console.log(e);
@@ -389,7 +389,7 @@ jqUnit.asyncTest("Test startProcess", function () {
     var allData = "";
     var pid = null;
 
-    var promise = gpiiIPC.startProcess(command, "test-startProcess");
+    var promise = ipc.startProcess(command, "test-startProcess");
 
     jqUnit.assertNotNull("startProcess must return non-null", promise);
     jqUnit.assertEquals("startProcess must return a promise", "function", typeof(promise.then));

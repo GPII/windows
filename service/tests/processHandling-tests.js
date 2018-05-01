@@ -166,7 +166,7 @@ processHandlingTests.testData.monitorProcessFailures = [
  * @return {ChildProcess}
  */
 processHandlingTests.startProcess = function () {
-    var id = "gpiiProcessTest" + Math.random().toString(32).substr(2);
+    var id = "processHandlingTest" + Math.random().toString(32).substr(2);
     var exe = path.join(process.env.SystemRoot, "/System32/waitfor.exe");
     var command = exe + " " + id + " /T 10 ";
     return child_process.exec(command);

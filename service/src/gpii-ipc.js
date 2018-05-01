@@ -30,7 +30,6 @@ The server (this process) end of the pipe is a node IPC socket and is created by
 also be a node socket, however due to how the child process is being started (as another user), node's exec/spawn can't
 be used and the file handle for the pipe needs to be known. For this reason, the child-end of the pipe needs to be
 created using the Win32 API. This doesn't affect how the client receives the pipe.
-
 */
 
 var ref = require("ref"),
@@ -39,21 +38,37 @@ var ref = require("ref"),
     Promise = require("bluebird"),
     service = require("./service.js"),
     windows = require("./windows.js"),
-    logging = require("./logging.js");
+    logging = require("./logging.js"),
+    messaging = require("../shared/pipe-messaging.js");
 
 var winapi = windows.winapi;
 
-var ipc = service.module("gpiiIPC");
+var ipc = service.module("ipc");
 module.exports = ipc;
 
 ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
-ipc.pipes = {};
+
+/**
+ * A connection to a client.
+ * @typedef {Object} IpcConnection
+ * @property authenticate true if authentication is required.
+ * @property admin true to run the process as administrator.
+ * @property pid The client pid.
+ * @property name Name of the connection.
+ * @property messaging {messaging.Session} Messaging session.
+ * @property requestHandler {function} Function to handle requests for this connection.
+ */
+
+/**
+ * @type {IpcConnection[]}
+ */
+ipc.ipcConnections = {};
 
 /**
  * Starts a process as the current desktop user, passing the name of a pipe to connect to.
  *
  * @param command {String} The command to execute.
- * @param ipcName {String} [optional] The IPC channel name.
+ * @param ipcName {String} [optional] The IPC connection name.
  * @param options {Object} [optional] Options (see also {this}.execute()).
  * @param options.authenticate {boolean} Child must authenticate to pipe (default is true, if undefined).
  * @param options.admin {boolean} true to keep pipe access to admin-only.
@@ -76,28 +91,27 @@ ipc.startProcess = function (command, ipcName, options) {
         return Promise.reject("startProcess must be called with command and/or ipcName.");
     }
 
-    var ipcChannel = null;
+    var ipcConnection = null;
     if (ipcName) {
-        ipcChannel = ipc.pipes[ipcName];
-        if (!ipcChannel) {
-            ipcChannel = ipc.pipes[ipcName] = {
-                name: ipcName
-            };
+        ipcConnection = ipc.ipcConnections[ipcName];
+        if (!ipcConnection) {
+            ipcConnection = ipc.ipcConnections[ipcName] = {};
         }
-        ipcChannel.authenticate = options.authenticate;
-        ipcChannel.admin = options.admin;
-        ipcChannel.pid = null;
+        ipcConnection.name = ipcName;
+        ipcConnection.authenticate = options.authenticate;
+        ipcConnection.admin = options.admin;
+        ipcConnection.pid = null;
     }
 
     // Create the pipe, and pass it to a new process.
-    return ipc.createPipe(pipeName, ipcChannel).then(function (pipeServer) {
+    return ipc.createPipe(pipeName, ipcConnection).then(function (pipeServer) {
         var pid = null;
         if (command) {
             options.env = Object.assign({}, options.env);
             options.env.GPII_SERVICE_PIPE = "pipe:" + pipeName.substr(ipc.pipePrefix.length);
             pid = ipc.execute(command, options);
-            if (ipcChannel) {
-                ipcChannel.pid = pid;
+            if (ipcConnection) {
+                ipcConnection.pid = pid;
             }
         }
 
@@ -122,10 +136,10 @@ ipc.generatePipeName = function () {
  * Open a named pipe, set the permissions, and start serving.
  *
  * @param pipeName {String} Name of the pipe.
- * @param ipcChannel {Object} The IPC channel.
+ * @param ipcConnection {IpcConnection} The IPC connection.
  * @return {Promise} A promise resolving with the pipe server when the pipe is ready to receive a connection.
  */
-ipc.createPipe = function (pipeName, ipcChannel) {
+ipc.createPipe = function (pipeName, ipcConnection) {
     return new Promise(function (resolve, reject) {
         if (pipeName) {
             var pipeServer = net.createServer();
@@ -139,13 +153,13 @@ ipc.createPipe = function (pipeName, ipcChannel) {
             pipeServer.listen(pipeName, function () {
                 logging.debug("pipe listening", pipeName);
 
-                var p = (ipcChannel && ipcChannel.admin)
+                var p = (ipcConnection && ipcConnection.admin)
                     ? Promise.resolve()
                     : ipc.setPipeAccess(pipeServer, pipeName);
 
                 p.then(function () {
-                    if (ipcChannel) {
-                        ipc.servePipe(ipcChannel, pipeServer);
+                    if (ipcConnection) {
+                        ipc.servePipe(ipcConnection, pipeServer);
                     }
 
                     resolve(pipeServer);
@@ -171,7 +185,7 @@ ipc.createPipe = function (pipeName, ipcChannel) {
  */
 ipc.setPipeAccess = function (pipeServer, pipeName) {
     return new Promise(function (resolve) {
-        // setPipePermissions will connect to the pipe (and close it). This connection cna be ignored, however the
+        // setPipePermissions will connect to the pipe (and close it). This connection can be ignored, however the
         // connection event needs to be swallowed before any more listeners are added.
         pipeServer.removeAllListeners("connection");
         pipeServer.on("connection", function (pipe) {
@@ -187,43 +201,48 @@ ipc.setPipeAccess = function (pipeServer, pipeName) {
 /**
  * Start serving the pipe.
  *
- * @param ipcName {String} Name of the IPC channel.
+ * @param ipcConnection {IpcConnection} The IPC connection.
  * @param pipeServer {net.Server} The pipe server.
  * @return {Promise} Resolves when the client has been validated, rejects if failed.
  */
-ipc.servePipe = function (ipcChannel, pipeServer) {
+ipc.servePipe = function (ipcConnection, pipeServer) {
     return new Promise(function (resolve, reject) {
         pipeServer.on("connection", function (pipe) {
             logging.debug("ipc got connection");
 
-            if (ipcChannel.authenticate) {
+            if (ipcConnection.authenticate) {
                 pipeServer.close();
-                if (!ipcChannel.pid) {
+                if (!ipcConnection.pid) {
                     throw new Error("Got pipe connection before client was started.");
                 }
             }
 
             pipe.on("error", function (err) {
-                logging.log("Pipe error", ipcChannel.name, err);
+                logging.log("Pipe error", ipcConnection.name, err);
             });
             pipe.on("end", function () {
-                logging.log("Pipe end", ipcChannel.name);
+                logging.log("Pipe end", ipcConnection.name);
             });
 
             var promise;
-            if (ipcChannel.authenticate) {
-                promise = ipc.validateClient(pipe, ipcChannel.pid);
+            if (ipcConnection.authenticate) {
+                promise = ipc.validateClient(pipe, ipcConnection.pid);
             } else {
                 pipe.write("challenge:none\nOK\n");
                 promise = Promise.resolve();
             }
 
             promise.then(function () {
-                logging.log("Pipe client authenticated:", ipcChannel.name);
-                ipcChannel.pipe = pipe;
+                logging.log("Pipe client authenticated:", ipcConnection.name);
+                ipcConnection.pipe = pipe;
 
-                ipcChannel.pipe.on("data", function (data) {
-                    logging.log("Pipe data", ipcChannel.name, data);
+                var handleRequest = function (request) {
+                    ipc.handleRequest(ipcConnection, request);
+                };
+
+                ipcConnection.messaging = messaging.createSession(ipcConnection.pipe, ipcConnection.name, handleRequest);
+                ipcConnection.messaging.on("ready", function () {
+                    ipc.event("connected", ipcConnection.name, ipcConnection);
                 });
             }).then(resolve, function (err) {
                 logging.error("validateClient rejected the client:", err);
@@ -396,3 +415,34 @@ ipc.execute = function (command, options) {
 
     return pid;
 };
+
+/**
+ * Handles a request received from a client.
+ *
+ * @param ipcConnection {IpcConnection} The IPC connection.
+ * @param request {Object} The request data.
+ */
+ipc.handleRequest = function (ipcConnection, request) {
+    if (ipcConnection.requestHandler) {
+        return ipcConnection.requestHandler(request);
+    }
+};
+
+/**
+ * Sends a request.
+ *
+ * @param ipcConnection {IpcConnection|string} The IPC connection.
+ * @param request {Object} The request data.
+ * @return {Promise} Resolves when there's a response.
+ */
+ipc.sendRequest = function (ipcConnection, request) {
+    if (typeof(ipcConnection) === "string") {
+        ipcConnection = ipc.ipcConnections[ipcConnection];
+    }
+
+    return ipcConnection.messaging.sendRequest(request);
+};
+
+service.on("ipc.connected", function (name, connection) {
+    ipc.event("connected:" + name,  connection);
+});

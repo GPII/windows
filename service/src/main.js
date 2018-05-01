@@ -23,5 +23,6 @@ var service = require("./service.js");
 require("./windows.js");
 require("./gpii-ipc.js");
 require("./processHandling.js");
+require("./gpiiClient.js");
 
 service.start();
