@@ -17,7 +17,7 @@
         "edge": "6.5.1",
         "edge-js": "8.8.1",
         "ffi": "2.0.0",
-        "gpii-universal": "stegru/universal#GPII-2338",
+        "gpii-universal": "stegru/universal#GPII-2971",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
