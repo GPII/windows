@@ -30,9 +30,9 @@ var gpiiClient = service.module("gpiiClient");
  * @type {function(request)}
  */
 gpiiClient.requestHandlers = {
-    "hello": function (request) {
+    "echo": function (request) {
         return {
-            message: "Hello from service",
+            message: "Echo back from service",
             youSaid: request
         };
     },
@@ -40,7 +40,7 @@ gpiiClient.requestHandlers = {
     /**
      * Executes something.
      *
-     * @param request {Object} The request.
+     * @param request {Object} The request data.
      * @param request.command {string} The command to run.
      * @param request.options {Object} The options argument for child_process.exec.
      * @param request.wait {boolean} True to wait for the process to terminate.
@@ -114,9 +114,9 @@ gpiiClient.connected = function (ipcConnection) {
  * @return {Promise|object} The response data.
  */
 gpiiClient.requestHandler = function (request) {
-    var handler = request.name && gpiiClient.requestHandlers[request.name];
+    var handler = request.action && gpiiClient.requestHandlers[request.action];
     if (handler) {
-        handler(request);
+        return handler(request.data);
     }
 };
 
@@ -126,9 +126,12 @@ gpiiClient.requestHandler = function (request) {
  * @param request {Object} The request data.
  * @return {Promise} Resolves with the response when it is received.
  */
-gpiiClient.sendRequest = function (name, request) {
-    var r = Object.assign({name: name}, request);
-    return ipc.sendRequest("gpii", r);
+gpiiClient.sendRequest = function (action, requestData) {
+    var req = {
+        action: action,
+        data: requestData
+    };
+    return ipc.sendRequest("gpii", req);
 };
 
 service.on("ipc.connected:gpii", gpiiClient.connected);

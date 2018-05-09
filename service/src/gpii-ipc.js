@@ -18,20 +18,6 @@
 
 "use strict";
 
-/*
-How it works:
-- A (randomly) named pipe is created and connected to.
-- The child process is created, with one end of the pipe passed to it (using c-runtime file descriptor inheritance).
-- The child process is then able to use the pipe as it would with any file descriptor.
-- The parent (this process) can trust the client end of the pipe because it opened it itself.
-- See GPII-2399.
-
-The server (this process) end of the pipe is a node IPC socket and is created by node. The client end of the pipe can
-also be a node socket, however due to how the child process is being started (as another user), node's exec/spawn can't
-be used and the file handle for the pipe needs to be known. For this reason, the child-end of the pipe needs to be
-created using the Win32 API. This doesn't affect how the client receives the pipe.
-*/
-
 var ref = require("ref"),
     net = require("net"),
     crypto = require("crypto"),
@@ -239,7 +225,7 @@ ipc.servePipe = function (ipcConnection, pipeServer) {
                 ipcConnection.pipe = pipe;
 
                 var handleRequest = function (request) {
-                    ipc.handleRequest(ipcConnection, request);
+                    return ipc.handleRequest(ipcConnection, request);
                 };
 
                 if (ipcConnection.messaging !== false) {
