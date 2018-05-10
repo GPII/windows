@@ -135,8 +135,8 @@ service.controlHandler = function (controlName, eventType) {
  * Creates a new (or returns an existing) module.
  * A module is a piece of the service that can emit events.
  *
- * @param name {String} Module name
- * @param initial {Object} [optional] An existing object to add on to.
+ * @param {String} name Module name
+ * @param {Object} initial [optional] An existing object to add on to.
  * @return {Object}
  */
 service.module = function (name, initial) {

@@ -53,12 +53,12 @@ ipc.ipcConnections = {};
 /**
  * Starts a process as the current desktop user, passing the name of a pipe to connect to.
  *
- * @param command {String} The command to execute.
- * @param ipcName {String} [optional] The IPC connection name.
- * @param options {Object} [optional] Options (see also {this}.execute()).
- * @param options.authenticate {boolean} Child must authenticate to pipe (default is true, if undefined).
- * @param options.admin {boolean} true to keep pipe access to admin-only.
- * @param options.messaging {boolean} true to use the messaging wrapper.
+ * @param {String} command The command to execute.
+ * @param {String} ipcName [optional] The IPC connection name.
+ * @param {Object} options [optional] Options (see also {this}.execute()).
+ * @param {boolean} options.authenticate Child must authenticate to pipe (default is true, if undefined).
+ * @param {boolean} options.admin true to keep pipe access to admin-only.
+ * @param {boolean} options.messaging true to use the messaging wrapper.
  * @return {Promise} Resolves with a value containing the pipe server and pid.
  */
 ipc.startProcess = function (command, ipcName, options) {
@@ -123,8 +123,8 @@ ipc.generatePipeName = function () {
 /**
  * Open a named pipe, set the permissions, and start serving.
  *
- * @param pipeName {String} Name of the pipe.
- * @param ipcConnection {IpcConnection} The IPC connection.
+ * @param {String} pipeName Name of the pipe.
+ * @param {IpcConnection} ipcConnection The IPC connection.
  * @return {Promise} A promise resolving with the pipe server when the pipe is ready to receive a connection.
  */
 ipc.createPipe = function (pipeName, ipcConnection) {
@@ -167,8 +167,8 @@ ipc.createPipe = function (pipeName, ipcConnection) {
  *
  * When running as a service, a normal user does not have enough permissions to open it.
  *
- * @param pipeServer {net.Server} The pipe server. All listeners of the "connection" event will be removed.
- * @param pipeName {string} Name of the pipe.
+ * @param {net.Server} pipeServer The pipe server. All listeners of the "connection" event will be removed.
+ * @param {string} pipeName Name of the pipe.
  * @return {Promise} Resolves when complete.
  */
 ipc.setPipeAccess = function (pipeServer, pipeName) {
@@ -189,8 +189,8 @@ ipc.setPipeAccess = function (pipeServer, pipeName) {
 /**
  * Start serving the pipe.
  *
- * @param ipcConnection {IpcConnection} The IPC connection.
- * @param pipeServer {net.Server} The pipe server.
+ * @param {IpcConnection} ipcConnection The IPC connection.
+ * @param {net.Server} pipeServer The pipe server.
  * @return {Promise} Resolves when the client has been validated, rejects if failed.
  */
 ipc.servePipe = function (ipcConnection, pipeServer) {
@@ -245,9 +245,9 @@ ipc.servePipe = function (ipcConnection, pipeServer) {
 /**
  * Validates the client connection of a pipe.
  *
- * @param pipe {net.Socket} The pipe to the client.
- * @param pid {number} The pid of the expected client.
- * @param timeout {number} Seconds to wait for the event (default 30).
+ * @param {net.Socket} pipe The pipe to the client.
+ * @param {number} pid The pid of the expected client.
+ * @param {number} timeout Seconds to wait for the event (default 30).
  * @return {Promise} Resolves when successful, rejects on failure.
  */
 ipc.validateClient = function (pipe, pid, timeout) {
@@ -319,12 +319,12 @@ ipc.validateClient = function (pipe, pid, timeout) {
  *
  * https://blogs.msdn.microsoft.com/winsdk/2013/04/30/how-to-launch-a-process-interactively-from-a-windows-service/
  *
- * @param command {String} The command to execute.
- * @param options {Object} [optional] Options
- * @param options.alwaysRun {boolean} true to run as the current user (what this process is running as), if the console
+ * @param {String} command The command to execute.
+ * @param {Object} options [optional] Options
+ * @param {boolean} options.alwaysRun true to run as the current user (what this process is running as), if the console
  * user token could not be received. Should only be true if not running as a service.
- * @param options.env {object} Additional environment key-value pairs.
- * @param options.currentDir {string} Current directory for the new process.
+ * @param {object} options.env Additional environment key-value pairs.
+ * @param {string} options.currentDir Current directory for the new process.
  *
  * @return {Number} The pid of the new process.
  */
@@ -409,8 +409,8 @@ ipc.execute = function (command, options) {
 /**
  * Handles a request received from a client.
  *
- * @param ipcConnection {IpcConnection} The IPC connection.
- * @param request {Object} The request data.
+ * @param {IpcConnection} ipcConnection The IPC connection.
+ * @param {Object} request The request data.
  */
 ipc.handleRequest = function (ipcConnection, request) {
     if (ipcConnection.requestHandler) {
@@ -421,8 +421,8 @@ ipc.handleRequest = function (ipcConnection, request) {
 /**
  * Sends a request.
  *
- * @param ipcConnection {IpcConnection|string} The IPC connection.
- * @param request {Object} The request data.
+ * @param {IpcConnection|string} ipcConnection The IPC connection.
+ * @param {Object} request The request data.
  * @return {Promise} Resolves when there's a response.
  */
 ipc.sendRequest = function (ipcConnection, request) {

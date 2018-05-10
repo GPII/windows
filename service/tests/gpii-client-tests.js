@@ -145,9 +145,9 @@ gpiiClientTests.actionTests = [
  * Check if all properties of expected are also in subject and are equal or match a regular expression, ignoring any
  * extra ones in subject.
  *
- * @param subject {Object} The object to check against
- * @param expected {Object} The object containing the values to check for.
- * @param maxDepth {Number} [Optional] How deep to check.
+ * @param {Object} subject The object to check against
+ * @param {Object} expected The object containing the values to check for.
+ * @param {Number} maxDepth [Optional] How deep to check.
  */
 gpiiClientTests.deepMatch = function (subject, expected, maxDepth) {
     var match = false;

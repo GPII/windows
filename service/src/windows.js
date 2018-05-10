@@ -47,9 +47,9 @@ windows.isService = function () {
 /**
  * Returns an Error containing the arguments.
  *
- * @param message {String} The message.
- * @param returnCode {String|Number} [optional] The return code.
- * @param errorCode {String|Number} [optional] The last win32 error (from GetLastError), if already known.
+ * @param {String} message The message.
+ * @param {String|Number} returnCode [optional] The return code.
+ * @param {String|Number} errorCode [optional] The last win32 error (from GetLastError), if already known.
  * @return {Error} The error.
  */
 windows.win32Error = function (message, returnCode, errorCode) {
@@ -84,7 +84,7 @@ windows.getOwnUserToken = function () {
 
 /**
  * Closes a user token.
- * @param userToken {Number} The user token.
+ * @param {Number} userToken The user token.
  */
 windows.closeToken = function (userToken) {
     if (userToken) {
@@ -164,7 +164,7 @@ windows.isUserLoggedOn = function () {
 /**
  * Gets the environment variables for the specified user.
  *
- * @param token {Number} Token handle for the user.
+ * @param {Number} token Token handle for the user.
  * @return {Array} An array of strings for each variable, in the format of "name=value"
  */
 windows.getEnv = function (token) {
@@ -181,7 +181,7 @@ windows.getEnv = function (token) {
  *
  * When running as a service, this process's "APPDATA" value will not point to the current user's.
  *
- * @param userToken {Number} Token handle for the user.
+ * @param {Number} userToken Token handle for the user.
  */
 windows.getUserDataDir = function (userToken) {
     // Search the environment block for the APPDATA value. (A better way would be to use SHGetKnownFolderPath)
@@ -200,7 +200,7 @@ windows.getUserDataDir = function (userToken) {
 
 /**
  * Terminates a process.
- * @param pid {Number} Process ID.
+ * @param {Number} pid Process ID.
  */
 windows.endProcess = function (pid) {
     var hProcess = winapi.kernel32.OpenProcess(winapi.constants.PROCESS_TERMINATE, 0, pid);
@@ -213,8 +213,8 @@ windows.endProcess = function (pid) {
 /**
  * Returns a promise that resolves when a process has terminated, or after the given timeout.
  *
- * @param pid {Number} The process ID.
- * @param timeout {Number} Milliseconds to wait before timing out. (default: infinate)
+ * @param {Number} pid The process ID.
+ * @param {Number} timeout Milliseconds to wait before timing out. (default: infinate)
  * @return {promise} Resolves when the process has terminated, or when timed out (with a value of "timeout"). Rejects
  * upon failure.
  */
@@ -254,9 +254,9 @@ windows.waitForProcessTermination = function (pid, timeout) {
  *
  * Wrapper for WaitForMultipleObjects (https://msdn.microsoft.com/library/ms687025)
  *
- * @param handles {number[]} The win32 handles to wait on.
- * @param timeout {number} [Optional] The timeout, in milliseconds. (default: infinite)
- * @param waitAll {boolean} [Optional] Wait for all handles to be signalled, instead of just one.
+ * @param {number[]} handles The win32 handles to wait on.
+ * @param {number} timeout [Optional] The timeout, in milliseconds. (default: infinite)
+ * @param {boolean} waitAll [Optional] Wait for all handles to be signalled, instead of just one.
  * @return {Promise} Resolves with the handle that triggered, "timeout", or "all" if waitAll is true.
  */
 windows.waitForMultipleObjects = function (handles, timeout, waitAll) {
@@ -320,7 +320,7 @@ windows.waitForMultipleObjects = function (handles, timeout, waitAll) {
 /**
  * Gets the security identifier (SID) from a user token.
  *
- * @param token {integer} The user token.
+ * @param {integer} token The user token.
  * @return {*} The SID of the user.
  */
 windows.getSidFromToken = function (token) {
@@ -360,7 +360,7 @@ windows.getSidFromToken = function (token) {
  *
  * This connects to the pipe, modifies the ACL to include the desktop user's security descriptor, then closes the pipe.
  *
- * @param pipeName {String} Name of the pipe.
+ * @param {String} pipeName Name of the pipe.
  */
 windows.setPipePermissions = function (pipeName) {
     // winnt.h

@@ -154,8 +154,8 @@ jqUnit.asyncTest("Test createPipe failures", function () {
 /**
  * Read from a pipe, calling callback with all the data when it ends.
  *
- * @param pipeName {String} Pipe name.
- * @param callback {Function(err,data)} What to call.
+ * @param {String} pipeName Pipe name.
+ * @param {Function(err,data)} callback What to call.
  */
 function readPipe(pipeName, callback) {
     var buffer = "";

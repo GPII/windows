@@ -40,12 +40,12 @@ gpiiClient.requestHandlers = {
     /**
      * Executes something.
      *
-     * @param request {Object} The request data.
-     * @param request.command {string} The command to run.
-     * @param request.args {string[]} Arguments to pass.
-     * @param request.options {Object} The options argument for child_process.spawn.
-     * @param request.wait {boolean} True to wait for the process to terminate before resolving.
-     * @param request.capture {boolean} True capture output to stdout/stderr members of the response; implies wait=true.
+     * @param {Object} request The request data.
+     * @param {string} request.command The command to run.
+     * @param {string[]} request.args Arguments to pass.
+     * @param {Object} request.options The options argument for child_process.spawn.
+     * @param {boolean} request.wait True to wait for the process to terminate before resolving.
+     * @param {boolean} request.capture True capture output to stdout/stderr members of the response; implies wait=true.
      * @return {Promise} Resolves when the process has started, if wait=false, or when it's terminated.
      */
     "execute": function (request) {
@@ -106,8 +106,8 @@ gpiiClient.requestHandlers = {
 /**
  * Adds a command handler.
  *
- * @param requestName {string} The request name.
- * @param callback {function(request)} The callback function.
+ * @param {string} requestName The request name.
+ * @param {function(request)} callback The callback function.
  */
 gpiiClient.addRequestHandler = function (requestName, callback) {
     gpiiClient.requestHandlers[requestName] = callback;
@@ -122,7 +122,7 @@ gpiiClient.ipcConnection = null;
 /**
  * Called when the GPII user process has connected to the service.
  *
- * @param ipcConnection {IpcConnection} The IPC connection.
+ * @param {IpcConnection} ipcConnection The IPC connection.
  */
 gpiiClient.connected = function (ipcConnection) {
     this.ipcConnection = ipcConnection;
@@ -139,7 +139,7 @@ gpiiClient.connected = function (ipcConnection) {
 /**
  * Handles a request from the GPII user process.
  *
- * @param request {Object} The request data.
+ * @param {Object} request The request data.
  * @return {Promise|object} The response data.
  */
 gpiiClient.requestHandler = function (request) {
@@ -152,7 +152,7 @@ gpiiClient.requestHandler = function (request) {
 /**
  * Sends a request to the GPII user process.
  *
- * @param request {Object} The request data.
+ * @param {Object} request The request data.
  * @return {Promise} Resolves with the response when it is received.
  */
 gpiiClient.sendRequest = function (action, requestData) {
