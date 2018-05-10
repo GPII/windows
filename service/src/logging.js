@@ -102,7 +102,7 @@ logging.doLog = function (level, args) {
 /**
  * Sets the log file that stdout/stderr is sent to.
  *
- * @param file {String} The file to log to.
+ * @param {String} file The file to log to.
  */
 logging.setFile = function (file) {
     logging.logFile = file;

@@ -382,9 +382,9 @@ winapi.wtsapi32 = ffi.Library("wtsapi32", {
 /**
  * Returns an Error containing the arguments.
  *
- * @param message {String} The message.
- * @param returnCode {String|Number} [optional] The return code.
- * @param errorCode {String|Number} [optional] The last win32 error (from GetLastError), if already known.
+ * @param {String} message The message.
+ * @param {String|Number} returnCode [optional] The return code.
+ * @param {String|Number} errorCode [optional] The last win32 error (from GetLastError), if already known.
  * @return {Error} The error.
  */
 winapi.error = function (message, returnCode, errorCode) {
@@ -398,9 +398,9 @@ winapi.error = function (message, returnCode, errorCode) {
 /**
  * Creates an error message for a win32 error.
  *
- * @param message {String} The message.
- * @param returnCode {String|Number} [optional] The return code.
- * @param errorCode {String|Number} [optional] The last win32 error (from GetLastError), if already known.
+ * @param {String} message The message.
+ * @param {String|Number} returnCode [optional] The return code.
+ * @param {String|Number} errorCode [optional] The last win32 error (from GetLastError), if already known.
  * @return {Error} The error message.
  */
 winapi.errorText = function (message, returnCode, errorCode) {
@@ -413,7 +413,7 @@ winapi.errorText = function (message, returnCode, errorCode) {
 /**
  * Convert a string to a wide-char string.
  *
- * @param string {String} The string to convert.
+ * @param {String} string The string to convert.
  * @return {Buffer} A buffer containing the wide-char string.
  */
 winapi.stringToWideChar = function (string) {
@@ -423,7 +423,7 @@ winapi.stringToWideChar = function (string) {
 /**
  * Convert a buffer containing a wide-char string to a string.
  *
- * @param buffer {Buffer} A buffer containing the wide-char string.
+ * @param {Buffer} buffer A buffer containing the wide-char string.
  * @return {String} A string.
  */
 winapi.stringFromWideChar = function (buffer) {

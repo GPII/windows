@@ -55,12 +55,12 @@ var messaging = {};
  *
  * This wraps a pipe, which fires a `message` event when for every JSON object received.
  *
- * @param pipe {Socket} The pipe.
- * @param sessionType {String} [Optional] Initial text that is sent and checked by both ends to ensure both sides are
+ * @param {Socket} pipe The pipe.
+ * @param {String} sessionType [Optional] Initial text that is sent and checked by both ends to ensure both sides are
  *  compatible.
- * @param requestCallback {function} [Optional] Function to call when a request has been received. The function should
+ * @param {function} requestCallback [Optional] Function to call when a request has been received. The function should
  *  return the result, or a promise resolving to the result.
- * @param initialData {Buffer} [Optional] Initial data.
+ * @param {Buffer} initialData [Optional] Initial data.
  * @return {Session}
  */
 messaging.createSession = function (pipe, sessionType, requestCallback, initialData) {
@@ -70,12 +70,12 @@ messaging.createSession = function (pipe, sessionType, requestCallback, initialD
 /**
  * Wraps a pipe with a session.
  *
- * @param pipe {Socket} The pipe.
- * @param sessionType {String} [Optional] Initial text that is sent and checked by both ends to ensure both sides are
+ * @param {Socket} pipe The pipe.
+ * @param {String} sessionType [Optional] Initial text that is sent and checked by both ends to ensure both sides are
  *  compatible.
- * @param requestCallback {function} [Optional] Function to call when a request has been received. The function should
+ * @param {function} requestCallback [Optional] Function to call when a request has been received. The function should
  *  return the result, or a promise resolving to the result.
- * @param initialData {Buffer} [Optional] Initial data.
+ * @param {Buffer} initialData [Optional] Initial data.
  * @constructor
  */
 function Session(pipe, sessionType, requestCallback, initialData) {
@@ -115,7 +115,7 @@ messaging.Session = Session;
 /**
  * Sends a message to the pipe.
  *
- * @param payload {String|Object|Buffer} The message payload.
+ * @param {String|Object|Buffer} payload The message payload.
  */
 Session.prototype.sendMessage = function (payload) {
     var payloadBuf;
@@ -148,7 +148,7 @@ Session.prototype.sendMessage = function (payload) {
  * size     :=  sizeof(payload) (32-bit uint)
  * payload  :=  The message.
  *
- * @param data {Buffer}
+ * @param {Buffer} data
  */
 Session.prototype.gotData = function (data) {
     if (data) {
@@ -203,7 +203,7 @@ Session.prototype.gotPacket = function (packet) {
 /**
  * Call the request callback when a request is received, and sends the response.
  *
- * @param message {Object} The request message.
+ * @param {Object} message The request message.
  */
 Session.prototype.handleRequest = function (message) {
     var session = this;
@@ -239,7 +239,7 @@ Session.prototype.handleRequest = function (message) {
 /**
  * Resolves (or rejects) the promise for a request.
  *
- * @param message {Object} The response object.
+ * @param {Object} message The response object.
  */
 Session.prototype.handleReply = function (message) {
     // Resolve or reject the promise that is waiting on the result.

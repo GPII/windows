@@ -167,7 +167,7 @@ windowsTests.testData.waitForMultipleObjectsFailures = [
 /**
  * Returns true if value looks like a promise.
  *
- * @param value {Object} The thing to test.
+ * @param {Object} value The thing to test.
  * @return {boolean} true if value is a promise.
  */
 windowsTests.isPromise = function (value) {

@@ -175,8 +175,8 @@ processHandlingTests.startProcess = function () {
 /**
  * Waits for a mutex to be create, by polling until OpenMutex succeeds.
  *
- * @param mutexName {String} The name of the mutex.
- * @param timeout {Number} [Optional] How long to wait (ms), default 1000.
+ * @param {String} mutexName The name of the mutex.
+ * @param {Number} timeout [Optional] How long to wait (ms), default 1000.
  * @return {Promise} Resolves when a mutex with the given name has been created, or with value of "timeout".
  */
 processHandlingTests.waitForMutex = function (mutexName, timeout) {
