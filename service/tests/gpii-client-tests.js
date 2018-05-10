@@ -1,0 +1,243 @@
+/* Tests for gpii-client.js
+ *
+ * Copyright 2017 Raising the Floor - International
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * The R&D leading to these results received funding from the
+ * Department of Education - Grant H421A150005 (GPII-APCP). However,
+ * these results do not necessarily represent the policy of the
+ * Department of Education, and you should not assume endorsement by the
+ * Federal Government.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
+"use strict";
+
+var jqUnit = require("node-jqunit"),
+    gpiiClient = require("../src/gpiiClient.js");
+
+var teardowns = [];
+
+jqUnit.module("GPII pipe tests", {
+    teardown: function () {
+        while (teardowns.length) {
+            teardowns.pop()();
+        }
+    }
+});
+
+var gpiiClientTests = {};
+
+gpiiClientTests.actionTests = [
+    {
+        action: "echo",
+        data: {
+            test: "test1"
+        },
+        expect: {
+            message: "Echo back from service",
+            youSaid: {
+                test: "test1"
+            }
+        }
+    },
+    {
+        id: "execute: simple command",
+        action: "execute",
+        data: {
+            command: "whoami"
+        },
+        expect: {
+            promise: {
+                pid: /^[0-9]+$/
+            }
+        }
+    },
+    {
+        id: "execute: bad command",
+        action: "execute",
+        data: {
+            command: "gpii-test-bad-command"
+        },
+        expect: {
+            promise: "reject"
+        }
+    },
+    {
+        id: "execute: wait",
+        action: "execute",
+        data: {
+            command: "whoami",
+            wait: true
+        },
+        expect: {
+            promise: {
+                code: 0
+            }
+        }
+    },
+    {
+        id: "execute: wait + exit code 1",
+        action: "execute",
+        data: {
+            command: "whoami",
+            args: ["/bad-option"],
+            wait: true
+        },
+        expect: {
+            promise: {
+                code: 1
+            }
+        }
+    },
+    {
+        id: "execute: capture output",
+        action: "execute",
+        data: {
+            command: "cmd.exe",
+            args: ["/c", "echo hello stdout & echo hello stderr 1>&2"],
+            wait: true,
+            capture: true
+        },
+        expect: {
+            promise: {
+                code: 0,
+                signal: null,
+                output: {
+                    stdout: "hello stdout \r\n",
+                    stderr: "hello stderr \r\n"
+                }
+            }
+        }
+    },
+    {
+        id: "execute: options",
+        action: "execute",
+        data: {
+            command: "cmd.exe",
+            options: {
+                env: {
+                    gpiiExecuteTest: "It worked"
+                }
+            },
+            args: ["/c", "echo %gpiiExecuteTest%"],
+            wait: true,
+            capture: true
+        },
+        expect: {
+            promise: {
+                code: 0,
+                signal: null,
+                output: {
+                    stdout: "It worked\r\n",
+                    stderr: ""
+                }
+            }
+        }
+    }
+];
+
+/**
+ * Check if all properties of expected are also in subject and are equal or match a regular expression, ignoring any
+ * extra ones in subject.
+ *
+ * @param subject {Object} The object to check against
+ * @param expected {Object} The object containing the values to check for.
+ * @param maxDepth {Number} [Optional] How deep to check.
+ */
+gpiiClientTests.deepMatch = function (subject, expected, maxDepth) {
+    var match = false;
+    if (maxDepth < 0) {
+        return false;
+    } else if (!maxDepth && maxDepth !== 0) {
+        maxDepth = 10;
+    }
+
+    if (!subject) {
+        return subject === expected;
+    }
+
+    for (var prop in expected) {
+        if (expected.hasOwnProperty(prop)) {
+            var exp = expected[prop];
+            if (["string", "number", "boolean"].indexOf(typeof(exp)) >= 0) {
+                match = subject[prop] === exp;
+            } else if (exp instanceof RegExp) {
+                match = exp.test(subject[prop]);
+            } else {
+                match = gpiiClientTests.deepMatch(subject[prop], exp, maxDepth - 1);
+            }
+            if (!match) {
+                break;
+            }
+        }
+    }
+
+    return match;
+};
+
+gpiiClientTests.assertDeepMatch = function (msg, expect, actual) {
+    var match = gpiiClientTests.deepMatch(actual, expect);
+    jqUnit.assertTrue(msg, match);
+    if (!match) {
+        console.log("expected:", expect);
+        console.log("actual:", actual);
+    }
+};
+
+// Tests isProcessRunning
+jqUnit.asyncTest("Test actions", function () {
+
+    var tests = gpiiClientTests.actionTests;
+    jqUnit.expect(tests.length * 3);
+
+    var testIndex = -1;
+    var nextTest = function () {
+        if (++testIndex >= tests.length) {
+            jqUnit.start();
+            return;
+        }
+        var test = tests[testIndex];
+
+        var suffix = " - testIndex=" + testIndex + " (" + (test.id || test.action) + ")";
+
+        var handler = gpiiClient.requestHandlers[test.action];
+
+        jqUnit.assertEquals("request handler should be a function" + suffix, "function", typeof handler);
+
+        var result = handler(test.data);
+
+        if (test.expect.promise) {
+            jqUnit.assertTrue("request handler should return a promise" + suffix,
+                result && typeof(result.then) === "function");
+
+            result.then(function (value) {
+                gpiiClientTests.assertDeepMatch("request handler should resolve with the expected value" + suffix,
+                    test.expect.promise, value);
+
+                nextTest();
+            }, function (err) {
+                jqUnit.assertEquals("request handler should only reject if expected" + suffix,
+                    test.expect.promise, "reject");
+
+                if (test.expect.promise !== "reject") {
+                    console.log(err);
+                }
+
+                nextTest();
+            });
+        } else {
+            gpiiClientTests.assertDeepMatch("request handler should return the expected value" + suffix,
+                test.expect, result);
+            jqUnit.assert("balancing assert count");
+            nextTest();
+        }
+    };
+
+    nextTest();
+
+});
