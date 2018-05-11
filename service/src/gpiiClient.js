@@ -143,6 +143,7 @@ gpiiClient.connected = function (ipcConnection) {
  * @return {Promise|object} The response data.
  */
 gpiiClient.requestHandler = function (request) {
+    service.log("Got request", request);
     var handler = request.action && gpiiClient.requestHandlers[request.action];
     if (handler) {
         return handler(request.data);
