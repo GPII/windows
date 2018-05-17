@@ -17,7 +17,7 @@
         "edge": "6.5.1",
         "edge-js": "8.8.1",
         "ffi": "2.0.0",
-        "gpii-universal": "klown/universal#f0e0cba9423054378e809d8b9dca27a57ee9ec6c",
+        "gpii-universal": "klown/universal#GPII-1939",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
