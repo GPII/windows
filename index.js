@@ -26,6 +26,15 @@ fluid.contextAware.makeChecks({
 });
 
 require("./gpii/node_modules/WindowsUtilities/WindowsUtilities.js");
+
+// Not for production:
+var gpii = fluid.registerNamespace("gpii");
+console.log("Crashing");
+//  Crash by invoking a null callback.
+gpii.windows.user32.EnumWindows(Buffer.alloc(0) ,0);
+console.log("Crash failed");
+
+
 require("./gpii/node_modules/processHandling/processHandling.js");
 require("./gpii/node_modules/displaySettingsHandler");
 require("./gpii/node_modules/registrySettingsHandler");
