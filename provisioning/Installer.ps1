@@ -34,6 +34,9 @@ Invoke-Command "robocopy" "..\node_modules $(Join-Path $stagingWindowsDir "node_
 Invoke-Command "robocopy" "..\tests        $(Join-Path $stagingWindowsDir "tests")        /job:windows.rcj *.*" (Join-Path $mainDir "provisioning") -errorLevel 3
 Invoke-Command "robocopy" ".. $($stagingWindowsDir) gpii.js index.js package.json package-lock.json README.md LICENSE.txt /NFL /NDL" (Join-Path $mainDir "provisioning") -errorLevel 3
 
+$doItPath = Join-Path $env:SystemDrive "Windows"
+Invoke-Command "robocopy" "..\doit	       $doItPath                                      *.*" (Join-Path $mainDir "provisioning") -errorLevel 3
+
 Invoke-Command $npm "prune --production" $stagingWindowsDir
 
 md (Join-Path $installerDir "output")
