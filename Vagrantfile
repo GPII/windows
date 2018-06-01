@@ -39,10 +39,9 @@ Vagrant.configure(2) do |config|
     $destinationDir = Join-Path $env:SystemDrive "tmp"
     cp $moduleLocation $destinationDir
   SHELL
-  
+
   config.vm.provision "shell", path: "provisioning/Chocolatey.ps1"
   config.vm.provision "shell", path: "provisioning/Npm.ps1"
   config.vm.provision "shell", path: "provisioning/Build.ps1"
-  config.vm.provision "shell", path: "provisioning/Installer.ps1"
 
 end
