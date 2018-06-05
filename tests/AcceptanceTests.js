@@ -16,9 +16,6 @@ https://github.com/gpii/universal/LICENSE.txt
 
 "use strict";
 
-console.log("Exiting with exit code 1:");
-process.exit(1);
-
 var fluid = require("gpii-universal"),
     gpii = fluid.registerNamespace("gpii");
 
