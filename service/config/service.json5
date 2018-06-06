@@ -1,3 +1,4 @@
+// Configuration for production.
 {
     "processes": {
         "gpii": {

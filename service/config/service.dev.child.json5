@@ -1,3 +1,4 @@
+// Development configuration, auto starts GPII.
 {
     "processes": {
         "gpii": {
