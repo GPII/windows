@@ -21,6 +21,7 @@ var os_service = require("os-service"),
     path = require("path"),
     fs = require("fs"),
     events = require("events"),
+    JSON5 = require("json5"),
     logging = require("./logging.js"),
     windows = require("./windows.js"),
     parseArgs = require("minimist");
@@ -60,14 +61,14 @@ var configFile = service.args.config;
 if (!configFile) {
     if (service.isService) {
         // Check if there's a config file next to the service executable.
-        var tryFile = path.join(dir, "service.json");
+        var tryFile = path.join(dir, "service.json5");
         if (fs.existsSync(tryFile)) {
             configFile = tryFile;
         }
     }
     if (!configFile) {
         // Use the built-in config file.
-        configFile = (service.isService ? "../config/service.json" : "../config/service.dev.json");
+        configFile = (service.isService ? "../config/service.json5" : "../config/service.dev.json5");
     }
 }
 if ((configFile.indexOf("/") === -1) && (configFile.indexOf("\\") === -1)) {
@@ -75,7 +76,7 @@ if ((configFile.indexOf("/") === -1) && (configFile.indexOf("\\") === -1)) {
 }
 
 service.log("Loading config file", configFile);
-service.config = require(configFile);
+service.config = JSON5.parse(fs.readFileSync(configFile));
 
 // Change to the configured log level (if it's not passed via command line)
 if (!service.args.loglevel && service.config.logging && service.config.logging.level) {
@@ -146,7 +147,7 @@ service.module = function (name, initial) {
         mod.moduleName = name;
         mod.event = function (event, arg1, arg2) {
             var eventName = name === "service" ? event : name + "." + event;
-            service.logDebug("EVENT", eventName, arg1, arg2);
+            service.logDebug("EVENT", eventName);
             service.emit(eventName, arg1, arg2);
         };
         service.modules[name] = mod;
