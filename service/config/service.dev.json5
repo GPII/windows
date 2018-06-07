@@ -1,0 +1,13 @@
+// Development configuration, opens a pipe and waits for GPII to connect.
+{
+    "processes": {
+        "gpii": {
+            "ipc": "gpii",
+            // Allow any process to connect.
+            "noAuth": true
+        }
+    },
+    "logging": {
+        "level": "DEBUG"
+    }
+}

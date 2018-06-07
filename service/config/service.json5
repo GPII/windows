@@ -1,7 +1,8 @@
+// Configuration for production.
 {
     "processes": {
         "gpii": {
-            "command": "node ../gpii.js",
+            "command": "gpii-app.exe",
             "ipc": "gpii",
             "autoRestart": true
         }

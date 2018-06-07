@@ -8,7 +8,7 @@
     "bin": "index.js",
     "scripts": {
         "test": "node tests/index.js",
-        "start": "node ./index.js --config=service.dev.child"
+        "start": "powershell \"Start-Process -Verb runas -Wait -FilePath node.exe -ArgumentList './index.js --config=service.dev.child.json5'"
     },
     "dependencies": {
         "bluebird": "^3.5.0",
@@ -18,12 +18,13 @@
         "ref-struct": "1",
         "ref-array": "1.1.2",
         "ref-wchar": "^1.0.2",
-        "minimist": "1.2.0"
+        "minimist": "1.2.0",
+        "json5": "0.5.1"
     },
     "pkg": {
         "targets": [
             "node6-win-x86"
         ],
-        "scripts": "config/service.json"
+        "scripts": "config/service.json5"
     }
 }

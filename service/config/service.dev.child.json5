@@ -1,8 +1,10 @@
+// Development configuration, auto starts GPII.
 {
     "processes": {
         "gpii": {
+            "command": "node ../gpii.js",
             "ipc": "gpii",
-            "noAuth": true
+            "autoRestart": true
         }
     },
     "logging": {
