@@ -11,13 +11,14 @@
         "test:refreshenv": "refreshenv",
         "test:acceptance": "node_modules/.bin/nyc node.exe ./tests/AcceptanceTests.js builtIn",
         "test:unit": "node_modules/.bin/nyc node.exe ./tests/UnitTests.js",
-        "posttest": "node_modules/.bin/nyc report -r html -r text-summary"
+        "posttest": "node_modules/.bin/nyc report -r html -r text-summary",
+        "install": "powershell -ExecutionPolicy Bypass provisioning/NpmInstall.ps1"
     },
     "dependencies": {
         "edge": "6.5.1",
         "edge-js": "8.8.1",
         "ffi": "2.0.0",
-        "gpii-universal": "0.3.0-dev.20180608T130946Z.7218a34",
+        "gpii-universal": "0.3.0-dev.20180625T165346Z.4467c87",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
