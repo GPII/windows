@@ -66,7 +66,7 @@ processHandling.startChildProcesses = function () {
  * @param {Object} procConfig The process configuration (from service-config.json).
  * @param {String} procConfig.command The command.
  * @param {String} procConfig.key Identifier.
- * @param {boolean} procConfig.autoRestart [Optional] true to re-start the process if terminates.
+ * @param {Boolean} procConfig.autoRestart [Optional] true to re-start the process if terminates.
  * @param {String} procConfig.ipc [Optional] IPC channel name.
  * @param {Object} procConfig.env [Optional] Environment variables to set.
  * @param {String} procConfig.currentDir [Optional] The current dir.
@@ -219,9 +219,9 @@ processHandling.throttleRate = function (failureCount) {
  * the running process ID still refers to the original one at the time of the getProcessCreationTime call, and hasn't
  * been re-used.
  *
- * @param {number} pid The process ID.
+ * @param {Number} pid The process ID.
  * @param {String} creationTime [Optional] Numeric string representing the time the process started.
- * @return {boolean} true if the process is running, and has the same creation time (if provided).
+ * @return {Boolean} true if the process is running, and has the same creation time (if provided).
  */
 processHandling.isProcessRunning = function (pid, creationTime) {
     var running = false;
@@ -261,7 +261,7 @@ processHandling.isProcessRunning = function (pid, creationTime) {
  * The return value is intended to be compared to another call to this function, so the actual value (microseconds
  * between 1601-01-01 and when the process started) isn't important.
  *
- * @param {number} pid The process ID.
+ * @param {Number} pid The process ID.
  * @return {String} A numeric string, representing the time the process started - null if there's no such process.
  */
 processHandling.getProcessCreationTime = function (pid) {
@@ -314,7 +314,7 @@ processHandling.lastProcess = null;
  * process is added to the monitoring list WaitForMultipleObjects can be restarted. (A nicer way would be to alert the
  * thread, but the thread is handled by ffi+libuv).
  *
- * @param {number} pid The process ID.
+ * @param {Number} pid The process ID.
  */
 processHandling.monitorProcess = function (pid) {
 
@@ -357,7 +357,7 @@ processHandling.monitorProcess = function (pid) {
  * Stops a monitored process from being monitored. The promises for the process will resolve with "removed".
  *
  * @param {Number|Object} process  The process ID, or the object in processHandling.monitoredProcesses.
- * @param {boolean} removeOnly true to only remove it from the list of monitored processes.
+ * @param {Boolean} removeOnly true to only remove it from the list of monitored processes.
  */
 processHandling.unmonitorProcess = function (process, removeOnly) {
     var resolves = [];

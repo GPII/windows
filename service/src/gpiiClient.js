@@ -27,7 +27,7 @@ var gpiiClient = service.module("gpiiClient");
 /**
  * A map of functions for the requests handled.
  *
- * @type {function(request)}
+ * @type {Function(request)}
  */
 gpiiClient.requestHandlers = {
     "echo": function (request) {
@@ -41,11 +41,11 @@ gpiiClient.requestHandlers = {
      * Executes something.
      *
      * @param {Object} request The request data.
-     * @param {string} request.command The command to run.
-     * @param {string[]} request.args Arguments to pass.
+     * @param {String} request.command The command to run.
+     * @param {Array<String>} request.args Arguments to pass.
      * @param {Object} request.options The options argument for child_process.spawn.
-     * @param {boolean} request.wait True to wait for the process to terminate before resolving.
-     * @param {boolean} request.capture True capture output to stdout/stderr members of the response; implies wait=true.
+     * @param {Boolean} request.wait True to wait for the process to terminate before resolving.
+     * @param {Boolean} request.capture True capture output to stdout/stderr members of the response; implies wait=true.
      * @return {Promise} Resolves when the process has started, if wait=false, or when it's terminated.
      */
     "execute": function (request) {
@@ -106,8 +106,8 @@ gpiiClient.requestHandlers = {
 /**
  * Adds a command handler.
  *
- * @param {string} requestName The request name.
- * @param {function(request)} callback The callback function.
+ * @param {String} requestName The request name.
+ * @param {Function(request)} callback The callback function.
  */
 gpiiClient.addRequestHandler = function (requestName, callback) {
     gpiiClient.requestHandlers[requestName] = callback;

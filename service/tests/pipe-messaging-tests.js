@@ -77,7 +77,7 @@ jqUnit.test("Test gotData", function () {
 /**
  * Create a pipe.
  *
- * @param {string|number} pipeName Name of the pipe, or port number.
+ * @param {String|Number} pipeName Name of the pipe, or port number.
  * @return {Promise} resolves with an object containing both ends of the pipe {server, client}.
  */
 var createPipe = function (pipeName) {

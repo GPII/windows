@@ -58,7 +58,7 @@ var messaging = {};
  * @param {Socket} pipe The pipe.
  * @param {String} sessionType [Optional] Initial text that is sent and checked by both ends to ensure both sides are
  *  compatible.
- * @param {function} requestCallback [Optional] Function to call when a request has been received. The function should
+ * @param {Function} requestCallback [Optional] Function to call when a request has been received. The function should
  *  return the result, or a promise resolving to the result.
  * @param {Buffer} initialData [Optional] Initial data.
  * @return {Session}
@@ -73,7 +73,7 @@ messaging.createSession = function (pipe, sessionType, requestCallback, initialD
  * @param {Socket} pipe The pipe.
  * @param {String} sessionType [Optional] Initial text that is sent and checked by both ends to ensure both sides are
  *  compatible.
- * @param {function} requestCallback [Optional] Function to call when a request has been received. The function should
+ * @param {Function} requestCallback [Optional] Function to call when a request has been received. The function should
  *  return the result, or a promise resolving to the result.
  * @param {Buffer} initialData [Optional] Initial data.
  * @constructor
