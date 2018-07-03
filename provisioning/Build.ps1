@@ -25,7 +25,3 @@ Write-Verbose "systemDrive is $($systemDrive)"
 Write-Verbose "mainDir is $($mainDir)"
 
 Invoke-Command "npm" "install" $mainDir
-
-# Build the Windows Service
-$serviceDir = "$mainDir\service"
-Invoke-Command "npm" "install" $serviceDir
