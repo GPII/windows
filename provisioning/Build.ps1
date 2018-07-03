@@ -26,11 +26,6 @@ Write-Verbose "mainDir is $($mainDir)"
 
 Invoke-Command "npm" "install" $mainDir
 
-Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"
-$testProcessHandlingDir = Join-Path $mainDir "gpii\node_modules\processHandling\test"
-Invoke-Command "cl" "test-window.c" $testProcessHandlingDir
-rm (Join-Path $testProcessHandlingDir "test-window.obj")
-
 # Build the Windows Service
 $serviceDir = "$mainDir\service"
 Invoke-Command "npm" "install" $serviceDir
