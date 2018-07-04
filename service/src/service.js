@@ -122,10 +122,14 @@ service.stop = function () {
  *
  * For this function to receive a control code, it needs to be added via os_service.acceptControl()
  *
+ * For the "sessionchange" control code, the eventType parameter will be one of:
+ * console-connect, console-disconnect, remote-connect, remote-disconnect, session-logon, session-logoff, session-lock,
+ * session-unlock, session-remote, session-create, session-terminate.
+ *
  * See also: https://msdn.microsoft.com/library/ms683241
  *
- * @param controlName Name of the control code.
- * @param eventType Event type.
+ * @param {String} controlName Name of the control code.
+ * @param {String} [eventType] For the "sessionchange" control code, this specifies the type of event.
  */
 service.controlHandler = function (controlName, eventType) {
     service.logDebug("Service control: ", controlName, eventType);
@@ -138,7 +142,7 @@ service.controlHandler = function (controlName, eventType) {
  *
  * @param {String} name Module name
  * @param {Object} initial [optional] An existing object to add on to.
- * @return {Object}
+ * @return {EventEmitter} The module object.
  */
 service.module = function (name, initial) {
     var mod = service.modules[name];
