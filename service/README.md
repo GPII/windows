@@ -7,81 +7,48 @@ unexpectedly, and provides the ability to run high-privileged tasks.
 
 The service can be ran as a normal process, without installing it.
 
-```
-node index.js
-```
+Start the service via `npm start`, and the service will start GPII, and restart GPII if it dies.
 
-## Operation
+`npm run service-dev` will start the service without it spawning GPII, allowing new GPII instances to connect later.
 
-### Command line options
-```
- --install     Install the Windows Service.
- --serviceArgs=ARGS
-         Comma separated arguments to pass to the service (use with --install).
- --uninstall   Uninstall the Windows Service.
- --service     Only used when running as a service.
- --config=FILE Specify the config file to use (default: service.json).
-```
+In both cases, the service will be started as a normal process but running as Administrator. This may only work in
+vagrant boxes where UAC is at the minimal level, otherwise the commands will need to be invoked from an elevated command
+prompt.
 
-Should be ran as Administrator in order to manipulate services.
+### Running as a Windows Service
 
-### Install the service
+In order to use the service related functionality, such as starting GPII at the start of a Windows session, the gpii
+service needs to be installed and ran as a Windows Service. These need to be started from an elevated command prompt.
 
-```
-node service/index.js --install
-```
+Install the service: `npm run service-install`. To install the service using a config that does not start GPII, and
+allows later instances to connect, run `npm run service-install-dev`
 
-This will make the service start when the computer restarts.
+Start the service: `npm run service-start`
 
-To verify the service has been installed: `sc qc gpii-service`
+Stop the service: `npm run service-stop`
 
-### Starting the service
+Uninstall the service: `npm run service-uninstall`
 
-```
-sc start gpii-service
-```
-
-This will start the service, then start GPII.
-
-### Stop the service:
-
-```
-sc stop gpii-service
-```
-
-This will stop GPII, then stop the service.
-
-### Uninstall the service
-
-After stopping the service...
-
-```
-node index.js --uninstall
-```
-
-(`sc delete gpii-service` also works, but `--uninstall` may perform additional work later)
-
-## Logging
+### Logging
 
 When the service is being ran as a Windows service, don't expect a console window. The log will be found in
 `%ProgramData%\GPII\gpii-service.log` (`C:\ProgramData\GPII\gpii-service.log`). The service doesn't put the log in the
 same directory as GPII, because that's in the directory belonging to a user profile and the server doesn't run as a
 normal user.
 
-
 ## Configuration
 
-### [service.json](config/service.json)
+### [service.json5](config/service.json5)
 
 Production config, used when being ran as `gpii-service.exe`. Starts `./gpii-app.exe` and accepts a connection from only
 that child process.
 
-### [service.dev.json](config/service.dev.json)
+### [service.dev.json5](config/service.dev.json5)
 
 Default development configuration, used when running the service from the source directory. This doesn't start a child
 gpii process, but allows any process to connect to the pipe using a known name.
 
-### [service.dev.child.json](config/service.dev.child.json)
+### [service.dev.child.json5](config/service.dev.child.json5)
 
 Starts GPII, via `node ../gpii.js` and accepts a connection only that child process.
 
@@ -129,12 +96,26 @@ To specify the config file, use the `--config` option when running or installing
 ```
 
 
-## Installation
+## Deployment
 
-During the build process, gpii-app's Installer.ps1 will bundle the service into a
-standalone executable, and the installer will put it in the same place as gpii-app.exe.
+During the build process, gpii-app's Installer.ps1 will bundle the service into a standalone executable, and the
+installer will put it in the same place as gpii-app.exe.
 
 The installer will install and start the service.
+
+## Command line options
+
+`index.js` recognises the following command-line arguments 
+
+```
+ --install     Install the Windows Service.
+ --serviceArgs=ARGS
+         Comma separated arguments to pass to the service (use with --install).
+ --uninstall   Uninstall the Windows Service.
+ --service     Only used when running as a service.
+ --config=FILE Specify the config file to use (default: service.json).
+```
+
 
 ## Notes
 
