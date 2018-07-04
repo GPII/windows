@@ -34,18 +34,6 @@ var gpiiClientTests = {};
 
 gpiiClientTests.actionTests = [
     {
-        action: "echo",
-        data: {
-            test: "test1"
-        },
-        expect: {
-            message: "Echo back from service",
-            youSaid: {
-                test: "test1"
-            }
-        }
-    },
-    {
         id: "execute: simple command",
         action: "execute",
         data: {

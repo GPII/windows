@@ -24,19 +24,17 @@ var Promise = require("bluebird"),
 
 var gpiiClient = service.module("gpiiClient");
 
+gpiiClient.options = {
+    // Number of seconds to wait for a response from the client before determining that the process is unresponsive.
+    clientTimeout: 20
+};
+
 /**
  * A map of functions for the requests handled.
  *
  * @type {Function(request)}
  */
 gpiiClient.requestHandlers = {
-    "echo": function (request) {
-        return {
-            message: "Echo back from service",
-            youSaid: request
-        };
-    },
-
     /**
      * Executes something.
      *
@@ -125,15 +123,43 @@ gpiiClient.ipcConnection = null;
  * @param {IpcConnection} ipcConnection The IPC connection.
  */
 gpiiClient.connected = function (ipcConnection) {
-    this.ipcConnection = ipcConnection;
+    gpiiClient.ipcConnection = ipcConnection;
     ipcConnection.requestHandler = gpiiClient.requestHandler;
     service.log("Established IPC channel with the GPII user process");
 
+    gpiiClient.monitorStatus(gpiiClient.options.clientTimeout);
+};
+
+/**
+ * Monitors the status of the GPII process, by continually sending a request and waiting for a reply. If there is no
+ * reply within a timeout, then the process is killed.
+ *
+ * @param {Number} timeout Seconds to wait before determining that the process is unresponsive.
+ */
+gpiiClient.monitorStatus = function (timeout) {
+
+    var isRunning = false;
+    var pid = gpiiClient.ipcConnection.pid;
+
+    gpiiClient.sendRequest("status").then(function (response) {
+        isRunning = response.isRunning;
+    });
+
     setTimeout(function () {
-        gpiiClient.sendRequest("echo", {a: 123}).then(function (r) {
-            service.log("echo back", r);
-        }, service.log);
-    }, 1000);
+        if (isRunning) {
+            gpiiClient.monitorStatus(timeout);
+        } else {
+            service.logError("GPII client is not responding.");
+            if (pid) {
+                // Terminate the process, and it should restart.
+                try {
+                    process.kill(pid);
+                } catch (e) {
+                    service.log("Error killing GPII client", e);
+                }
+            }
+        }
+    }, timeout * 1000);
 };
 
 /**
@@ -152,13 +178,14 @@ gpiiClient.requestHandler = function (request) {
 /**
  * Sends a request to the GPII user process.
  *
+ * @param {String} requestName The request name.
  * @param {Object} request The request data.
  * @return {Promise} Resolves with the response when it is received.
  */
-gpiiClient.sendRequest = function (action, requestData) {
+gpiiClient.sendRequest = function (requestName, requestData) {
     var req = {
-        action: action,
-        data: requestData
+        requestName: requestName,
+        requestData: requestData
     };
     return ipc.sendRequest("gpii", req);
 };

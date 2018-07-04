@@ -422,7 +422,7 @@ ipc.handleRequest = function (ipcConnection, request) {
  * Sends a request.
  *
  * @param {IpcConnection|string} ipcConnection The IPC connection.
- * @param {Object} request The request data.
+ * @param {ServiceRequest} request The request data.
  * @return {Promise} Resolves when there's a response.
  */
 ipc.sendRequest = function (ipcConnection, request) {
