@@ -71,12 +71,12 @@ gpiiClient.requestHandlers = {
                     };
                     child.stdout.on("data", function (data) {
                         // Limit the output to ~1 million characters
-                        if (output.stdout.length < 0xffff) {
+                        if (output.stdout.length < 0xfffff) {
                             output.stdout += data;
                         }
                     });
                     child.stderr.on("data", function (data) {
-                        if (output.stderr.length < 0xffff) {
+                        if (output.stderr.length < 0xfffff) {
                             output.stderr += data;
                         }
                     });
