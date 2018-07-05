@@ -22,7 +22,6 @@ var ffi = require("ffi"),
     Struct = require("ref-struct"),
     arrayType = require("ref-array");
 
-//var ArrayType = arrayType;
 var winapi = {};
 
 winapi.NULL = ref.NULL;

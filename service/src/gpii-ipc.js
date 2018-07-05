@@ -37,12 +37,12 @@ ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
 /**
  * A connection to a client.
  * @typedef {Object} IpcConnection
- * @property authenticate true if authentication is required.
- * @property admin true to run the process as administrator.
- * @property pid The client pid.
- * @property name Name of the connection.
- * @property messaging {messaging.Session} Messaging session.
- * @property requestHandler {function} Function to handle requests for this connection.
+ * @property {boolean} authenticate true if authentication is required.
+ * @property {boolean} admin true to run the process as administrator.
+ * @property {number} pid The client pid.
+ * @property {String} name Name of the connection.
+ * @property {messaging.Session} messaging Messaging session.
+ * @property {function} requestHandler Function to handle requests for this connection.
  */
 
 /**
@@ -281,7 +281,7 @@ ipc.validateClient = function (pipe, pid, timeout) {
 
         // Duplicate the event handle for the child.
         var eventHandleBuf = ref.alloc(winapi.types.HANDLE);
-        var ownProcess = -1 >>> 0;
+        var ownProcess = 0xffffffff; // (uint)-1
         var success =
             winapi.kernel32.DuplicateHandle(ownProcess, eventHandle, processHandle, eventHandleBuf, ref.NULL, false, 2);
         if (!success) {
