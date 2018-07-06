@@ -29,7 +29,7 @@ var ref = require("ref"),
 
 var winapi = windows.winapi;
 
-var ipc = service.module("ipc");
+var ipc = {};
 module.exports = ipc;
 
 ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
@@ -231,7 +231,7 @@ ipc.servePipe = function (ipcConnection, pipeServer) {
                 if (ipcConnection.messaging !== false) {
                     ipcConnection.messaging = messaging.createSession(ipcConnection.pipe, ipcConnection.name, handleRequest);
                     ipcConnection.messaging.on("ready", function () {
-                        ipc.event("connected", ipcConnection.name, ipcConnection);
+                        service.emit("ipc.connected", ipcConnection.name, ipcConnection);
                     });
                 }
             }).then(resolve, function (err) {
@@ -434,5 +434,6 @@ ipc.sendRequest = function (ipcConnection, request) {
 };
 
 service.on("ipc.connected", function (name, connection) {
-    ipc.event("connected:" + name,  connection);
+    // emit another event that's bound to the IPC name
+    service.emit("ipc:connected:" + name,  connection);
 });

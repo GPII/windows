@@ -22,7 +22,8 @@ var Promise = require("bluebird"),
     service = require("./service.js"),
     ipc = require("./gpii-ipc.js");
 
-var gpiiClient = service.module("gpiiClient");
+var gpiiClient = {};
+module.exports = gpiiClient;
 
 gpiiClient.options = {
     // Number of seconds to wait for a response from the client before determining that the process is unresponsive.
@@ -191,5 +192,3 @@ gpiiClient.sendRequest = function (requestName, requestData) {
 };
 
 service.on("ipc.connected:gpii", gpiiClient.connected);
-
-module.exports = gpiiClient;

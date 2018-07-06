@@ -23,7 +23,8 @@ var Promise = require("bluebird"),
     windows = require("./windows.js"),
     winapi = require("./winapi.js");
 
-var processHandling = service.module("processHandling");
+var processHandling = {};
+module.exports = processHandling;
 
 processHandling.childProcesses = {};
 
@@ -173,7 +174,7 @@ processHandling.autoRestartProcess = function (processKey) {
     var childProcess = processHandling.childProcesses[processKey];
     processHandling.monitorProcess(childProcess.pid).then(function () {
         service.log("Child process '" + processKey + "' died");
-        processHandling.event("process-stop", processKey);
+        service.emit("process.stop", processKey);
 
         if (!childProcess.shutdown) {
             var restart = true;
@@ -442,8 +443,6 @@ processHandling.startWait = function () {
 };
 
 // Listen for session change.
-service.on("svc-sessionchange", processHandling.sessionChange);
+service.on("service.sessionchange", processHandling.sessionChange);
 // Listen for service stop.
 service.on("stop", processHandling.stopChildProcesses);
-
-module.exports = processHandling;

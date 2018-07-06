@@ -26,8 +26,21 @@ var os_service = require("os-service"),
     windows = require("./windows.js"),
     parseArgs = require("minimist");
 
-// Different parts of the service are isolated, and will communicate by emitting events through this central "service"
-// object.
+/**
+ * The service object is a central event source, to reduce coupling between the different modules. Events can be emitted
+ * for other modules to act upon.
+ *
+ * The events are:
+ *  start - The service has started.
+ *
+ *  stop - The service is about to stop.
+ *
+ *  service.<control code name> - The service has received a control code (see service.controlHandler())
+ *
+ *  ipc.connected(<connection name>, {IpcConnection}) - Something has connected (and authenticated) to an IPC channel.
+ *
+ *  process.stop(<process key>) - A child process has stopped.
+ */
 var service = new events.EventEmitter();
 
 service.args = parseArgs(process.argv.slice(2));
@@ -95,7 +108,7 @@ service.start = function () {
     os_service.on("*", service.controlHandler);
     os_service.on("stop", service.stop);
 
-    service.event("start");
+    service.emit("start");
     service.log("service start");
 
     if (windows.isUserLoggedOn) {
@@ -108,13 +121,15 @@ service.start = function () {
  * Stop the service.
  */
 service.stop = function () {
-    service.event("stop");
+    service.emit("stop");
     os_service.stop();
 };
 
 /**
  * Called when the service receives a control code. This is what's used to detect a shutdown, service stop, or Windows
  * user log-in/out.
+ *
+ * This emits a "service.<controlName>" event.
  *
  * Possible control codes: start, stop, pause, continue, interrogate, shutdown, paramchange, netbindadd, netbindremove,
  * netbindenable, netbinddisable, deviceevent, hardwareprofilechange, powerevent, sessionchange, preshutdown,
@@ -133,32 +148,7 @@ service.stop = function () {
  */
 service.controlHandler = function (controlName, eventType) {
     service.logDebug("Service control: ", controlName, eventType);
-    service.event("svc-" + controlName, eventType);
+    service.emit("service." + controlName, eventType);
 };
-
-/**
- * Creates a new (or returns an existing) module.
- * A module is a piece of the service that can emit events.
- *
- * @param {String} name Module name
- * @param {Object} initial [optional] An existing object to add on to.
- * @return {EventEmitter} The module object.
- */
-service.module = function (name, initial) {
-    var mod = service.modules[name];
-    if (!mod) {
-        mod = initial || {};
-        mod.moduleName = name;
-        mod.event = function (event, arg1, arg2) {
-            var eventName = name === "service" ? event : name + "." + event;
-            service.logDebug("EVENT", eventName);
-            service.emit(eventName, arg1, arg2);
-        };
-        service.modules[name] = mod;
-    }
-    return mod;
-};
-service.modules = { };
-service.module("service", service);
 
 module.exports = service;
