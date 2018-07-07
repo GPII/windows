@@ -435,5 +435,5 @@ ipc.sendRequest = function (ipcConnection, request) {
 
 service.on("ipc.connected", function (name, connection) {
     // emit another event that's bound to the IPC name
-    service.emit("ipc:connected:" + name,  connection);
+    service.emit("ipc.connected:" + name,  connection);
 });

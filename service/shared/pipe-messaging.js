@@ -225,7 +225,7 @@ Session.prototype.handleRequest = function (message) {
         if (err instanceof Error) {
             // Error doesn't serialise
             e = {};
-            fluid.each(Object.getOwnPropertyNames(err), function (a) {
+            Object.getOwnPropertyNames(err).forEach(function (a) {
                 e[a] = err[a];
             });
         }

@@ -166,13 +166,13 @@ gpiiClient.monitorStatus = function (timeout) {
 /**
  * Handles a request from the GPII user process.
  *
- * @param {Object} request The request data.
+ * @param {ServiceRequest} request The request data.
  * @return {Promise|object} The response data.
  */
 gpiiClient.requestHandler = function (request) {
-    var handler = request.action && gpiiClient.requestHandlers[request.action];
+    var handler = request.requestName && gpiiClient.requestHandlers[request.requestName];
     if (handler) {
-        return handler(request.data);
+        return handler(request.requestData);
     }
 };
 
