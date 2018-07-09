@@ -209,7 +209,7 @@ Session.prototype.handleRequest = function (message) {
     var session = this;
     var promise;
     try {
-        var result = this.requestCallback && this.requestCallback(message.data);
+        var result = this.requestCallback && this.requestCallback(message);
         promise = Promise.resolve(result);
     } catch (e) {
         promise = Promise.reject(e);
@@ -259,10 +259,10 @@ Session.prototype.handleReply = function (message) {
 /**
  * Send a request.
  *
- * @param requestData The request data.
+ * @param {ServiceRequest} request The request data.
  * @return {Promise} Resolves when the response has been received, rejects on error.
  */
-Session.prototype.sendRequest = function (requestData) {
+Session.prototype.sendRequest = function (request) {
     var session = this;
     return new Promise(function (resolve, reject) {
 
@@ -273,10 +273,9 @@ Session.prototype.sendRequest = function (requestData) {
             reject: reject
         };
 
-        session.sendMessage({
-            request: requestId,
-            data: requestData
-        });
+        var message = Object.assign({}, request);
+        message.request = requestId;
+        session.sendMessage(message);
     });
 };
 
