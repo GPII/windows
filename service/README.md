@@ -9,11 +9,17 @@ The service can be ran as a normal process, without installing it.
 
 Start the service via `npm start`, and the service will start GPII, and restart GPII if it dies.
 
-`npm run service-dev` will start the service without it spawning GPII, allowing new GPII instances to connect later.
+`npm run service-dev` will start the service in development mode. That is, without it spawning GPII and allowing new
+GPII instances to connect later without any authentication.
 
 In both cases, the service will be started as a normal process but running as Administrator. This may only work in
 vagrant boxes where UAC is at the minimal level, otherwise the commands will need to be invoked from an elevated command
 prompt.
+
+### From gpii-windows
+
+`npm start` from gpii-windows ensures the service is running (in development mode) before starting gpii. GPII only
+requires the service to be running if it applies solutions that depend on it.
 
 ### Running as a Windows Service
 

@@ -81,7 +81,7 @@ if (!configFile) {
     }
     if (!configFile) {
         // Use the built-in config file.
-        configFile = (service.isService ? "../config/service.json5" : "../config/service.dev.json5");
+        configFile = (service.isService ? "config/service.json5" : "config/service.dev.json5");
     }
 }
 if ((configFile.indexOf("/") === -1) && (configFile.indexOf("\\") === -1)) {

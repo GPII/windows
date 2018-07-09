@@ -223,7 +223,7 @@ jqUnit.asyncTest("Test requests", function () {
         }
     ];
 
-    jqUnit.expect(tests.length * 4);
+    jqUnit.expect(tests.length * 5);
     var currentTest;
     var testIndex = 0;
     var suffix;
@@ -232,6 +232,9 @@ jqUnit.asyncTest("Test requests", function () {
 
         // Reply to the request.
         var serverRequest = function (req) {
+            req = Object.assign({}, req);
+            jqUnit.assertTrue("received request should contain the 'request' field" + suffix, !!req.request);
+            delete req.request;
             jqUnit.assertDeepEq("received request should match the sent request" + suffix, currentTest, req);
             switch (req.action) {
             case "resolve":
