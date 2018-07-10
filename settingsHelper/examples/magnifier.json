@@ -1,0 +1,11 @@
+[
+    {
+        "settingID": "SystemSettings_Accessibility_Magnifier_IsEnabled",
+        "method": "GetValue"
+    },
+    {
+        "settingID": "SystemSettings_Accessibility_Magnifier_IsEnabled",
+        "method": "SetValue",
+        "parameters": [ true ]
+    }
+]

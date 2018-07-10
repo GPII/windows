@@ -32,19 +32,7 @@ jqUnit.module("GPII pipe tests", {
 
 var gpiiClientTests = {};
 
-gpiiClientTests.actionTests = [
-    {
-        action: "echo",
-        data: {
-            test: "test1"
-        },
-        expect: {
-            message: "Echo back from service",
-            youSaid: {
-                test: "test1"
-            }
-        }
-    },
+gpiiClientTests.requestTests = [
     {
         id: "execute: simple command",
         action: "execute",
@@ -189,15 +177,20 @@ gpiiClientTests.assertDeepMatch = function (msg, expect, actual) {
     }
 };
 
-// Tests isProcessRunning
-jqUnit.asyncTest("Test actions", function () {
 
-    var tests = gpiiClientTests.actionTests;
+jqUnit.asyncTest("Test request handlers", function () {
+
+    var tests = gpiiClientTests.requestTests;
     jqUnit.expect(tests.length * 3);
+
+    // Change to a local directory to stop cmd.exe complaining about being on a UNC path.
+    var currentDir = process.cwd();
+    process.chdir(process.env.HOME);
 
     var testIndex = -1;
     var nextTest = function () {
         if (++testIndex >= tests.length) {
+            process.chdir(currentDir);
             jqUnit.start();
             return;
         }

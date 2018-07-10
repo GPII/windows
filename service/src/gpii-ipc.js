@@ -29,7 +29,7 @@ var ref = require("ref"),
 
 var winapi = windows.winapi;
 
-var ipc = service.module("ipc");
+var ipc = {};
 module.exports = ipc;
 
 ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
@@ -37,12 +37,12 @@ ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
 /**
  * A connection to a client.
  * @typedef {Object} IpcConnection
- * @property authenticate true if authentication is required.
- * @property admin true to run the process as administrator.
- * @property pid The client pid.
- * @property name Name of the connection.
- * @property messaging {messaging.Session} Messaging session.
- * @property requestHandler {function} Function to handle requests for this connection.
+ * @property {boolean} authenticate true if authentication is required.
+ * @property {boolean} admin true to run the process as administrator.
+ * @property {number} pid The client pid.
+ * @property {String} name Name of the connection.
+ * @property {messaging.Session} messaging Messaging session.
+ * @property {function} requestHandler Function to handle requests for this connection.
  */
 
 /**
@@ -56,9 +56,9 @@ ipc.ipcConnections = {};
  * @param {String} command The command to execute.
  * @param {String} ipcName [optional] The IPC connection name.
  * @param {Object} options [optional] Options (see also {this}.execute()).
- * @param {boolean} options.authenticate Child must authenticate to pipe (default is true, if undefined).
- * @param {boolean} options.admin true to keep pipe access to admin-only.
- * @param {boolean} options.messaging true to use the messaging wrapper.
+ * @param {Boolean} options.authenticate Child must authenticate to pipe (default is true, if undefined).
+ * @param {Boolean} options.admin true to keep pipe access to admin-only.
+ * @param {Boolean} options.messaging true to use the messaging wrapper.
  * @return {Promise} Resolves with a value containing the pipe server and pid.
  */
 ipc.startProcess = function (command, ipcName, options) {
@@ -113,7 +113,7 @@ ipc.startProcess = function (command, ipcName, options) {
 /**
  * Generates a named-pipe name.
  *
- * @return {string} The name of the pipe.
+ * @return {String} The name of the pipe.
  */
 ipc.generatePipeName = function () {
     var pipeName = ipc.pipePrefix + crypto.randomBytes(18).toString("base64").replace(/[\\/]/g, ".");
@@ -168,7 +168,7 @@ ipc.createPipe = function (pipeName, ipcConnection) {
  * When running as a service, a normal user does not have enough permissions to open it.
  *
  * @param {net.Server} pipeServer The pipe server. All listeners of the "connection" event will be removed.
- * @param {string} pipeName Name of the pipe.
+ * @param {String} pipeName Name of the pipe.
  * @return {Promise} Resolves when complete.
  */
 ipc.setPipeAccess = function (pipeServer, pipeName) {
@@ -231,7 +231,7 @@ ipc.servePipe = function (ipcConnection, pipeServer) {
                 if (ipcConnection.messaging !== false) {
                     ipcConnection.messaging = messaging.createSession(ipcConnection.pipe, ipcConnection.name, handleRequest);
                     ipcConnection.messaging.on("ready", function () {
-                        ipc.event("connected", ipcConnection.name, ipcConnection);
+                        service.emit("ipc.connected", ipcConnection.name, ipcConnection);
                     });
                 }
             }).then(resolve, function (err) {
@@ -246,8 +246,8 @@ ipc.servePipe = function (ipcConnection, pipeServer) {
  * Validates the client connection of a pipe.
  *
  * @param {net.Socket} pipe The pipe to the client.
- * @param {number} pid The pid of the expected client.
- * @param {number} timeout Seconds to wait for the event (default 30).
+ * @param {Number} pid The pid of the expected client.
+ * @param {Number} timeout Seconds to wait for the event (default 30).
  * @return {Promise} Resolves when successful, rejects on failure.
  */
 ipc.validateClient = function (pipe, pid, timeout) {
@@ -281,7 +281,7 @@ ipc.validateClient = function (pipe, pid, timeout) {
 
         // Duplicate the event handle for the child.
         var eventHandleBuf = ref.alloc(winapi.types.HANDLE);
-        var ownProcess = -1 >>> 0;
+        var ownProcess = 0xffffffff; // (uint)-1
         var success =
             winapi.kernel32.DuplicateHandle(ownProcess, eventHandle, processHandle, eventHandleBuf, ref.NULL, false, 2);
         if (!success) {
@@ -321,10 +321,10 @@ ipc.validateClient = function (pipe, pid, timeout) {
  *
  * @param {String} command The command to execute.
  * @param {Object} options [optional] Options
- * @param {boolean} options.alwaysRun true to run as the current user (what this process is running as), if the console
+ * @param {Boolean} options.alwaysRun true to run as the current user (what this process is running as), if the console
  * user token could not be received. Should only be true if not running as a service.
- * @param {object} options.env Additional environment key-value pairs.
- * @param {string} options.currentDir Current directory for the new process.
+ * @param {Object} options.env Additional environment key-value pairs.
+ * @param {String} options.currentDir Current directory for the new process.
  *
  * @return {Number} The pid of the new process.
  */
@@ -422,7 +422,7 @@ ipc.handleRequest = function (ipcConnection, request) {
  * Sends a request.
  *
  * @param {IpcConnection|string} ipcConnection The IPC connection.
- * @param {Object} request The request data.
+ * @param {ServiceRequest} request The request data.
  * @return {Promise} Resolves when there's a response.
  */
 ipc.sendRequest = function (ipcConnection, request) {
@@ -434,5 +434,6 @@ ipc.sendRequest = function (ipcConnection, request) {
 };
 
 service.on("ipc.connected", function (name, connection) {
-    ipc.event("connected:" + name,  connection);
+    // emit another event that's bound to the IPC name
+    service.emit("ipc.connected:" + name,  connection);
 });

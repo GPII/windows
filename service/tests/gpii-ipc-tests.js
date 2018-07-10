@@ -322,9 +322,9 @@ jqUnit.asyncTest("Test validateClient", function () {
 
             if (test.startChildProcess) {
                 var script = path.join(__dirname, "gpii-ipc-tests-child.js");
-                var command = ["node", script, "validate-client"].join(" ");
+                var command = ["node", script, "validate-client", challenge].join(" ");
                 console.log("starting", command);
-                child_process.exec(command, function (err, stdout, stderr) {
+                child_process.exec(command, { shell: false}, function (err, stdout, stderr) {
                     console.log("child stdout:", stdout);
                     console.log("child stderr:", stderr);
                     if (err) {
@@ -365,7 +365,12 @@ jqUnit.asyncTest("Test validateClient", function () {
 jqUnit.asyncTest("Test startProcess", function () {
     var logFile = createLogFile();
     var getLog = function () {
-        return fs.readFileSync(logFile, {encoding: "utf8"});
+        try {
+            return fs.readFileSync(logFile, {encoding: "utf8"});
+        } catch (e) {
+            // ignore
+            return "";
+        }
     };
 
     var script = path.join(__dirname, "gpii-ipc-tests-child.js");

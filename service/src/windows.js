@@ -165,7 +165,7 @@ windows.isUserLoggedOn = function () {
  * Gets the environment variables for the specified user.
  *
  * @param {Number} token Token handle for the user.
- * @return {Array} An array of strings for each variable, in the format of "name=value"
+ * @return {Array<String>} An array of strings for each variable, in the format of "name=value"
  */
 windows.getEnv = function (token) {
     var envPtr = ref.alloc(winapi.types.LP);
@@ -215,7 +215,7 @@ windows.endProcess = function (pid) {
  *
  * @param {Number} pid The process ID.
  * @param {Number} timeout Milliseconds to wait before timing out. (default: infinate)
- * @return {promise} Resolves when the process has terminated, or when timed out (with a value of "timeout"). Rejects
+ * @return Promise} Resolves when the process has terminated, or when timed out (with a value of "timeout"). Rejects
  * upon failure.
  */
 windows.waitForProcessTermination = function (pid, timeout) {
@@ -254,9 +254,9 @@ windows.waitForProcessTermination = function (pid, timeout) {
  *
  * Wrapper for WaitForMultipleObjects (https://msdn.microsoft.com/library/ms687025)
  *
- * @param {number[]} handles The win32 handles to wait on.
- * @param {number} timeout [Optional] The timeout, in milliseconds. (default: infinite)
- * @param {boolean} waitAll [Optional] Wait for all handles to be signalled, instead of just one.
+ * @param {Array<number>} handles The win32 handles to wait on.
+ * @param {Number} timeout [Optional] The timeout, in milliseconds. (default: infinite)
+ * @param {Boolean} waitAll [Optional] Wait for all handles to be signalled, instead of just one.
  * @return {Promise} Resolves with the handle that triggered, "timeout", or "all" if waitAll is true.
  */
 windows.waitForMultipleObjects = function (handles, timeout, waitAll) {
@@ -320,7 +320,7 @@ windows.waitForMultipleObjects = function (handles, timeout, waitAll) {
 /**
  * Gets the security identifier (SID) from a user token.
  *
- * @param {integer} token The user token.
+ * @param {Integer} token The user token.
  * @return {*} The SID of the user.
  */
 windows.getSidFromToken = function (token) {

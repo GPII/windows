@@ -22,7 +22,6 @@ var ffi = require("ffi"),
     Struct = require("ref-struct"),
     arrayType = require("ref-array");
 
-//var ArrayType = arrayType;
 var winapi = {};
 
 winapi.NULL = ref.NULL;
@@ -437,7 +436,7 @@ winapi.stringFromWideChar = function (buffer) {
  * by an additional 2 null characters.
  *
  * @param buffer The buffer to convert.
- * @return {Array} An array of string.
+ * @return {Array<String>} An array of string.
  */
 winapi.stringFromWideCharArray = function (buffer) {
     var togo = [];

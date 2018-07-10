@@ -58,7 +58,7 @@ var messaging = {};
  * @param {Socket} pipe The pipe.
  * @param {String} sessionType [Optional] Initial text that is sent and checked by both ends to ensure both sides are
  *  compatible.
- * @param {function} requestCallback [Optional] Function to call when a request has been received. The function should
+ * @param {Function} requestCallback [Optional] Function to call when a request has been received. The function should
  *  return the result, or a promise resolving to the result.
  * @param {Buffer} initialData [Optional] Initial data.
  * @return {Session}
@@ -73,7 +73,7 @@ messaging.createSession = function (pipe, sessionType, requestCallback, initialD
  * @param {Socket} pipe The pipe.
  * @param {String} sessionType [Optional] Initial text that is sent and checked by both ends to ensure both sides are
  *  compatible.
- * @param {function} requestCallback [Optional] Function to call when a request has been received. The function should
+ * @param {Function} requestCallback [Optional] Function to call when a request has been received. The function should
  *  return the result, or a promise resolving to the result.
  * @param {Buffer} initialData [Optional] Initial data.
  * @constructor
@@ -209,7 +209,7 @@ Session.prototype.handleRequest = function (message) {
     var session = this;
     var promise;
     try {
-        var result = this.requestCallback && this.requestCallback(message.data);
+        var result = this.requestCallback && this.requestCallback(message);
         promise = Promise.resolve(result);
     } catch (e) {
         promise = Promise.reject(e);
@@ -225,7 +225,7 @@ Session.prototype.handleRequest = function (message) {
         if (err instanceof Error) {
             // Error doesn't serialise
             e = {};
-            fluid.each(Object.getOwnPropertyNames(err), function (a) {
+            Object.getOwnPropertyNames(err).forEach(function (a) {
                 e[a] = err[a];
             });
         }
@@ -259,10 +259,10 @@ Session.prototype.handleReply = function (message) {
 /**
  * Send a request.
  *
- * @param requestData The request data.
+ * @param {ServiceRequest} request The request data.
  * @return {Promise} Resolves when the response has been received, rejects on error.
  */
-Session.prototype.sendRequest = function (requestData) {
+Session.prototype.sendRequest = function (request) {
     var session = this;
     return new Promise(function (resolve, reject) {
 
@@ -273,10 +273,9 @@ Session.prototype.sendRequest = function (requestData) {
             reject: reject
         };
 
-        session.sendMessage({
-            request: requestId,
-            data: requestData
-        });
+        var message = Object.assign({}, request);
+        message.request = requestId;
+        session.sendMessage(message);
     });
 };
 

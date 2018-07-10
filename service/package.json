@@ -8,7 +8,13 @@
     "bin": "index.js",
     "scripts": {
         "test": "node tests/index.js",
-        "start": "powershell \"Start-Process -Verb runas -Wait -FilePath node.exe -ArgumentList './index.js --config=service.dev.child.json5'"
+        "start": "powershell \"Start-Process -Verb runas -Wait -FilePath node.exe -ArgumentList './index.js --config=service.dev.child.json5'",
+        "service-dev": "powershell \"if (test-path \\\\.\\pipe\\gpii-gpii) { echo 'Service is running' } else { Start-Process -Verb runas -FilePath node.exe -ArgumentList './index.js --config=service.dev.json5' }",
+        "service-install-dev": "node ./index.js --install --config=service.dev.json5",
+        "service-install": "node ./index.js --install --config=service.dev.child.json5",
+        "service-uninstall": "node ./index.js --uninstall",
+        "service-start": "sc start gpii-service",
+        "service-stop": "sc stop gpii-service"
     },
     "dependencies": {
         "bluebird": "^3.5.0",
