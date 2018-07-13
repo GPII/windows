@@ -31,9 +31,4 @@ Write-Verbose "Calling build in $($winVersion.VersionString) - OS $($OSBitness)b
 Write-Verbose "PSModulePath is $($env:PSModulePath)"
 Write-Verbose "mainDir is $($mainDir)"
 
-if (-Not $skipNpm) {
-    Invoke-Command "npm" "install" $mainDir
-}
-
-Invoke-Environment "C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools_msbuild.bat"
-Invoke-Expression (Join-Path $originalBuildScriptPath "Tests.ps1")
+Invoke-Command "npm" "install" $mainDir

@@ -1,7 +1,9 @@
 /node_modules/
 .vagrant
+package-lock.json
 **/test/*.exe
 coverage
 instrumented
 listeners
 reports
+/bin
