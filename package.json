@@ -15,10 +15,9 @@
         "install": "powershell -ExecutionPolicy Bypass provisioning/NpmInstall.ps1"
     },
     "dependencies": {
-        "edge": "6.5.1",
         "edge-js": "8.8.1",
         "ffi": "2.0.0",
-        "gpii-universal": "0.3.0-dev.20180625T165346Z.4467c87",
+        "gpii-universal": "0.3.0-dev.20180711T150609Z.2bb2ecf",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
