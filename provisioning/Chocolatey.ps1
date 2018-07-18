@@ -21,7 +21,4 @@ Invoke-Command $chocolatey "install python2 -y"
 Add-Path $python2Path $true
 refreshenv
 
-Invoke-Command $chocolatey "install msbuild.extensionpack -y"
-refreshenv
-
 exit 0
