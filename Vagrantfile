@@ -38,6 +38,5 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell", path: "provisioning/Chocolatey.ps1", args: "-originalBuildScriptPath \"C:\\vagrant\\provisioning\\\""
   config.vm.provision "shell", path: "provisioning/Npm.ps1", args: "-originalBuildScriptPath \"C:\\vagrant\\provisioning\\\""
   config.vm.provision "shell", path: "provisioning/Build.ps1", args: "-originalBuildScriptPath \"C:\\vagrant\\provisioning\\\""
-  config.vm.provision "shell", path: "provisioning/Installer.ps1", args: "-originalBuildScriptPath \"C:\\vagrant\\provisioning\\\""
 
 end
