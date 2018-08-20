@@ -106,7 +106,7 @@ gpiiClient.requestHandlers = {
  * Adds a command handler.
  *
  * @param {String} requestType The request type.
- * @param {Function(request)} callback The callback function.
+ * @param {Function} callback The callback function.
  */
 gpiiClient.addRequestHandler = function (requestType, callback) {
     gpiiClient.requestHandlers[requestType] = callback;
@@ -167,7 +167,7 @@ gpiiClient.monitorStatus = function (timeout) {
  * Handles a request from the GPII user process.
  *
  * @param {ServiceRequest} request The request data.
- * @return {Promise|object} The response data.
+ * @return {Promise|Object} The response data.
  */
 gpiiClient.requestHandler = function (request) {
     var handler = request.requestType && gpiiClient.requestHandlers[request.requestType];
@@ -180,7 +180,7 @@ gpiiClient.requestHandler = function (request) {
  * Sends a request to the GPII user process.
  *
  * @param {String} requestType The request type.
- * @param {Object} request The request data.
+ * @param {Object} requestData The request data.
  * @return {Promise} Resolves with the response when it is received.
  */
 gpiiClient.sendRequest = function (requestType, requestData) {

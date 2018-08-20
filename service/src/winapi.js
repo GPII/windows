@@ -435,7 +435,7 @@ winapi.stringFromWideChar = function (buffer) {
  * The input array is a C style string array, where the values are separated by null characters. The array is terminated
  * by an additional 2 null characters.
  *
- * @param buffer The buffer to convert.
+ * @param {Buffer} buffer The buffer to convert.
  * @return {Array<String>} An array of string.
  */
 winapi.stringFromWideCharArray = function (buffer) {

@@ -30,6 +30,7 @@ processHandling.childProcesses = {};
 
 /**
  * The active console session has changed.
+ * @param {String} eventType The event type for the sessionChange event (see service.controlHandler()).
  */
 processHandling.sessionChange = function (eventType) {
     service.logDebug("session change", eventType);
@@ -316,6 +317,7 @@ processHandling.lastProcess = null;
  * thread, but the thread is handled by ffi+libuv).
  *
  * @param {Number} pid The process ID.
+ * @return {Promise} Resolves when the process identified by pid terminates.
  */
 processHandling.monitorProcess = function (pid) {
 

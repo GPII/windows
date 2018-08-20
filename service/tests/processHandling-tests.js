@@ -163,7 +163,7 @@ processHandlingTests.testData.monitorProcessFailures = [
 
 /**
  * Start a process that self terminates after 10 seconds.
- * @return {ChildProcess}
+ * @return {ChildProcess} The child process.
  */
 processHandlingTests.startProcess = function () {
     var id = "processHandlingTest" + Math.random().toString(32).substr(2);
