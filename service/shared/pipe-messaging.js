@@ -61,7 +61,7 @@ var messaging = {};
  * @param {Function} requestCallback [Optional] Function to call when a request has been received. The function should
  *  return the result, or a promise resolving to the result.
  * @param {Buffer} initialData [Optional] Initial data.
- * @return {Session}
+ * @return {Session} The new session instance.
  */
 messaging.createSession = function (pipe, sessionType, requestCallback, initialData) {
     return new Session(pipe, sessionType, requestCallback, initialData);
@@ -148,7 +148,7 @@ Session.prototype.sendMessage = function (payload) {
  * size     :=  sizeof(payload) (32-bit uint)
  * payload  :=  The message.
  *
- * @param {Buffer} data
+ * @param {Buffer} data The data.
  */
 Session.prototype.gotData = function (data) {
     if (data) {
@@ -179,7 +179,7 @@ Session.prototype.gotData = function (data) {
 /**
  * Called when a message has been received.
  *
- * @param message
+ * @param {String} packet The JSON string of the message.
  */
 Session.prototype.gotPacket = function (packet) {
     if (this.sessionTypeChecked) {

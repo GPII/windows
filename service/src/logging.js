@@ -33,20 +33,6 @@ logging.levels = {
     "DEBUG": 40
 };
 
-for (var level in logging.levels) {
-    if (logging.levels.hasOwnProperty(level)) {
-        // Create a level object.
-        var levelObj = {
-            isLevel: true,
-            value: logging.levels[level],
-            name: level
-        };
-        // Add a convenience function for that level.
-        logging[level.toLowerCase()] = createLogFunction(levelObj);
-        logging.levels[level] = levelObj;
-    }
-}
-
 // The current logging level
 logging.logLevel = logging.levels.INFO;
 // Default level for Log entries when unspecified.
@@ -72,7 +58,7 @@ logging.setLogLevel = function (newLevel) {
  * Log something.
  */
 logging.log = function () {
-    var args = argsArray(arguments);
+    var args = logging.argsArray(arguments);
 
     var level = (args[0] && args[0].isLevel)
         ? args.shift()
@@ -116,7 +102,12 @@ logging.setFile = function (file) {
     };
 };
 
-function argsArray(args) {
+/**
+ * Converts an arguments object into an array.
+ * @param {Object} args An arguments object, or an array.
+ * @return {Array} The args object as an array.
+ */
+logging.argsArray = function (args) {
     var togo;
     if (Array.isArray(args)) {
         togo = args;
@@ -128,17 +119,31 @@ function argsArray(args) {
     }
 
     return togo;
-}
+};
 
 /**
  * Returns a function that logs to the given log level.
- * @param level The log level.
- * @return {Function}
+ * @param {Object} level A member of logging.levels identifying the log level.
+ * @return {Function} A function that logs at the given level.
  */
-function createLogFunction(level) {
+logging.createLogFunction = function (level) {
     return function () {
-        logging.doLog(level, argsArray(arguments));
+        logging.doLog(level, logging.argsArray(arguments));
     };
+};
+
+for (var level in logging.levels) {
+    if (logging.levels.hasOwnProperty(level)) {
+        // Create a level object.
+        var levelObj = {
+            isLevel: true,
+            value: logging.levels[level],
+            name: level
+        };
+        // Add a convenience function for that level.
+        logging[level.toLowerCase()] = logging.createLogFunction(levelObj);
+        logging.levels[level] = levelObj;
+    }
 }
 
 /** @name logging.fatal

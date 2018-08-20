@@ -411,17 +411,16 @@ ipc.execute = function (command, options) {
  *
  * @param {IpcConnection} ipcConnection The IPC connection.
  * @param {Object} request The request data.
+ * @return {Object} The result of the requestHandler callback.
  */
 ipc.handleRequest = function (ipcConnection, request) {
-    if (ipcConnection.requestHandler) {
-        return ipcConnection.requestHandler(request);
-    }
+    return ipcConnection.requestHandler && ipcConnection.requestHandler(request);
 };
 
 /**
  * Sends a request.
  *
- * @param {IpcConnection|string} ipcConnection The IPC connection.
+ * @param {IpcConnection|String} ipcConnection The IPC connection.
  * @param {ServiceRequest} request The request data.
  * @return {Promise} Resolves when there's a response.
  */

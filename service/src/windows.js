@@ -150,6 +150,7 @@ windows.getDesktopUser = function () {
 
 /**
  * Determines if the active console session is a user logged on.
+ * @return {Boolean} true if the active console session is a user logged on.
  */
 windows.isUserLoggedOn = function () {
     var token = windows.getDesktopUser();
@@ -182,6 +183,7 @@ windows.getEnv = function (token) {
  * When running as a service, this process's "APPDATA" value will not point to the current user's.
  *
  * @param {Number} userToken Token handle for the user.
+ * @return {String} The GPII data directory for the given user.
  */
 windows.getUserDataDir = function (userToken) {
     // Search the environment block for the APPDATA value. (A better way would be to use SHGetKnownFolderPath)
@@ -215,7 +217,7 @@ windows.endProcess = function (pid) {
  *
  * @param {Number} pid The process ID.
  * @param {Number} timeout Milliseconds to wait before timing out. (default: infinate)
- * @return Promise} Resolves when the process has terminated, or when timed out (with a value of "timeout"). Rejects
+ * @return {Promise} Resolves when the process has terminated, or when timed out (with a value of "timeout"). Rejects
  * upon failure.
  */
 windows.waitForProcessTermination = function (pid, timeout) {
@@ -254,7 +256,7 @@ windows.waitForProcessTermination = function (pid, timeout) {
  *
  * Wrapper for WaitForMultipleObjects (https://msdn.microsoft.com/library/ms687025)
  *
- * @param {Array<number>} handles The win32 handles to wait on.
+ * @param {Array<Number>} handles The win32 handles to wait on.
  * @param {Number} timeout [Optional] The timeout, in milliseconds. (default: infinite)
  * @param {Boolean} waitAll [Optional] Wait for all handles to be signalled, instead of just one.
  * @return {Promise} Resolves with the handle that triggered, "timeout", or "all" if waitAll is true.

@@ -136,6 +136,7 @@ gpiiClientTests.requestTests = [
  * @param {Object} subject The object to check against
  * @param {Object} expected The object containing the values to check for.
  * @param {Number} maxDepth [Optional] How deep to check.
+ * @return {Boolean} true if there's a match.
  */
 gpiiClientTests.deepMatch = function (subject, expected, maxDepth) {
     var match = false;
