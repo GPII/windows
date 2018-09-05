@@ -43,5 +43,6 @@ require("./gpii/node_modules/windowMessages");
 require("./gpii/node_modules/userListeners");
 require("./gpii/node_modules/systemSettingsHandler");
 require("./gpii/node_modules/nativeSettingsHandler");
+require("./gpii/node_modules/gpii-app-zoom");
 
 module.exports = fluid;
