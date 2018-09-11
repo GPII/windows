@@ -44,6 +44,6 @@ require("./gpii/node_modules/userListeners");
 require("./gpii/node_modules/systemSettingsHandler");
 require("./gpii/node_modules/gpii-app-zoom");
 require("./gpii/node_modules/gpii-service-handler");
-require("./gpii/node_modules/installOnDemand");
+require("./gpii/node_modules/gpii-iod");
 
 module.exports = fluid;
