@@ -14,6 +14,8 @@ https://github.com/gpii/universal/LICENSE.txt
 
 "use strict";
 
+require("../index.js");
+
 require("../gpii/node_modules/displaySettingsHandler/test/testDisplaySettingsHandler.js");
 require("../gpii/node_modules/registrySettingsHandler/test/testRegistrySettingsHandler.js");
 require("../gpii/node_modules/spiSettingsHandler/test/testSpiSettingsHandler.js");
