@@ -17,7 +17,7 @@
     "dependencies": {
         "edge-js": "8.8.1",
         "ffi": "2.0.0",
-        "gpii-universal": "0.3.0-dev.20180923T002946Z.87b955b5",
+        "gpii-universal": "0.3.0-dev.20180926T110215Z.ca7d0f47",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
