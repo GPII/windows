@@ -5,23 +5,35 @@
     "author": "GPII",
     "bugs": "http://issues.gpii.net/browse/GPII",
     "homepage": "http://gpii.net/",
+    "scripts": {
+        "pretest": "node node_modules/rimraf/bin.js coverage/* reports/*",
+        "test": "npm run test:refreshenv && npm run test:unit && npm run test:acceptance",
+        "test:refreshenv": "refreshenv",
+        "test:acceptance": "node_modules/.bin/nyc node.exe ./tests/AcceptanceTests.js builtIn",
+        "test:unit": "node_modules/.bin/nyc node.exe ./tests/UnitTests.js",
+        "posttest": "node_modules/.bin/nyc report -r html -r text-summary",
+        "install": "powershell -ExecutionPolicy Bypass provisioning/NpmInstall.ps1"
+    },
     "dependencies": {
+        "edge-js": "8.8.1",
         "ffi": "2.0.0",
+        "gpii-universal": "0.3.0-dev.20181002T105741Z.daaaf4a4",
+        "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
         "ref-array": "1.1.2",
-        "edge-js": "8.8.1",
-        "string-argv": "0.0.2",
-        "@pokusew/pcsclite": "0.4.18",
-        "gpii-universal": "0.3.0-dev.20180314T153442Z.bcc35970"
+        "string-argv": "0.0.2"
     },
     "devDependencies": {
-        "grunt": "1.0.2",
         "eslint-config-fluid": "1.2.0",
+        "express": "4.16.3",
         "fluid-grunt-eslint": "18.1.2",
+        "grunt": "1.0.2",
         "grunt-jsonlint": "1.1.0",
-        "shelljs": "0.8.1",
-        "node-jqunit": "1.1.8"
+        "node-jqunit": "1.1.8",
+        "nyc": "11.3.0",
+        "rimraf": "2.6.2",
+        "shelljs": "0.8.1"
     },
     "license": "BSD-3-Clause",
     "keywords": [
