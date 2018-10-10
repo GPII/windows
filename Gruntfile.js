@@ -15,16 +15,17 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
 module.exports = function (grunt) {
 
     grunt.initConfig({
-        eslint: {
-            src: ["./gpii/**/*.js", "./tests/**/*.js", "./*.js"]
-        },
-        jsonlint: {
-            src: ["gpii/**/*.json", "tests/**/*.json", "examples/**/*.json", "./*.json"]
+        lintAll: {
+            sources: {
+                md:    [ "./*.md","./documentation/*.md", "./examples/**/*.md"],
+                js:    ["!./browserify/**/*.js", "./gpii/**/*.js", "./tests/**/*.js", "./examples/**/*.js", "*.js"],
+                json:  ["./gpii/**/*.json", "./tests/**/*.json", "./testData/**/*.json", "./*.json"],
+                json5: ["./gpii/**/*.json5", "./tests/**/*.json5", "./testData/**/*.json5", "./*.json5"],
+                other: ["./.*"]
+            }
         }
     });
 
-    grunt.loadNpmTasks("grunt-jsonlint");
-    grunt.loadNpmTasks("fluid-grunt-eslint");
-
-    grunt.registerTask("lint", "Apply jshint and jsonlint", ["eslint", "jsonlint"]);
+    grunt.loadNpmTasks("gpii-grunt-lint-all");
+    grunt.registerTask("lint", "Perform all standard lint checks.", ["lint-all"]);
 };
