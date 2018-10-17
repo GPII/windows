@@ -1,6 +1,6 @@
 {
-  "extends": "eslint-config-fluid",
-  "env": {
-    "node": true
-  }
+    "extends": "eslint-config-fluid",
+    "env": {
+        "node": true
+    }
 }
