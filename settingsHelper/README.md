@@ -1,4 +1,4 @@
-# hello
+# Windows system settings handler helper process
 
 Small utility that sets Windows settings via the back-end used by the Windows 10 setting app.
 
@@ -12,10 +12,10 @@ List all possible settings for the current system:
 
     SettingsHelper -list
 
-
 ## Payload JSON
 
 The payload sent to the application's standard input looks like this:
+
 ```json
 [
     {
@@ -34,7 +34,6 @@ There can be several items, allowing more than one setting to be applied.
 
 See [examples](./examples)
 
-
 ### Methods
 
 | Method |  |
@@ -48,31 +47,26 @@ See [examples](./examples)
 
 These are the exposed methods of the [SettingItem](WindowsSettings/SettingItem.cs) class.
 
-
 ### Setting Types and methods
 
 The type of a setting can be retrieved with `WindowsSettings -list`.
 
-
 #### `Boolean`, `String`, `List`, `LabeledString`, and `Range`
 
-The `GetValue` method returns the value, and `SetValue` sets it. 
+The `GetValue` method returns the value, and `SetValue` sets it.
 
 * `Boolean` and `String` settings are straightforward.
 * `List` settings accept one of several possible values (or the index, depending on the setting), returned by `GetPossibleValues`.
 * `Range` appears to be numeric, determining the min and max value is currently unknown.
 * `LabeledString` is read-only.
 
-
 #### `Action`
 
 Settings of this type perform an action when the `Invoke` method is used.
 
-
 #### `Custom`, `DisplayString` and `SettingCollection`
 
 Unsupported - needs further investigation.
-
 
 ## Response
 
@@ -90,18 +84,15 @@ Each payload item yields a response:
 * `isError`: true if there was an error (optional).
 * `errorMessage`: The error message (optional).
 
-
 ## Limitations
 
 * Relies heavily on undocumented behaviour.
 * Some settings crash.
 * The availability of settings depends on the exact Windows version.
 
-
 ## Building
 
     msbuild WindowsSettings.sln /t:Rebuild /p:Configuration=Release /p:Platform="Any CPU"
-
 
 ## How it works
 
