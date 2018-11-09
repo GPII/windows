@@ -15,12 +15,19 @@ param ( # default to script path if no parameter is given
 # Turn verbose on, change to "SilentlyContinue" for default behaviour.
 $VerbosePreference = "continue"
 
-# Include main Provisioning module.
-Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force -Verbose
-Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1" -Force -Verbose
+# Determine the right dir we are building from
+If ($originalBuildScriptPath -eq "V:\provisioning\") {
+    Write-Verbose "I'm running from a GPII provisioned box. Changing into V: folder to avoid problems during 'npm install'"
+    $mainDir = "V:\"
+    net use V: \\vboxsvr\vagrant
+    pushd V:
+} Else {
+    $mainDir = (get-item $originalBuildScriptPath).parent.FullName
+}
 
-# Obtain some useful paths.
-$mainDir = (get-item $originalBuildScriptPath).parent.FullName
+# Include main Provisioning module.
+Import-Module "$($mainDir)/provisioning/Provisioning.psm1" -Force -Verbose
+Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1" -Force -Verbose
 
 # Acquire information about the system and environment.
 $winVersion = [System.Environment]::OSVersion
