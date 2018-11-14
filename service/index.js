@@ -123,7 +123,7 @@ function uninstall() {
 }
 
 function startService() {
-    var dataDir = path.join(process.env.ProgramData, "GPII");
+    var dataDir = path.join(process.env.ProgramData, "Morphic");
 
     try {
         fs.mkdirSync(dataDir);
@@ -143,6 +143,9 @@ function startService() {
     }
 
     process.on("uncaughtException", function (err) {
+        if (!args.service) {
+            console.error(err);
+        }
         logging.error(err, (err && err.stack) ? err.stack : err);
     });
 

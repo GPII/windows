@@ -17,19 +17,18 @@
         "service-stop": "sc stop gpii-service"
     },
     "dependencies": {
-        "bluebird": "^3.5.0",
+        "bluebird": "3.5.3",
         "os-service": "stegru/node-os-service#GPII-2338",
-        "ffi": "2.0.0",
-        "ref": "1.3.4",
-        "ref-struct": "1",
-        "ref-array": "1.1.2",
-        "ref-wchar": "^1.0.2",
+        "ffi-napi": "2.4.4",
+        "ref-napi": "1.4.0",
+        "ref-struct-di": "1.1.0",
+        "ref-array-di": "1.2.1",
         "minimist": "1.2.0",
-        "json5": "0.5.1"
+        "json5": "2.1.0"
     },
     "pkg": {
         "targets": [
-            "node6-win-x86"
+            "node10-win-x86"
         ],
         "scripts": "config/service.json5"
     }

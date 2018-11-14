@@ -53,7 +53,7 @@ process.on("uncaughtException", function (e) {
 log("child started");
 
 function setEvent(eventHandle) {
-    var ffi = require("ffi");
+    var ffi = require("ffi-napi");
     var kernel32 = ffi.Library("kernel32", {
         "SetEvent": [
             "int", [ "uint" ]

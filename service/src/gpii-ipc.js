@@ -18,7 +18,7 @@
 
 "use strict";
 
-var ref = require("ref"),
+var ref = require("ref-napi"),
     net = require("net"),
     crypto = require("crypto"),
     Promise = require("bluebird"),

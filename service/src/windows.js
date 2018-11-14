@@ -17,7 +17,7 @@
 
 "use strict";
 
-var ref = require("ref"),
+var ref = require("ref-napi"),
     Promise = require("bluebird"),
     logging = require("./logging.js"),
     winapi = require("./winapi.js"),

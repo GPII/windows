@@ -17,10 +17,10 @@
 
 "use strict";
 
-var ffi = require("ffi"),
-    ref = require("ref"),
-    Struct = require("ref-struct"),
-    arrayType = require("ref-array");
+var ffi = require("ffi-napi"),
+    ref = require("ref-napi"),
+    Struct = require("ref-struct-di")(ref),
+    arrayType = require("ref-array-di")(ref);
 
 var winapi = {};
 
