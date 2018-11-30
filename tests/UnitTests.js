@@ -26,3 +26,4 @@ require("../gpii/node_modules/wmiSettingsHandler/test/testWmiSettingsHandler.js"
 require("../gpii/node_modules/windowMessages/test/windowMessagesTest.js");
 require("../gpii/node_modules/userListeners/test/all-tests.js");
 require("../gpii/node_modules/gpii-app-zoom/test/testAppZoom.js");
+require("../gpii/node_modules/gpii-localisation/test/testLanguage.js");
