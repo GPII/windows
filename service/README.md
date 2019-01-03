@@ -63,7 +63,7 @@ To specify the config file, use the `--config` option when running or installing
 
 ### Config options
 
-```javascript
+```json5
 {
     "processes": {
         /* A process block */
@@ -82,7 +82,7 @@ To specify the config file, use the `--config` option when running or installing
         "gpii-dev": {
             "ipc": "gpii",
             "noAuth": true
-        }
+        },
 
         /* More processes */
         "rfid-listener": {
