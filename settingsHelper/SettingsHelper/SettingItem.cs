@@ -100,6 +100,7 @@ namespace SettingsHelper
         {
             int timer = 5000, delay = 200;
 
+            this.settingItem.GetValue(valueName);
             while (!this.gotValue && (timer -= delay) > 0)
             {
                 Thread.Sleep(delay);
