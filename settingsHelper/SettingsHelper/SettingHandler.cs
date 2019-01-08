@@ -63,54 +63,101 @@ namespace SettingsHelper
 
                 payload.SettingItem = settingItem;
 
-                // Get the parameter types to get the right overload.
-                Type[] paramTypes = Type.EmptyTypes;
-                if (payload.Parameters != null)
-                {
-                    paramTypes = payload.Parameters.Select(p => p.GetType()).ToArray();
+                BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase;
+                MethodInfo getMethod = settingItem.GetType().GetMethod("GetValue", bindingFlags, null, Type.EmptyTypes, null);
+
+                if (getMethod == null) {
+                    throw new SettingFailedException("Unable to get 'GetValue' method, setting can't be verified");
                 }
 
-                BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase;
-                MethodInfo method =
-                    settingItem.GetType().GetMethod(payload.Method, bindingFlags, null, paramTypes, null);
+                var oldValue = getMethod.Invoke(settingItem, null);
 
-                if (method == null)
+                // In case of setting a new value, verify that the setting value has changed
+                if (payload.Method == "GetValue")
                 {
-                    // Method can't be found matching the parameter types, get any method with the same name
-                    // and let .Invoke worry about the parameters.
-                    try
+                    result.ReturnValue = oldValue;
+                }
+                else
+                {
+
+                    // Get the parameter types to get the right overload.
+                    Type[] paramTypes = Type.EmptyTypes;
+                    if (payload.Parameters != null)
                     {
-                        method = settingItem.GetType().GetMethod(payload.Method, bindingFlags);
+                        paramTypes = payload.Parameters.Select(p => p.GetType()).ToArray();
                     }
-                    catch (AmbiguousMatchException)
-                    {
-                        method = null;
-                    }
+
+                    MethodInfo method =
+                        settingItem.GetType().GetMethod(payload.Method, bindingFlags, null, paramTypes, null);
 
                     if (method == null)
                     {
-                        throw new SettingFailedException("Unknown method " + payload.Method);
+                        // Method can't be found matching the parameter types, get any method with the same name
+                        // and let .Invoke worry about the parameters.
+                        try
+                        {
+                            method = settingItem.GetType().GetMethod(payload.Method, bindingFlags);
+                        }
+                        catch (AmbiguousMatchException)
+                        {
+                            method = null;
+                        }
+
+                        if (method == null)
+                        {
+                            throw new SettingFailedException("Unknown method " + payload.Method);
+                        }
                     }
-                }
 
-                if (!method.IsExposed())
-                {
-                    // Only use those with the "Exposed" attribute.
-                    throw new SettingFailedException("Not an exposed method " + payload.Method);
-                }
-
-                try
-                {
-                    result.ReturnValue = method.Invoke(settingItem, payload.Parameters);
-                    if (!(payload.Async ?? true))
+                    if (!method.IsExposed())
                     {
-                        settingItem.WaitForCompletion(5);
+                        // Only use those with the "Exposed" attribute.
+                        throw new SettingFailedException("Not an exposed method " + payload.Method);
                     }
-                }
-                catch (Exception e)
-                {
-                    // Catching general exceptions is ok with .NET 4 because corrupted state exceptions aren't caught.
-                    throw new SettingFailedException(null, e.InnerException ?? e);
+
+                    try
+                    {
+                        object expectedValue = null;
+                        if (payload.Parameters.Length == 1 && payload.Method == "SetValue")
+                        {
+                            expectedValue = oldValue;
+                        }
+                        else
+                        {
+                            if (payload.ExpectedValue != null) {
+                                expectedValue = payload.ExpectedValue;
+                            } else {
+                                throw new SettingFailedException("Unable to verify setting due to missing 'ExpectedValue' field in payload");
+                            }
+                        }
+
+                        Type paramType = paramTypes[0];
+                        var parameter = Convert.ChangeType(payload.Parameters[0], paramType);
+
+                        if (!parameter.Equals(oldValue))
+                        {
+                            result.ReturnValue = method.Invoke(settingItem, payload.Parameters);
+
+                            if (!(payload.Async ?? true))
+                            {
+                                settingItem.WaitForCompletion(5);
+                            }
+
+                            var newValue = getMethod.Invoke(settingItem, null);
+
+                            if (!newValue.Equals(parameter))
+                            {
+                                throw new SettingFailedException("Unable to set the provided setting value");
+                            }
+                        } else {
+                            result.ReturnValue = oldValue;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // Catching general exceptions is ok with .NET 4 because corrupted state exceptions aren't caught.
+                        throw new SettingFailedException(null, e.InnerException ?? e);
+                    }
                 }
             }
             catch (SettingFailedException e)
@@ -139,6 +186,9 @@ namespace SettingsHelper
         [DataMember(Name = "parameters")]
         public object[] Parameters { get; private set; }
 
+        /// <summary> The expected value for the setting after performing the set operation.</summary>
+        [DataMember(Name = "expectedValue")]
+        public object ExpectedValue { get; private set; }
         /// <summary>False to wait for this setting to complete.</summary>
         [DataMember(Name = "async")]
         public bool? Async { get; private set; }
