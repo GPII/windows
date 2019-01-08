@@ -30,6 +30,6 @@
         "targets": [
             "node10-win-x86"
         ],
-        "scripts": "config/service.json5"
+        "assets": "config/service.json5"
     }
 }
