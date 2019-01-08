@@ -100,6 +100,8 @@ namespace SettingsHelper
         {
             int timer = 5000, delay = 200;
 
+            // This function is neccessary to be called so the async operations
+            // for getting the actual ISettingItem value are triggered.
             this.settingItem.GetValue(valueName);
             while (!this.gotValue && (timer -= delay) > 0)
             {
