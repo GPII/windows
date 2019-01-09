@@ -79,7 +79,6 @@ namespace SettingsHelper
                 }
                 else
                 {
-
                     // Get the parameter types to get the right overload.
                     Type[] paramTypes = Type.EmptyTypes;
                     if (payload.Parameters != null)
@@ -120,21 +119,22 @@ namespace SettingsHelper
                         object expectedValue = null;
                         if (payload.Parameters.Length == 1 && payload.Method == "SetValue")
                         {
-                            expectedValue = oldValue;
+                            Type paramType = paramTypes[0];
+                            expectedValue = Convert.ChangeType(payload.Parameters[0], paramType);
                         }
                         else
                         {
                             if (payload.ExpectedValue != null) {
-                                expectedValue = payload.ExpectedValue;
-                            } else {
+                                Type expValueType = payload.ExpectedValue.GetType();
+                                expectedValue = Convert.ChangeType(payload.ExpectedValue, expValueType);
+                            }
+                            else
+                            {
                                 throw new SettingFailedException("Unable to verify setting due to missing 'ExpectedValue' field in payload");
                             }
                         }
 
-                        Type paramType = paramTypes[0];
-                        var parameter = Convert.ChangeType(payload.Parameters[0], paramType);
-
-                        if (!parameter.Equals(oldValue))
+                        if (!expectedValue.Equals(oldValue))
                         {
                             result.ReturnValue = method.Invoke(settingItem, payload.Parameters);
 
@@ -145,11 +145,13 @@ namespace SettingsHelper
 
                             var newValue = getMethod.Invoke(settingItem, null);
 
-                            if (!newValue.Equals(parameter))
+                            if (!expectedValue.Equals(newValue))
                             {
                                 throw new SettingFailedException("Unable to set the provided setting value");
                             }
-                        } else {
+                        }
+                        else
+                        {
                             result.ReturnValue = oldValue;
                         }
                     }
