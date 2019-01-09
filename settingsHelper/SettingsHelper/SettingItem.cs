@@ -140,6 +140,7 @@ namespace SettingsHelper
             {
                 this.settingItem.SetValue(valueName, newValue);
             }
+            WaitForCompletion(5);
 
             return old;
         }
