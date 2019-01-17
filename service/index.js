@@ -65,7 +65,7 @@ function showUsage() {
  */
 function install() {
 
-    var serviceName = args.serviceName || "gpii-service";
+    var serviceName = args.serviceName || "morphic-service";
 
     var serviceArgs = [ "--service" ];
 
@@ -107,10 +107,10 @@ function install() {
  * Removes the service. This needs to be ran as Administrator, and the service should be already stopped.
  *
  * It reads the following arguments from the command line:
- *  --serviceName NAME   Name of the Windows Service (default: gpii-service).
+ *  --serviceName NAME   Name of the Windows Service (default: morphic-service).
  */
 function uninstall() {
-    var serviceName = args.serviceName || "gpii-service";
+    var serviceName = args.serviceName || "morphic-service";
 
     console.log("Uninstalling");
     os_service.remove(serviceName, function (error) {
@@ -135,7 +135,7 @@ function startService() {
 
     if (args.service) {
         // Set up the logging early - there's no way to capture stdout for windows services.
-        var logFile = path.join(dataDir, "gpii-service.log");
+        var logFile = path.join(dataDir, "morphic-service.log");
         logging.setFile(logFile);
     }
     if (args.loglevel) {
