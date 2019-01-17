@@ -1,5 +1,5 @@
 {
-    "name": "gpii-service",
+    "name": "morphic-service",
     "version": "0.0.1",
     "description": "Windows service to ensure GPII is running.",
     "author": "GPII",
@@ -13,8 +13,8 @@
         "service-install-dev": "node ./index.js --install --config=service.dev.json5",
         "service-install": "node ./index.js --install --config=service.dev.child.json5",
         "service-uninstall": "node ./index.js --uninstall",
-        "service-start": "sc start gpii-service",
-        "service-stop": "sc stop gpii-service"
+        "service-start": "sc start morphic-service",
+        "service-stop": "sc stop morphic-service"
     },
     "dependencies": {
         "bluebird": "3.5.3",
