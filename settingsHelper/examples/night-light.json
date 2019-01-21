@@ -1,0 +1,6 @@
+[
+    {
+        "settingID": "SystemSettings_Display_BlueLight_ManualToggleQuickAction",
+        "method": "GetValue"
+    }
+]

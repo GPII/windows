@@ -32,17 +32,11 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     choco upgrade firefox googlechrome -y
-    # Copying custom Provisioning powershell module to vagrant tmp location.
-    # I didn't find another way to load a custom Powershell module avoiding
-    # the compactation of vagrant scripts in the tmp location.
-    $moduleLocation = Join-Path $env:SystemDrive "vagrant/provisioning/Provisioning.psm1"
-    $destinationDir = Join-Path $env:SystemDrive "tmp"
-    cp $moduleLocation $destinationDir
   SHELL
-  
-  config.vm.provision "shell", path: "provisioning/Chocolatey.ps1"
-  config.vm.provision "shell", path: "provisioning/Npm.ps1"
-  config.vm.provision "shell", path: "provisioning/Build.ps1"
-  config.vm.provision "shell", path: "provisioning/Installer.ps1"
+
+  # Provide original script path for use in relative paths, since vagrant copies the script to a temporary location
+  config.vm.provision "shell", path: "provisioning/Chocolatey.ps1", args: "-originalBuildScriptPath \"C:\\vagrant\\provisioning\\\""
+  config.vm.provision "shell", path: "provisioning/Npm.ps1", args: "-originalBuildScriptPath \"C:\\vagrant\\provisioning\\\""
+  config.vm.provision "shell", path: "provisioning/Build.ps1", args: "-originalBuildScriptPath \"V:\\provisioning\\\""
 
 end
