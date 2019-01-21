@@ -80,8 +80,12 @@ if (!configFile) {
         }
     }
     if (!configFile) {
-        // Use the built-in config file.
-        configFile = (service.isService ? "config/service.json5" : "config/service.dev.json5");
+        if (service.isService) {
+            // Use the built-in config file.
+            configFile = path.join(__dirname, "../config/service.json5");
+        } else {
+            configFile = "config/service.dev.json5";
+        }
     }
 }
 if ((configFile.indexOf("/") === -1) && (configFile.indexOf("\\") === -1)) {

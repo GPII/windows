@@ -50,7 +50,7 @@ function showUsage() {
     console.log("         Comma separated arguments to pass to the service (use with --install).");
     console.log(" --uninstall   Uninstall the Windows Service.");
     console.log(" --service     Only used when running as a service.");
-    console.log(" --config=FILE Specify the config file to use (default: service-config.json).");
+    console.log(" --config=FILE Specify the config file to use (default: service.json5).");
 }
 
 /**
@@ -151,12 +151,9 @@ function startService() {
 
     // Start the service
     if (args.service) {
-        os_service.on("start", function () {
-            require("./src/main.js");
-        });
-        os_service.run(logging.logStream);
-    } else {
-        require("./src/main.js");
+        logging.log("Starting service");
+        os_service.run();
+        logging.log("Service initialising");
     }
-
+    require("./src/main.js");
 }
