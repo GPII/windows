@@ -17,13 +17,11 @@
 
 "use strict";
 
-var fs = require("fs"),
-    stream = require("stream");
+var fs = require("fs");
 
 var logging = {};
 
 logging.logFile = null;
-logging.logStream = null;
 
 logging.levels = {
     "FATAL": 0,
@@ -32,11 +30,6 @@ logging.levels = {
     "INFO": 30,
     "DEBUG": 40
 };
-
-// The current logging level
-logging.logLevel = logging.levels.INFO;
-// Default level for Log entries when unspecified.
-logging.defaultLevel = logging.levels.INFO;
 
 logging.setLogLevel = function (newLevel) {
     var level = newLevel || logging.defaultLevel;
@@ -93,13 +86,14 @@ logging.doLog = function (level, args) {
 logging.setFile = function (file) {
     logging.logFile = file;
 
-    // Create a stream that logs each line to the log file, which will be used when redirecting stdout/err.
-    logging.logStream = new stream.Writable();
-    logging.logStream._write = function (chunk, encoding, done) {
+    // Capture and log writes to standard out and err.
+    var write = function (chunk, encoding, done) {
         // This assumes a whole line is in one chunk. If not, then the parts of line will be on different log entries.
         logging.log(chunk.toString().trim());
         done && done();
     };
+
+    process.stdout._write = process.stderr._write = write;
 };
 
 /**
@@ -145,6 +139,11 @@ for (var level in logging.levels) {
         logging.levels[level] = levelObj;
     }
 }
+
+// Default level for Log entries when unspecified.
+logging.defaultLevel = logging.levels.INFO;
+// The current logging level
+logging.logLevel = logging.defaultLevel;
 
 /** @name logging.fatal
  *  @function
