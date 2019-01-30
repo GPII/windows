@@ -26,6 +26,7 @@ logging.logFile = null;
 logging.levels = {
     "FATAL": 0,
     "ERROR": 10,
+    "IMPORTANT": 10,
     "WARN": 20,
     "INFO": 30,
     "DEBUG": 40
@@ -149,6 +150,9 @@ logging.logLevel = logging.defaultLevel;
  *  @function
  */
 /** @name logging.error
+ *  @function
+ */
+/** @name logging.important
  *  @function
  */
 /** @name logging.warn

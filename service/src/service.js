@@ -17,7 +17,8 @@
 
 "use strict";
 
-var os_service = require("os-service"),
+var Promise = require("bluebird"),
+    os_service = require("os-service"),
     path = require("path"),
     fs = require("fs"),
     events = require("events"),
@@ -33,7 +34,8 @@ var os_service = require("os-service"),
  * The events are:
  *  start - The service has started.
  *
- *  stop - The service is about to stop.
+ *  stopping(promises) - The service is about to stop. Add a promise to the first argument to delay the shutdown.
+ *  stop - The service is about to stop (second pass).
  *
  *  service.<control code name> - The service has received a control code (see service.controlHandler())
  *
@@ -54,6 +56,7 @@ service.isExe = !!process.versions.pkg;
 service.log = logging.log;
 service.logFatal = logging.fatal;
 service.logError = logging.error;
+service.logImportant = logging.important;
 service.logWarn = logging.warn;
 service.logDebug = logging.debug;
 
@@ -125,8 +128,12 @@ service.start = function () {
  * Stop the service.
  */
 service.stop = function () {
-    service.emit("stop");
-    os_service.stop();
+    var promises = [];
+    service.emit("stopping", promises);
+    Promise.all(promises).then(function () {
+        service.emit("stop", promises);
+        os_service.stop();
+    });
 };
 
 /**

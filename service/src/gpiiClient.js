@@ -20,7 +20,8 @@
 var Promise = require("bluebird"),
     child_process = require("child_process"),
     service = require("./service.js"),
-    ipc = require("./gpii-ipc.js");
+    ipc = require("./gpii-ipc.js"),
+    processHandling = require("./processHandling.js");
 
 var gpiiClient = {};
 module.exports = gpiiClient;
@@ -35,72 +36,86 @@ gpiiClient.options = {
  *
  * @type {Function(request)}
  */
-gpiiClient.requestHandlers = {
-    /**
-     * Executes something.
-     *
-     * @param {Object} request The request data.
-     * @param {String} request.command The command to run.
-     * @param {Array<String>} request.args Arguments to pass.
-     * @param {Object} request.options The options argument for child_process.spawn.
-     * @param {Boolean} request.wait True to wait for the process to terminate before resolving.
-     * @param {Boolean} request.capture True capture output to stdout/stderr members of the response; implies wait=true.
-     * @return {Promise} Resolves when the process has started, if wait=false, or when it's terminated.
-     */
-    "execute": function (request) {
-        return new Promise(function (resolve, reject) {
-            if (request.capture) {
-                request.wait = true;
-            }
+gpiiClient.requestHandlers = {};
 
-            // spawn is used instead of exec, to avoid using the shell and worry about escaping.
-            var child = child_process.spawn(request.command, request.args, request.options);
+/**
+ * Executes something.
+ *
+ * @param {Object} request The request data.
+ * @param {String} request.command The command to run.
+ * @param {Array<String>} request.args Arguments to pass.
+ * @param {Object} request.options The options argument for child_process.spawn.
+ * @param {Boolean} request.wait True to wait for the process to terminate before resolving.
+ * @param {Boolean} request.capture True capture output to stdout/stderr members of the response; implies wait=true.
+ * @return {Promise} Resolves when the process has started, if wait=false, or when it's terminated.
+ */
+gpiiClient.requestHandlers.execute = function (request) {
+    return new Promise(function (resolve, reject) {
+        if (request.capture) {
+            request.wait = true;
+        }
 
-            child.on("error", function (err) {
-                reject({
-                    isError: true,
-                    error: err
-                });
+        // spawn is used instead of exec, to avoid using the shell and worry about escaping.
+        var child = child_process.spawn(request.command, request.args, request.options);
+
+        child.on("error", function (err) {
+            reject({
+                isError: true,
+                error: err
             });
-
-            if (child.pid) {
-                var output = null;
-                if (request.capture) {
-                    output = {
-                        stdout: "",
-                        stderr: ""
-                    };
-                    child.stdout.on("data", function (data) {
-                        // Limit the output to ~1 million characters
-                        if (output.stdout.length < 0xfffff) {
-                            output.stdout += data;
-                        }
-                    });
-                    child.stderr.on("data", function (data) {
-                        if (output.stderr.length < 0xfffff) {
-                            output.stderr += data;
-                        }
-                    });
-                }
-
-                if (request.wait) {
-                    child.on("exit", function (code, signal) {
-                        var result = {
-                            code: code,
-                            signal: signal
-                        };
-                        if (output) {
-                            result.output = output;
-                        }
-                        resolve(result);
-                    });
-                } else {
-                    resolve({pid: child.pid});
-                }
-            }
         });
-    }
+
+        if (child.pid) {
+            var output = null;
+            if (request.capture) {
+                output = {
+                    stdout: "",
+                    stderr: ""
+                };
+                child.stdout.on("data", function (data) {
+                    // Limit the output to ~1 million characters
+                    if (output.stdout.length < 0xfffff) {
+                        output.stdout += data;
+                    }
+                });
+                child.stderr.on("data", function (data) {
+                    if (output.stderr.length < 0xfffff) {
+                        output.stderr += data;
+                    }
+                });
+            }
+
+            if (request.wait) {
+                child.on("exit", function (code, signal) {
+                    var result = {
+                        code: code,
+                        signal: signal
+                    };
+                    if (output) {
+                        result.output = output;
+                    }
+                    resolve(result);
+                });
+            } else {
+                resolve({pid: child.pid});
+            }
+        }
+    });
 };
+
+/**
+ * The user process is shutting down (eg, due to the user logging out of the system). The client sends this request
+ * to prevent the service restarting it when it terminates.
+ *
+ */
+gpiiClient.requestHandlers.closing = function () {
+    service.logImportant("GPII Client is closing itself");
+    gpiiClient.inShutdown = true;
+    processHandling.dontRestartProcess(gpiiClient.ipcConnection.processKey);
+};
+
+/** @type {Boolean} true if the client is being shutdown */
+gpiiClient.inShutdown = false;
 
 /**
  * Adds a command handler.
@@ -125,10 +140,25 @@ gpiiClient.ipcConnection = null;
  */
 gpiiClient.connected = function (ipcConnection) {
     gpiiClient.ipcConnection = ipcConnection;
+    gpiiClient.inShutdown = false;
     ipcConnection.requestHandler = gpiiClient.requestHandler;
+
     service.log("Established IPC channel with the GPII user process");
 
     gpiiClient.monitorStatus(gpiiClient.options.clientTimeout);
+};
+
+/**
+ * Called when the GPII user process has disconnected from the service.
+ *
+ * @param {IpcConnection} ipcConnection The IPC connection.
+ */
+gpiiClient.closed = function (ipcConnection) {
+    service.log("Lost IPC channel with the GPII user process");
+    gpiiClient.ipcConnection = null;
+    if (!gpiiClient.inShutdown) {
+        processHandling.stopChildProcess(ipcConnection.processKey, true);
+    }
 };
 
 /**
@@ -140,25 +170,20 @@ gpiiClient.connected = function (ipcConnection) {
 gpiiClient.monitorStatus = function (timeout) {
 
     var isRunning = false;
-    var pid = gpiiClient.ipcConnection.pid;
+    var processKey = gpiiClient.ipcConnection && gpiiClient.ipcConnection.processKey;
 
     gpiiClient.sendRequest("status").then(function (response) {
-        isRunning = response.isRunning;
+        isRunning = response && response.isRunning;
     });
 
     setTimeout(function () {
-        if (isRunning) {
+        if (gpiiClient.inShutdown || !gpiiClient.ipcConnection) {
+            // No longer needs to be monitored.
+        } else if (isRunning) {
             gpiiClient.monitorStatus(timeout);
         } else {
             service.logError("GPII client is not responding.");
-            if (pid) {
-                // Terminate the process, and it should restart.
-                try {
-                    process.kill(pid);
-                } catch (e) {
-                    service.log("Error killing GPII client", e);
-                }
-            }
+            processHandling.stopChildProcess(processKey, true);
         }
     }, timeout * 1000);
 };
@@ -188,7 +213,25 @@ gpiiClient.sendRequest = function (requestType, requestData) {
         requestType: requestType,
         requestData: requestData
     };
-    return ipc.sendRequest("gpii", req);
+    return ipc.sendRequest(gpiiClient.ipcConnection, req);
+};
+
+/**
+ * Tell the GPII user process to shutdown.
+ * @return {Promise} Resolves with the response when it is received.
+ */
+gpiiClient.shutdown = function () {
+    if (!gpiiClient.inShutdown) {
+        gpiiClient.inShutdown = true;
+        return gpiiClient.sendRequest("shutdown");
+    }
 };
 
 service.on("ipc.connected:gpii", gpiiClient.connected);
+service.on("ipc.closed:gpii", gpiiClient.closed);
+
+service.on("stopping", function (promises) {
+    promises.push(gpiiClient.shutdown());
+});
+
+//setTimeout(service.stop, 15000);

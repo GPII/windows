@@ -26,6 +26,32 @@ var Promise = require("bluebird"),
 var processHandling = {};
 module.exports = processHandling;
 
+/**
+ * Configuration of a child process (taken from service.json5)
+ * @typedef {Object} ProcessConfig
+ * @property {String} command The command.
+ * @property {String} key Identifier.
+ * @property {Boolean} autoRestart true to re-start the process if terminates.
+ * @property {String} ipc IPC channel name (optional).
+ * @property {Object} env Environment variables to set (optional).
+ * @property {String} currentDir The current dir (optional).
+ */
+
+/**
+ * A running child process
+ * @typedef {Object} ChildProcess
+ * @property {ProcessConfig} procConfig The process configuration.
+ * @property {Number} pid Process ID.
+ * @property {Array<Number>} lastStart When the process was started (used for restart-throttling)
+ * @property {Number} failureCount How many times this process has failed to start.
+ * @property {Boolean} shutdown true if shutting down.
+ * @property {String} creationTime A number representing the time the process started. Used to ensure the process
+ *   identified by pid is the same process.
+ */
+
+/**
+ * @type {Array<ChildProcess>}
+ */
 processHandling.childProcesses = {};
 
 /**
@@ -37,8 +63,12 @@ processHandling.sessionChange = function (eventType) {
 
     switch (eventType) {
     case "session-logon":
-        // User just logged on.
+        // User just logged on - start the processes.
         processHandling.startChildProcesses();
+        break;
+    case "session-logoff":
+        // User just logged off - stop the processes (windows should have done this already).
+        processHandling.stopChildProcesses();
         break;
     }
 };
@@ -65,13 +95,7 @@ processHandling.startChildProcesses = function () {
 /**
  * Starts a process.
  *
- * @param {Object} procConfig The process configuration (from service-config.json).
- * @param {String} procConfig.command The command.
- * @param {String} procConfig.key Identifier.
- * @param {Boolean} procConfig.autoRestart [Optional] true to re-start the process if terminates.
- * @param {String} procConfig.ipc [Optional] IPC channel name.
- * @param {Object} procConfig.env [Optional] Environment variables to set.
- * @param {String} procConfig.currentDir [Optional] The current dir.
+ * @param {ProcessConfig} procConfig The process configuration (from service-config.json).
  * @return {Promise} Resolves (with the pid) when the process has started.
  */
 processHandling.startChildProcess = function (procConfig) {
@@ -101,7 +125,8 @@ processHandling.startChildProcess = function (procConfig) {
         env: procConfig.env,
         currentDir: procConfig.currentDir,
         authenticate: !procConfig.noAuth,
-        admin: procConfig.admin
+        admin: procConfig.admin,
+        processKey: procConfig.key
     };
 
     var processPromise = null;
@@ -144,15 +169,16 @@ processHandling.stopChildProcesses = function () {
 };
 
 /**
- * Stops a child process, without restarting it.
+ * Stops a child process.
  * @param {String} processKey Identifies the child process.
+ * @param {Boolean} [restart] Allow the process to be restarted, if configured.
  */
-processHandling.stopChildProcess = function (processKey) {
+processHandling.stopChildProcess = function (processKey, restart) {
     var childProcess = processHandling.childProcesses[processKey];
     if (childProcess) {
         service.log("Stopping " + processKey + ": " + childProcess.procConfig.command);
-        // Don't restart it.
-        childProcess.shutdown = true;
+
+        childProcess.shutdown = !restart;
 
         if (processHandling.isProcessRunning(childProcess.pid,  childProcess.creationTime)) {
             try {
@@ -167,6 +193,17 @@ processHandling.stopChildProcess = function (processKey) {
 };
 
 /**
+ * Set a running process to not restart. Called when the impending termination is intentional.
+ * @param {String} processKey Identifies the child process.
+ */
+processHandling.dontRestartProcess = function (processKey) {
+    var childProcess = processHandling.childProcesses[processKey];
+    if (childProcess) {
+        childProcess.shutdown = true;
+    }
+};
+
+/**
  * Auto-restarts a child process when it terminates.
  *
  * @param {String} processKey Identifies the child process.
@@ -177,7 +214,9 @@ processHandling.autoRestartProcess = function (processKey) {
         service.log("Child process '" + processKey + "' died");
         service.emit("process.stop", processKey);
 
-        if (!childProcess.shutdown) {
+        if (childProcess.shutdown) {
+            service.log("Not restarting process (shutting down)");
+        } else {
             var restart = true;
             // Check if it's failing to start - if it's been running for less than 20 seconds.
             var timespan = process.hrtime(childProcess.lastStart);

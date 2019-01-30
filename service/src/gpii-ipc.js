@@ -41,6 +41,7 @@ ipc.pipePrefix = "\\\\.\\pipe\\gpii-";
  * @property {boolean} admin true to run the process as administrator.
  * @property {number} pid The client pid.
  * @property {String} name Name of the connection.
+ * @property {String} processKey Identifies the child process.
  * @property {messaging.Session} messaging Messaging session.
  * @property {function} requestHandler Function to handle requests for this connection.
  */
@@ -59,6 +60,7 @@ ipc.ipcConnections = {};
  * @param {Boolean} options.authenticate Child must authenticate to pipe (default is true, if undefined).
  * @param {Boolean} options.admin true to keep pipe access to admin-only.
  * @param {Boolean} options.messaging true to use the messaging wrapper.
+ * @param {Boolean} options.processKey Identifies the child process.
  * @return {Promise} Resolves with a value containing the pipe server and pid.
  */
 ipc.startProcess = function (command, ipcName, options) {
@@ -87,7 +89,7 @@ ipc.startProcess = function (command, ipcName, options) {
         ipcConnection.name = ipcName;
         ipcConnection.authenticate = options.authenticate;
         ipcConnection.admin = options.admin;
-        ipcConnection.pid = null;
+        ipcConnection.processKey = options.processKey;
         ipcConnection.messaging = options.messaging ? undefined : false;
     }
 
@@ -206,10 +208,12 @@ ipc.servePipe = function (ipcConnection, pipeServer) {
             }
 
             pipe.on("error", function (err) {
-                logging.log("Pipe error", ipcConnection.name, err);
+                logging.log("Pipe error", ipcConnection.name);
+                service.on("ipc.error", ipcConnection.name, ipcConnection, err);
             });
-            pipe.on("end", function () {
-                logging.log("Pipe end", ipcConnection.name);
+            pipe.on("close", function () {
+                logging.log("Pipe close", ipcConnection.name);
+                service.emit("ipc.closed", ipcConnection.name, ipcConnection);
             });
 
             var promise;
@@ -435,4 +439,8 @@ ipc.sendRequest = function (ipcConnection, request) {
 service.on("ipc.connected", function (name, connection) {
     // emit another event that's bound to the IPC name
     service.emit("ipc.connected:" + name,  connection);
+});
+service.on("ipc.closed", function (name, connection) {
+    // emit another event that's bound to the IPC name
+    service.emit("ipc.closed:" + name,  connection);
 });

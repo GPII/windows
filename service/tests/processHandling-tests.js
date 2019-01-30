@@ -363,7 +363,7 @@ jqUnit.asyncTest("Test startChildProcess", function () {
                             jqUnit.assertEquals("process should not restart" + messageSuffix, "timeout", value);
                         }
 
-                        processHandling.stopChildProcess(procConfig.key);
+                        processHandling.stopChildProcess(procConfig.key, true);
 
                         nextTest(testIndex + 1);
                     }, jqUnit.fail);
@@ -372,7 +372,7 @@ jqUnit.asyncTest("Test startChildProcess", function () {
 
             // Kill the first process.
             if (test.input.stopChildProcess) {
-                processHandling.stopChildProcess(procConfig.key);
+                processHandling.stopChildProcess(procConfig.key, true);
             } else {
                 process.kill(pid);
             }

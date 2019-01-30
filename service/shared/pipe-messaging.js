@@ -102,6 +102,10 @@ function Session(pipe, sessionType, requestCallback, initialData) {
         pipe.on("data", function (data) {
             session.gotData(data);
         });
+
+        pipe.on("close", function (hadError) {
+            session.emit("close", hadError);
+        });
     });
 }
 

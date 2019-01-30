@@ -93,7 +93,7 @@ function install() {
     os_service.add(serviceName, {
         programArgs: serviceArgs,
         nodeArgs: nodeArgs,
-        displayName: "GPII Service"
+        displayName: "Morphic Service"
     }, function (error) {
         if (error) {
             console.log(error.message);
