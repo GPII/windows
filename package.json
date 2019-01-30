@@ -32,6 +32,7 @@
         "fluid-grunt-eslint": "18.1.2",
         "gpii-grunt-lint-all": "1.0.5",
         "grunt": "1.0.3",
+        "lodash": "^4.17.11",
         "node-jqunit": "1.1.8",
         "nyc": "13.0.1",
         "rimraf": "2.6.2",
