@@ -44,6 +44,9 @@ namespace SettingsHelper
         private bool dryRun;
         private bool gotValue = false;
 
+        /// <summary>True to make the setting behaves as an "Async" setting.</summary>
+        private bool async;
+
         /// <see cref="https://msdn.microsoft.com/library/ms684175.aspx"/>
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern IntPtr LoadLibrary(string lpFileName);
@@ -71,8 +74,9 @@ namespace SettingsHelper
         /// </summary>
         /// <param name="settingId">The setting ID.</param>
         /// <param name="dryRun">true to make Invoke and SetValue methods do nothing.</param>
-        public SettingItem(string settingId, bool dryRun = false)
+        public SettingItem(string settingId, bool dryRun = false, bool async = false)
         {
+            this.async = async;
             this.dryRun = dryRun;
             string dllPath = this.GetSettingDll(settingId);
             if (dllPath == null)
@@ -100,7 +104,10 @@ namespace SettingsHelper
         {
             int timer = 5000, delay = 200;
 
-            while (!this.gotValue && (timer -= delay) > 0)
+            // This function is neccessary to be called so the async operations
+            // for getting the actual ISettingItem value are triggered.
+            this.settingItem.GetValue(valueName);
+            while (this.async && !this.gotValue && (timer -= delay) > 0)
             {
                 Thread.Sleep(delay);
             }
@@ -137,6 +144,7 @@ namespace SettingsHelper
             {
                 this.settingItem.SetValue(valueName, newValue);
             }
+            WaitForCompletion(5);
 
             return old;
         }
