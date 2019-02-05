@@ -60,48 +60,48 @@ service.logImportant = logging.important;
 service.logWarn = logging.warn;
 service.logDebug = logging.debug;
 
-// Change directory to a sane location, allowing relative paths in the config file.
-var dir = null;
-if (service.isExe) {
-    // The path of gpii-app.exe
-    dir = path.dirname(process.execPath);
-} else {
-    // Path of the index.js.
-    dir = path.join(__dirname, "..");
-}
-
-process.chdir(dir);
-
-// Load the config file.
-var configFile = service.args.config;
-if (!configFile) {
-    if (service.isService) {
-        // Check if there's a config file next to the service executable.
-        var tryFile = path.join(dir, "service.json5");
-        if (fs.existsSync(tryFile)) {
-            configFile = tryFile;
-        }
-    }
+/**
+ * Loads the config file, which may be found in the first of the following locations:
+ * - The file parameter.
+ * - "--config" command line option.
+ * - "service.json5" next to the service executable.
+ * - "service.json5" in the config directory.
+ *
+ * @param {String} dir The directory form which relative paths are used.
+ * @param {String} file [optional] The config file.
+ */
+service.loadConfig = function (dir, file) {
+    // Load the config file.
+    var configFile = file || service.args.config;
     if (!configFile) {
         if (service.isService) {
-            // Use the built-in config file.
-            configFile = path.join(__dirname, "../config/service.json5");
-        } else {
-            configFile = "config/service.dev.json5";
+            // Check if there's a config file next to the service executable.
+            var tryFile = path.join(dir, "service.json5");
+            if (fs.existsSync(tryFile)) {
+                configFile = tryFile;
+            }
+        }
+        if (!configFile) {
+            if (service.isService) {
+                // Use the built-in config file.
+                configFile = path.join(__dirname, "../config/service.json5");
+            } else {
+                configFile = "config/service.dev.json5";
+            }
         }
     }
-}
-if ((configFile.indexOf("/") === -1) && (configFile.indexOf("\\") === -1)) {
-    configFile = path.join(dir, "config", configFile);
-}
+    if ((configFile.indexOf("/") === -1) && (configFile.indexOf("\\") === -1)) {
+        configFile = path.join(dir, "config", configFile);
+    }
 
-service.log("Loading config file", configFile);
-service.config = JSON5.parse(fs.readFileSync(configFile));
+    service.log("Loading config file", configFile);
+    service.config = JSON5.parse(fs.readFileSync(configFile));
 
-// Change to the configured log level (if it's not passed via command line)
-if (!service.args.loglevel && service.config.logging && service.config.logging.level) {
-    logging.setLogLevel(service.config.logging.level);
-}
+    // Change to the configured log level (if it's not passed via command line)
+    if (!service.args.loglevel && service.config.logging && service.config.logging.level) {
+        logging.setLogLevel(service.config.logging.level);
+    }
+};
 
 /**
  * Called when the service has just started.
@@ -118,7 +118,7 @@ service.start = function () {
     service.emit("start");
     service.log("service start");
 
-    if (windows.isUserLoggedOn) {
+    if (windows.isUserLoggedOn()) {
         // The service was started while a user is already active; fake a session-change event to get things started.
         service.controlHandler("sessionchange", "session-logon");
     }
@@ -161,5 +161,22 @@ service.controlHandler = function (controlName, eventType) {
     service.logDebug("Service control: ", controlName, eventType);
     service.emit("service." + controlName, eventType);
 };
+
+
+// Change directory to a sane location, allowing relative paths in the config file.
+var dir = null;
+if (service.isExe) {
+    // The directory containing this executable (morphic-service.exe)
+    dir = path.dirname(process.execPath);
+} else {
+    // Path of the index.js.
+    dir = path.join(__dirname, "..");
+}
+
+process.chdir(dir);
+
+// Load the configuration
+service.loadConfig(dir);
+
 
 module.exports = service;

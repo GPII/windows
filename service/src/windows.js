@@ -201,18 +201,6 @@ windows.getUserDataDir = function (userToken) {
 };
 
 /**
- * Terminates a process.
- * @param {Number} pid Process ID.
- */
-windows.endProcess = function (pid) {
-    var hProcess = winapi.kernel32.OpenProcess(winapi.constants.PROCESS_TERMINATE, 0, pid);
-    if (hProcess !== winapi.NULL) {
-        winapi.kernel32.TerminateProcess(hProcess, 9);
-        winapi.kernel32.CloseHandle(hProcess);
-    }
-};
-
-/**
  * Returns a promise that resolves when a process has terminated, or after the given timeout.
  *
  * @param {Number} pid The process ID.

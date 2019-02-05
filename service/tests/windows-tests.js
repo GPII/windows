@@ -462,3 +462,92 @@ jqUnit.asyncTest("Test waitForMultipleObjects with a process", function () {
 
     runTest(false);
 });
+
+jqUnit.test("test getDesktopUser", function () {
+
+
+    // Pretend to be running as a service
+    var realIsService = windows.isService;
+    windows.isService = function () {
+        return true;
+    };
+
+    var sessionId = winapi.kernel32.WTSGetActiveConsoleSessionId();
+    var realWTSGetActiveConsoleSessionId = winapi.kernel32.WTSGetActiveConsoleSessionId;
+    winapi.kernel32.WTSGetActiveConsoleSessionId = function () {
+        return sessionId;
+    };
+
+    var realWTSQueryUserToken = winapi.wtsapi32.WTSQueryUserToken;
+    var userToken = undefined;
+    winapi.wtsapi32.WTSQueryUserToken = function (sessionId, tokenBuf) {
+        if (userToken) {
+            tokenBuf.writeInt32LE(userToken);
+        }
+        return userToken === undefined ? realWTSQueryUserToken(sessionId, tokenBuf) : !!userToken;
+    };
+
+    try {
+
+        // There is no session
+        sessionId = 0xffffffff;
+        var token2 = windows.getDesktopUser();
+        jqUnit.assertEquals("getDesktopUser unsuccessful there's no current session", 0, token2);
+
+        // Successful token
+        sessionId = 1;
+        userToken = 1234;
+        var token3 = windows.getDesktopUser();
+        jqUnit.assertEquals("getDesktopUser should return correct token", userToken, token3);
+
+        // Fail token
+        sessionId = 1;
+        userToken = 0;
+        var token4 = windows.getDesktopUser();
+        jqUnit.assertEquals("getDesktopUser should return 0 for no token", userToken, token4);
+
+
+    } finally {
+        windows.isService = realIsService;
+        winapi.kernel32.WTSGetActiveConsoleSessionId = realWTSGetActiveConsoleSessionId;
+        realWTSQueryUserToken = winapi.wtsapi32.WTSQueryUserToken;
+    }
+});
+
+jqUnit.test("user environment tests", function () {
+
+    // Should always be able to get the users own token
+    var token = windows.getOwnUserToken();
+    try {
+        jqUnit.assertTrue("getOwnUserToken should return something", !!token);
+
+        var env = windows.getEnv(token);
+        jqUnit.assertNotNull("getEnv should return something", token);
+        jqUnit.assertTrue("getEnv should return an array", Array.isArray(env));
+        jqUnit.assertTrue("getEnv should return a filled array", env.length > 0);
+
+        env.forEach(function (value) {
+            var pair = value.split("=", 2);
+            var result = pair.length === 2 && pair[0].length > 0;
+            if (!result) {
+                console.log("full block:", env);
+                console.log("current value:", value);
+            }
+            jqUnit.assertTrue("environment value should be in the format of 'key=value'", result);
+        });
+
+        var userDatadir = windows.getUserDataDir(token);
+        var expectedDataDir = path.join(process.env.APPDATA, "GPII");
+
+        jqUnit.assertEquals("User data dir for this user should be correct", expectedDataDir, userDatadir);
+
+
+    } finally {
+        windows.closeToken(token);
+    }
+
+
+
+
+
+});

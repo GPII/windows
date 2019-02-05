@@ -20,6 +20,8 @@
 // but also prevents having to re-build to be ran under electron for the gpii-app tests.
 
 if (!global.fluid) {
+    // In child process.
+    require("./service-tests.js");
     require("./windows-tests.js");
     require("./gpii-ipc-tests.js");
     require("./processHandling-tests.js");

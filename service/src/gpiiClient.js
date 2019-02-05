@@ -221,7 +221,7 @@ gpiiClient.sendRequest = function (requestType, requestData) {
  * @return {Promise} Resolves with the response when it is received.
  */
 gpiiClient.shutdown = function () {
-    if (!gpiiClient.inShutdown) {
+    if (gpiiClient.ipcConnection && !gpiiClient.inShutdown) {
         gpiiClient.inShutdown = true;
         return gpiiClient.sendRequest("shutdown");
     }
@@ -233,5 +233,3 @@ service.on("ipc.closed:gpii", gpiiClient.closed);
 service.on("stopping", function (promises) {
     promises.push(gpiiClient.shutdown());
 });
-
-//setTimeout(service.stop, 15000);

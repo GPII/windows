@@ -30,7 +30,7 @@ var jqUnit = require("node-jqunit"),
 
 var teardowns = [];
 
-jqUnit.module("GPII pipe tests", {
+jqUnit.module("GPII service ipc tests", {
     teardown: function () {
         while (teardowns.length) {
             teardowns.pop()();
@@ -121,8 +121,9 @@ jqUnit.asyncTest("Test createPipe failures", function () {
 
     var testPipes = function (pipeNames) {
         var pipeName = pipeNames.shift();
-        console.log("Checking bad pipe name:", pipeName);
+        fluid.log("Checking bad pipe name:", pipeName);
 
+        fluid.log("Error is expected:");
         var promise = ipc.createPipe(pipeName);
         jqUnit.assertNotNull("createPipe must return non-null", promise);
         jqUnit.assertEquals("createPipe must return a promise", "function", typeof(promise.then));

@@ -22,7 +22,7 @@ var jqUnit = require("node-jqunit"),
 
 var teardowns = [];
 
-jqUnit.module("GPII pipe tests", {
+jqUnit.module("GPII client tests", {
     teardown: function () {
         while (teardowns.length) {
             teardowns.pop()();
@@ -98,31 +98,6 @@ gpiiClientTests.requestTests = [
                 output: {
                     stdout: "hello stdout \r\n",
                     stderr: "hello stderr \r\n"
-                }
-            }
-        }
-    },
-    {
-        id: "execute: options",
-        action: "execute",
-        data: {
-            command: "cmd.exe",
-            options: {
-                env: {
-                    gpiiExecuteTest: "It worked"
-                }
-            },
-            args: ["/c", "echo %gpiiExecuteTest%"],
-            wait: true,
-            capture: true
-        },
-        expect: {
-            promise: {
-                code: 0,
-                signal: null,
-                output: {
-                    stdout: "It worked\r\n",
-                    stderr: ""
                 }
             }
         }
@@ -219,7 +194,7 @@ jqUnit.asyncTest("Test request handlers", function () {
                     test.expect.promise, "reject");
 
                 if (test.expect.promise !== "reject") {
-                    console.log(err);
+                    console.log("Rejection:", err);
                 }
 
                 nextTest();

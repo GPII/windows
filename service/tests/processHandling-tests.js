@@ -30,7 +30,7 @@ var processHandlingTests = {
 };
 var teardowns = [];
 
-jqUnit.module("GPII pipe tests", {
+jqUnit.module("GPII Service processHandling tests", {
     teardown: function () {
         while (teardowns.length) {
             teardowns.pop()();
@@ -523,3 +523,61 @@ jqUnit.asyncTest("Test unmonitorProcess", function () {
 
 });
 
+// Test starting and stopping the service
+jqUnit.asyncTest("Service start+stop", function () {
+    jqUnit.expect(1);
+
+    var service = require("../src/service.js");
+
+    var mutexName = "gpii-test-" + Math.random().toString(32);
+
+    // Configure a child process
+    service.config = {
+        processes: {
+            testProcess: {
+                command: "node.exe " + path.join(__dirname, "gpii-ipc-tests-child.js") + " mutex " + mutexName,
+                autoRestart: false
+            }
+        }
+    };
+
+    // Mock process.exit - the call to this is expected, but not desired.
+    var oldExit = process.exit;
+    process.exit = function () {
+        console.log("process.exit()");
+        jqUnit.assert("process.exit");
+    };
+    teardowns.push(function () {
+        process.exit = oldExit;
+    });
+
+
+    // Start the service
+    service.start();
+
+    // Wait for the child process to start.
+    processHandlingTests.waitForMutex(mutexName).then(function (value) {
+        if (value === "timeout") {
+            jqUnit.fail("Timed out waiting for child process");
+        } else {
+            var pid = processHandling.childProcesses.testProcess.pid;
+
+            // stop the service, see if the child terminates.
+            service.stop();
+
+            windows.waitForProcessTermination(pid, 5000).then(function (value) {
+                if (value === "timeout") {
+                    jqUnit.fail("Timed out waiting for child process to terminate");
+                } else {
+                    console.log("Process died");
+                    jqUnit.start();
+                }
+            });
+        }
+    }, jqUnit.fail);
+});
+
+
+jqUnit.test("non", function () {
+    jqUnit.assert("ok");
+});

@@ -161,13 +161,13 @@ var actions = {
         var mutexName = winapi.stringToWideChar(process.argv[3]);
         var mutex = null;
 
-        // Release the mutex and die after 10 seconds.
+        // Release the mutex and die after 30 seconds.
         setTimeout(function () {
             if (mutex) {
                 winapi.kernel32.ReleaseMutex(mutex);
                 winapi.kernel32.CloseHandle(mutex);
             }
-        }, 10000);
+        }, 30000);
 
         mutex = winapi.kernel32.CreateMutexW(winapi.NULL, true, mutexName);
         log("mutex", winapi.stringFromWideChar(mutexName), mutex);
