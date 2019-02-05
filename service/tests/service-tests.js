@@ -46,4 +46,3 @@ jqUnit.test("Test config loader", function () {
         service.config = origConfig;
     }
 });
-

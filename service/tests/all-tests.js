@@ -48,4 +48,3 @@ jqUnit.asyncTest("Test window service", function () {
         jqUnit.start();
     });
 });
-
