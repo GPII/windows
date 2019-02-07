@@ -21,7 +21,6 @@
         "ffi-napi": "2.4.4",
         "json5": "2.1.0",
         "minimist": "1.2.0",
-        "node-jqunit": "^1.1.8",
         "os-service": "stegru/node-os-service#GPII-2338",
         "ref-array-di": "1.2.1",
         "ref-napi": "1.4.0",
