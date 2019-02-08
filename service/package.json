@@ -17,7 +17,6 @@
         "service-stop": "sc stop morphic-service"
     },
     "dependencies": {
-        "bluebird": "3.5.3",
         "ffi-napi": "2.4.4",
         "json5": "2.1.0",
         "minimist": "1.2.0",

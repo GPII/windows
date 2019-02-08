@@ -21,7 +21,6 @@
 var ref = require("ref-napi"),
     net = require("net"),
     crypto = require("crypto"),
-    Promise = require("bluebird"),
     service = require("./service.js"),
     windows = require("./windows.js"),
     logging = require("./logging.js"),

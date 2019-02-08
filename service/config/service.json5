@@ -4,7 +4,11 @@
         "gpii": {
             "command": "morphic-app.exe",
             "ipc": "gpii",
-            "autoRestart": true
+            "autoRestart": true,
+            "disabled": false,
+            env: {
+                NODE_ENV: "app.production"
+            }
         }
     },
     "logging": {

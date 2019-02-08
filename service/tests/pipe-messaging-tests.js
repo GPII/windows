@@ -19,7 +19,6 @@
 
 var jqUnit = require("node-jqunit"),
     net = require("net"),
-    Promise = require("bluebird"),
     EventEmitter = require("events");
 
 

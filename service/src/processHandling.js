@@ -17,8 +17,7 @@
 
 "use strict";
 
-var Promise = require("bluebird"),
-    service = require("./service.js"),
+var service = require("./service.js"),
     ipc = require("./gpii-ipc.js"),
     windows = require("./windows.js"),
     winapi = require("./winapi.js");
@@ -81,7 +80,7 @@ processHandling.startChildProcesses = function () {
     // Start each child process sequentially.
     var startNext = function () {
         var key = processes.shift();
-        if (key) {
+        if (key && !service.config.processes[key].disabled) {
             var proc = Object.assign({key: key}, service.config.processes[key]);
             processHandling.startChildProcess(proc).then(startNext, function (err) {
                 service.logError("startChildProcess failed for " + key, err);

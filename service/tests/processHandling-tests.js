@@ -20,7 +20,6 @@
 var jqUnit = require("node-jqunit"),
     path = require("path"),
     child_process = require("child_process"),
-    Promise = require("bluebird"),
     processHandling = require("../src/processHandling.js"),
     windows = require("../src/windows.js"),
     winapi = require("../src/winapi.js");

@@ -17,8 +17,7 @@
 
 "use strict";
 
-var Promise = require("bluebird"),
-    child_process = require("child_process"),
+var child_process = require("child_process"),
     service = require("./service.js"),
     ipc = require("./gpii-ipc.js"),
     processHandling = require("./processHandling.js");

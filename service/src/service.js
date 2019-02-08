@@ -17,8 +17,7 @@
 
 "use strict";
 
-var Promise = require("bluebird"),
-    os_service = require("os-service"),
+var os_service = require("os-service"),
     path = require("path"),
     fs = require("fs"),
     events = require("events"),
