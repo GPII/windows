@@ -143,7 +143,7 @@ restart them if they die.
 When installing the service, add the debug arguments using the `--nodeArgs`. For example:
 
 ```
-node index.js --install --nodeArgs=--inspect=0.0.0.0:1234,--debug-brk
+node index.js --install --nodeArgs=--inspect-brk=0.0.0.0:1234
 sc start gpii-service
 ```
 

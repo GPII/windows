@@ -373,7 +373,6 @@ jqUnit.asyncTest("Test waitForMultipleObjects", function () {
         test.input.signal.forEach(function (index) {
             winapi.kernel32.SetEvent(handles[index]);
         });
-
     };
 
     runTest(0);
@@ -406,7 +405,6 @@ jqUnit.asyncTest("Test waitForMultipleObjects failures", function () {
                 e instanceof Error || e.isError);
             runTest(testIndex + 1);
         });
-
     };
 
     runTest(0);
@@ -451,7 +449,6 @@ jqUnit.asyncTest("Test waitForMultipleObjects with a process", function () {
                 // Test again, but expect a timeout
                 runTest(true);
             }
-
         }, jqUnit.fail);
 
         if (!testTimeout) {
@@ -505,8 +502,6 @@ jqUnit.test("test getDesktopUser", function () {
         userToken = 0;
         var token4 = windows.getDesktopUser();
         jqUnit.assertEquals("getDesktopUser should return 0 for no token", userToken, token4);
-
-
     } finally {
         windows.isService = realIsService;
         winapi.kernel32.WTSGetActiveConsoleSessionId = realWTSGetActiveConsoleSessionId;
@@ -540,14 +535,7 @@ jqUnit.test("user environment tests", function () {
         var expectedDataDir = path.join(process.env.APPDATA, "GPII");
 
         jqUnit.assertEquals("User data dir for this user should be correct", expectedDataDir, userDatadir);
-
-
     } finally {
         windows.closeToken(token);
     }
-
-
-
-
-
 });
