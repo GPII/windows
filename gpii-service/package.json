@@ -1,5 +1,5 @@
 {
-    "name": "morphic-service",
+    "name": "gpii-service",
     "version": "0.0.1",
     "description": "Windows service to ensure GPII is running.",
     "author": "GPII",
