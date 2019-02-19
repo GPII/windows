@@ -27,7 +27,7 @@ module.exports = gpiiClient;
 
 gpiiClient.options = {
     // Number of seconds to wait for a response from the client before determining that the process is unresponsive.
-    clientTimeout: 20
+    clientTimeout: 120
 };
 
 /**
