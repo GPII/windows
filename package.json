@@ -9,7 +9,7 @@
         "pretest": "node node_modules/rimraf/bin.js coverage/* reports/*",
         "test": "npm run test:refreshenv && npm run test:unit && npm run test:acceptance",
         "test:refreshenv": "refreshenv",
-        "test:acceptance": "node_modules/.bin/nyc node.exe ./tests/AcceptanceTests.js builtIn",
+        "test:acceptance": "set GPII_TEST_COUCH_USE_EXTERNAL=TRUE && nyc node.exe ./tests/AcceptanceTests.js builtIn",
         "test:unit": "node_modules/.bin/nyc node.exe ./tests/UnitTests.js",
         "posttest": "node_modules/.bin/nyc report -r html -r text-summary",
         "install": "powershell -ExecutionPolicy Bypass provisioning/NpmInstall.ps1"
