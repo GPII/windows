@@ -9,29 +9,42 @@ param ( # default to script path if no parameter is given
     [string]$originalBuildScriptPath = (Split-Path -parent $PSCommandPath)
 )
 
+Write-OutPut "Adding CouchDB to the system"
 Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
 
 $couchDBInstallerURL = "http://archive.apache.org/dist/couchdb/binary/win/2.3.0/couchdb-2.3.0.msi"
 $couchDBInstaller = Join-Path $originalBuildScriptPath "couchdb-2.3.0.msi"
 
 # Download msi file
+Write-OutPut "Downloading CouchDB from $couchDBInstallerURL"
 try {
-    Write-OutPut "Downloading CouchDB $couchDBInstallerURL"
-    iwr $couchDBInstallerURL -OutFile $couchDBInstaller
+    $r1 = iwr $couchDBInstallerURL -OutFile $couchDBInstaller
 } catch {
-    Write-OutPut "ERROR: Couldn't download CouchDB installer from the specified location."
+    Write-OutPut "ERROR: Couldn't download CouchDB installer from the specified location. Error was $_"
     exit 1
 }
 
 # Install couchdb
 $msiexec = "msiexec.exe"
-Invoke-Command $msiexec "/i $couchDBInstaller /passive"
+Write-OutPut "Installing CouchDB ..."
+try {
+    Invoke-Command $msiexec "/i $couchDBInstaller /passive"
+} catch {
+    Write-OutPut "ERROR: CouchDB couldn't be installed"
+    exit 1
+}
 
 # Set-up CouchDB to run as a single node server as described
 # here: https://docs.couchdb.org/en/stable/setup/single-node.html
-iwr -Method PUT -Uri http://127.0.0.1:5984/_users 
-iwr -Method PUT -Uri http://127.0.0.1:5984/_replicator
-iwr -Method PUT -Uri http://127.0.0.1:5984/_global_changes
+Write-OutPut "Configuring CouchDB ..."
+try {
+    $r1 = iwr -Method PUT -Uri http://127.0.0.1:5984/_users
+    $r2 = iwr -Method PUT -Uri http://127.0.0.1:5984/_replicator
+    $r3 = iwr -Method PUT -Uri http://127.0.0.1:5984/_global_changes
+} catch {
+    Write-OutPut "ERROR: CouchDB couldn't be installed. Error was $_"
+    exit 1
+}
 
 # Replace the default listening port
 # By default, CouchDB will be installed at C:\CouchDB and we need admin privileges.
@@ -42,4 +55,5 @@ iwr -Method PUT -Uri http://127.0.0.1:5984/_global_changes
 #Invoke-Command $net "stop 'Apache CouchDB'"
 #Invoke-Command $net "start 'Apache CouchDB'"
 
+Write-OutPut "CouchDB is now installed and configured"
 exit 0
