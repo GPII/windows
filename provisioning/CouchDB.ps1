@@ -11,7 +11,7 @@ param ( # default to script path if no parameter is given
 
 Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
 
-#Write-OutPut "Adding CouchDB to the system"
+Write-OutPut "Adding CouchDB to the system"
 $couchDBInstallerURL = "http://archive.apache.org/dist/couchdb/binary/win/2.3.0/couchdb-2.3.0.msi"
 $couchDBInstaller = Join-Path $originalBuildScriptPath "couchdb-2.3.0.msi"
 
@@ -48,9 +48,9 @@ try {
 
 # Replace the default listening port
 # By default, CouchDB will be installed at C:\CouchDB.
-Write-OutPut "Changing default listening port to 25984 ..."
+Write-OutPut "Changing default listening port to 35984 ..."
 $couchDBConfigFile = Join-Path (Join-Path "C:\CouchDB" "etc") "default.ini"
-((Get-Content -path $couchDBConfigFile -Raw) -replace "5984","25984") | Set-Content -Path $couchDBConfigFile
+((Get-Content -path $couchDBConfigFile -Raw) -replace "5984","35984") | Set-Content -Path $couchDBConfigFile
 
 # In addition to that, we must restart CouchDB in order for the changes to take effect
 Write-OutPut "Restarting CouchDB ..."
