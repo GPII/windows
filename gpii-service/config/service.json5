@@ -7,7 +7,7 @@
             "autoRestart": true,
             "disabled": false,
             env: {
-                NODE_ENV: "app.production"
+                //NODE_ENV: "app.testing"
             }
         }
     },
