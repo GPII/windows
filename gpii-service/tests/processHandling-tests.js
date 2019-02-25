@@ -555,7 +555,7 @@ jqUnit.asyncTest("Service start+stop", function () {
     service.start();
 
     // Wait for the child process to start.
-    processHandlingTests.waitForMutex(mutexName).then(function (value) {
+    processHandlingTests.waitForMutex(mutexName, 5000).then(function (value) {
         if (value === "timeout") {
             jqUnit.fail("Timed out waiting for child process");
         } else {
@@ -564,7 +564,7 @@ jqUnit.asyncTest("Service start+stop", function () {
             // stop the service, see if the child terminates.
             service.stop();
 
-            windows.waitForProcessTermination(pid, 5000).then(function (value) {
+            windows.waitForProcessTermination(pid, 15000).then(function (value) {
                 if (value === "timeout") {
                     jqUnit.fail("Timed out waiting for child process to terminate");
                 } else {
@@ -574,9 +574,4 @@ jqUnit.asyncTest("Service start+stop", function () {
             });
         }
     }, jqUnit.fail);
-});
-
-
-jqUnit.test("non", function () {
-    jqUnit.assert("ok");
 });
