@@ -20,19 +20,19 @@ Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
   -RetryIntervalSec as parameters when calling Invoke-WebRequest.
 #>
 Function iwr-Retry {
-  Param (
-    [Parameter(Mandatory=$true)]
-    [string] $Uri,
-    [string] $Method = "GET",
-    [int] $Retries = 5,
-    [int] $Delay = 5
-  )
+    Param (
+        [Parameter(Mandatory=$true)]
+        [string] $Uri,
+        [string] $Method = "GET",
+        [int] $Retries = 5,
+        [int] $Delay = 5
+    )
 
-  $retryCount = 0
-  $completed = false
-  $response = $null
+    $retryCount = 0
+    $completed = false
+    $response = $null
 
-  while (-not $completed) {
+    while (-not $completed) {
         try {
             $response = iwr -Uri $Uri -Method $Method
             $completed = $true
@@ -49,32 +49,32 @@ Function iwr-Retry {
     }
 }
 
-Write-OutPut "Adding CouchDB to the system"
+Write-Verbose "Adding CouchDB to the system"
 $couchDBInstallerURL = "http://archive.apache.org/dist/couchdb/binary/win/2.3.0/couchdb-2.3.0.msi"
 $couchDBInstaller = Join-Path $originalBuildScriptPath "couchdb-2.3.0.msi"
 
 # Download msi file
-Write-OutPut "Downloading CouchDB from $couchDBInstallerURL"
+Write-Verbose "Downloading CouchDB from $couchDBInstallerURL"
 try {
     $r1 = iwr $couchDBInstallerURL -OutFile $couchDBInstaller
 } catch {
-    Write-OutPut "ERROR: Couldn't download CouchDB installer from the specified location. Error was $_"
+    Write-Error "ERROR: Couldn't download CouchDB installer from the specified location. Error was $_"
     exit 1
 }
 
 # Install couchdb
 $msiexec = "msiexec.exe"
-Write-OutPut "Installing CouchDB ..."
+Write-Verbose "Installing CouchDB ..."
 try {
     Invoke-Command $msiexec "/i $couchDBInstaller /passive"
 } catch {
-    Write-OutPut "ERROR: CouchDB couldn't be installed"
+    Write-Error "ERROR: CouchDB couldn't be installed"
     exit 1
 }
 
 # Set-up CouchDB to run as a single node server as described
 # here: https://docs.couchdb.org/en/stable/setup/single-node.html
-Write-OutPut "Configuring CouchDB ..."
+Write-Verbose "Configuring CouchDB ..."
 try {
     # Let's retry the first request until CouchDB is ready.
     # When the maximum retries is reached, the error is propagated.
@@ -83,19 +83,19 @@ try {
     $r2 = iwr -Method PUT -Uri http://127.0.0.1:5984/_replicator
     $r3 = iwr -Method PUT -Uri http://127.0.0.1:5984/_global_changes
 } catch {
-    Write-OutPut "ERROR: CouchDB couldn't be configured. Error was $_"
+    Write-Error "ERROR: CouchDB couldn't be configured. Error was $_"
     exit 1
 }
 
 # Replace the default listening port
 # By default, CouchDB will be installed at C:\CouchDB.
-Write-OutPut "Changing default listening port to 25984 ..."
+Write-Verbose "Changing default listening port to 25984 ..."
 $couchDBConfigFile = Join-Path (Join-Path "C:\CouchDB" "etc") "default.ini"
 ((Get-Content -path $couchDBConfigFile -Raw) -replace "5984","25984") | Set-Content -Path $couchDBConfigFile
 
 # In addition to that, we must restart CouchDB in order for the changes to take effect
-Write-OutPut "Restarting CouchDB ..."
+Write-Verbose "Restarting CouchDB ..."
 Restart-Service -Name "Apache CouchDB"
 
-Write-OutPut "CouchDB is now installed and configured"
+Write-Verbose "CouchDB is now installed and configured"
 exit 0
