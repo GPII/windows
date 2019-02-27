@@ -49,12 +49,12 @@ Function iwr-Retry {
     }
 }
 
-Write-Verbose "Adding CouchDB to the system"
+Write-Output "Adding CouchDB to the system"
 $couchDBInstallerURL = "http://archive.apache.org/dist/couchdb/binary/win/2.3.0/couchdb-2.3.0.msi"
 $couchDBInstaller = Join-Path $originalBuildScriptPath "couchdb-2.3.0.msi"
 
 # Download msi file
-Write-Verbose "Downloading CouchDB from $couchDBInstallerURL"
+Write-Output "Downloading CouchDB from $couchDBInstallerURL"
 try {
     $r1 = iwr $couchDBInstallerURL -OutFile $couchDBInstaller
 } catch {
@@ -64,7 +64,7 @@ try {
 
 # Install couchdb
 $msiexec = "msiexec.exe"
-Write-Verbose "Installing CouchDB ..."
+Write-Output "Installing CouchDB ..."
 try {
     Invoke-Command $msiexec "/i $couchDBInstaller /passive"
 } catch {
@@ -74,7 +74,7 @@ try {
 
 # Set-up CouchDB to run as a single node server as described
 # here: https://docs.couchdb.org/en/stable/setup/single-node.html
-Write-Verbose "Configuring CouchDB ..."
+Write-Output "Configuring CouchDB ..."
 try {
     # Let's retry the first request until CouchDB is ready.
     # When the maximum retries is reached, the error is propagated.
@@ -89,13 +89,13 @@ try {
 
 # Replace the default listening port
 # By default, CouchDB will be installed at C:\CouchDB.
-Write-Verbose "Changing default listening port to 25984 ..."
+Write-Output "Changing default listening port to 25984 ..."
 $couchDBConfigFile = Join-Path (Join-Path "C:\CouchDB" "etc") "default.ini"
 ((Get-Content -path $couchDBConfigFile -Raw) -replace "5984","25984") | Set-Content -Path $couchDBConfigFile
 
 # In addition to that, we must restart CouchDB in order for the changes to take effect
-Write-Verbose "Restarting CouchDB ..."
+Write-Output "Restarting CouchDB ..."
 Restart-Service -Name "Apache CouchDB"
 
-Write-Verbose "CouchDB is now installed and configured"
+Write-Output "CouchDB is now installed and configured"
 exit 0
