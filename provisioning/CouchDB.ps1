@@ -11,6 +11,44 @@ param ( # default to script path if no parameter is given
 
 Import-Module "$($originalBuildScriptPath)/Provisioning.psm1" -Force
 
+<#
+  The support for specifying the retries and the retry delay when using
+  Invoke-WebRequest has been added recently and is available since the 6.1.x series.
+  See https://github.com/PowerShell/PowerShell/releases/tag/v6.1.0-preview.4
+
+  After our vm receives such update, we will be able to pass -MaximumRetryCount and
+  -RetryIntervalSec as parameters when calling Invoke-WebRequest.
+#>
+Function iwr-Retry {
+  Param (
+    [Parameter(Mandatory=$true)]
+    [string] $Uri,
+    [string] $Method = "GET",
+    [int] $Retries = 5,
+    [int] $Delay = 5
+  )
+
+  $retryCount = 0
+  $completed = false
+  $response = $null
+
+  while (-not $completed) {
+        try {
+            $response = iwr -Uri $Uri -Method $Method
+            $completed = $true
+        } catch {
+            if ($retryCount -ge $Retries) {
+                Write-Warning "Request to $Uri failed the maximum number of $retryCount times."
+                throw
+            } else {
+                Write-Warning "Request to $Uri failed. Retrying in $Delay seconds."
+                Start-Sleep $Delay
+                $retryCount++
+            }
+        }
+    }
+}
+
 Write-OutPut "Adding CouchDB to the system"
 $couchDBInstallerURL = "http://archive.apache.org/dist/couchdb/binary/win/2.3.0/couchdb-2.3.0.msi"
 $couchDBInstaller = Join-Path $originalBuildScriptPath "couchdb-2.3.0.msi"
@@ -38,7 +76,10 @@ try {
 # here: https://docs.couchdb.org/en/stable/setup/single-node.html
 Write-OutPut "Configuring CouchDB ..."
 try {
-    $r1 = iwr -Method PUT -Uri http://127.0.0.1:5984/_users
+    # Let's retry the first request until CouchDB is ready.
+    # When the maximum retries is reached, the error is propagated.
+    #
+    $r1 = iwr-Retry -Method PUT -Uri http://127.0.0.1:5984/_users
     $r2 = iwr -Method PUT -Uri http://127.0.0.1:5984/_replicator
     $r3 = iwr -Method PUT -Uri http://127.0.0.1:5984/_global_changes
 } catch {
