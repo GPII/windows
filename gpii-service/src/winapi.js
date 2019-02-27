@@ -416,7 +416,7 @@ winapi.errorText = function (message, returnCode, errorCode) {
  * @return {Buffer} A buffer containing the wide-char string.
  */
 winapi.stringToWideChar = function (string) {
-    return new Buffer(string + "\u0000", "ucs2"); // add null at the end
+    return Buffer.from(string + "\u0000", "ucs2"); // add null at the end
 };
 
 /**
