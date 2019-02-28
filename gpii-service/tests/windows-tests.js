@@ -539,3 +539,35 @@ jqUnit.test("user environment tests", function () {
         windows.closeToken(token);
     }
 });
+
+jqUnit.test("expandEnvironmentStrings tests", function () {
+
+    // Test a normal value
+    process.env._env_test1 = "VALUE";
+    var input = "start%_env_test1%end";
+    var result = windows.expandEnvironmentStrings(input);
+    // the value should be expanded
+    jqUnit.assertEquals("expandEnvironmentStrings should return expected result", "startVALUEend", result);
+    delete process.env._env_test1;
+
+    // Test an unset value
+    var input2 = "start%_env_unset%end";
+    var result2 = windows.expandEnvironmentStrings(input2);
+    // The value should be unexpanded
+    jqUnit.assertEquals("expandEnvironmentStrings (unset value) should return the input", input2, result2);
+
+    // Test a very long value - this should cause the initial call to ExpandEnvironmentStrings to fail, and get recalled
+    // with a larger buffer.
+    process.env._env_test2 = "very long value" + "X".repeat(winapi.constants.MAX_PATH * 2);
+    var input3 = "start%_env_test2%end";
+    var result3 = windows.expandEnvironmentStrings(input3);
+
+    jqUnit.assertEquals("expandEnvironmentStrings (long value) should return the expected result",
+        "start" + process.env._env_test2 + "end", result3);
+
+    // Call with empty string or null should return an empty string.
+    ["", null].forEach(function (input) {
+        var result = windows.expandEnvironmentStrings(input);
+        jqUnit.assertEquals("expandEnvironmentStrings (empty/null) should return empty string", "", result);
+    });
+});

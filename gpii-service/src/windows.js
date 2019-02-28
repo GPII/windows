@@ -428,4 +428,37 @@ windows.setPipePermissions = function (pipeName) {
     }
 };
 
+/**
+ * Expands the environment variables in a string, which are surrounded by '%'.
+ * For example, the input string of "%SystemRoot%\System32" returns "C:\Windows\System32".
+ *
+ * @param {String} input The input string.
+ * @return {String} The input string with the environment variables expanded.
+ */
+windows.expandEnvironmentStrings = function (input) {
+    var result;
+    if (input && input.length > 0) {
+        var inputBuffer = winapi.stringToWideChar(input);
+        // Initial buffer of MAX_PATH should be big enough for most cases (assuming this function is called for paths).
+        var len = Math.max(winapi.constants.MAX_PATH + 1, input.length + 20);
+        var outputBuffer = Buffer.alloc(len);
+        // Expand the variables
+        var requiredSize = winapi.kernel32.ExpandEnvironmentStringsW(inputBuffer, outputBuffer, len);
+        if (requiredSize > len) {
+            // Initial buffer is too small - call again with the correct size.
+            len = requiredSize;
+            requiredSize = winapi.kernel32.ExpandEnvironmentStringsW(inputBuffer, outputBuffer, len);
+        }
+        if (requiredSize === 0) {
+            throw winapi.error("ExpandEnvironmentStringsW", requiredSize);
+        }
+
+        result = winapi.stringFromWideChar(outputBuffer);
+    } else {
+        result = "";
+    }
+
+    return result;
+};
+
 module.exports = windows;

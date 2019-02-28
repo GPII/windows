@@ -213,7 +213,7 @@ winapi.kernel32 = ffi.Library("kernel32", {
     ],
     // https://msdn.microsoft.com/library/ms684320
     "OpenProcess": [
-        t.HANDLE, [ t.DWORD, t.BOOL, t.DWORD ]
+        t.HANDLE, [ t.DWORD, t.BOOL, "int" ]
     ],
     // https://msdn.microsoft.com/library/ms683179
     "GetCurrentProcess": [
@@ -286,8 +286,11 @@ winapi.kernel32 = ffi.Library("kernel32", {
     // https://msdn.microsoft.com/library/ms724251
     "DuplicateHandle": [
         t.BOOL, [ t.HANDLE, t.HANDLE, t.HANDLE, t.PHANDLE, t.DWORD, t.BOOL, t.DWORD ]
+    ],
+    // https://msdn.microsoft.com/library/ms724265
+    "ExpandEnvironmentStringsW": [
+        t.BOOL, [ t.LPTSTR, t.LPTSTR, t.UINT ]
     ]
-
 });
 
 winapi.advapi32 = ffi.Library("advapi32", {

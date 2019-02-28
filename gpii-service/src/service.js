@@ -103,6 +103,29 @@ service.loadConfig = function (dir, file) {
 };
 
 /**
+ * Gets the the secret, which is used in authenticating the service with the cloud.
+ *
+ * The secret is installed in a separate installer, which could occur after Morphic was installed. Also, the secret
+ * may be later updated. Because of this, the secret is read each time it is used.
+ *
+ * @return {Object} The secret, or null if the secret could not be read.
+ */
+service.getSecret = function () {
+    var secret = null;
+
+    try {
+        var file = path.resolve(windows.expandEnvironmentStrings(service.config.secretFile));
+        service.log("Reading secret from " + file);
+        var secretData = fs.readFileSync(file);
+        secret = JSON5.parse(secretData);
+    } catch (e) {
+        service.logWarn("Unable to read the secret file " + service.config.secretFile, e);
+    }
+
+    return secret;
+};
+
+/**
  * Called when the service has just started.
  */
 service.start = function () {

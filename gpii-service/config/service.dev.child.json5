@@ -9,5 +9,6 @@
     },
     "logging": {
         "level": "DEBUG"
-    }
+    },
+    "secretFile": "test-secret.json5"
 }
