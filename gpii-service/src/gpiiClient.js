@@ -113,6 +113,10 @@ gpiiClient.requestHandlers.closing = function () {
     processHandling.dontRestartProcess(gpiiClient.ipcConnection.processKey);
 };
 
+gpiiClient.requestHandlers.getAccessToken = function () {
+    return service.getSecret();
+};
+
 /** @type {Boolean} true if the client is being shutdown */
 gpiiClient.inShutdown = false;
 
@@ -195,6 +199,7 @@ gpiiClient.monitorStatus = function (timeout) {
  */
 gpiiClient.requestHandler = function (request) {
     var handler = request.requestType && gpiiClient.requestHandlers[request.requestType];
+    service.logDebug("Got request:", request);
     if (handler) {
         return handler(request.requestData);
     }
