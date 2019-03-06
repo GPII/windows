@@ -9,7 +9,7 @@
         "pretest": "node node_modules/rimraf/bin.js coverage/* reports/*",
         "test": "npm run test:refreshenv && npm run test:unit && npm run test:acceptance",
         "test:refreshenv": "refreshenv",
-        "test:acceptance": "node_modules/.bin/nyc node.exe ./tests/AcceptanceTests.js builtIn",
+        "test:acceptance": "set GPII_TEST_COUCH_USE_EXTERNAL=TRUE && nyc node.exe ./tests/AcceptanceTests.js builtIn",
         "test:unit": "node_modules/.bin/nyc node.exe ./tests/UnitTests.js",
         "posttest": "node_modules/.bin/nyc report -r html -r text-summary",
         "install": "powershell -ExecutionPolicy Bypass provisioning/NpmInstall.ps1"
@@ -30,6 +30,7 @@
         "fluid-grunt-eslint": "18.1.2",
         "gpii-grunt-lint-all": "1.0.5",
         "grunt": "1.0.3",
+        "lodash": "^4.17.11",
         "node-jqunit": "1.1.8",
         "nyc": "13.0.1",
         "rimraf": "2.6.2",
