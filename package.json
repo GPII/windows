@@ -7,7 +7,7 @@
     "homepage": "http://gpii.net/",
     "scripts": {
         "pretest": "node node_modules/rimraf/bin.js coverage/* reports/*",
-        "service": "npm --prefix ./service/ run service-dev",
+        "service": "npm --prefix ./gpii-service/ run service-dev",
         "start": "npm run service && node ./gpii.js",
         "test": "npm run test:refreshenv && npm run test:unit && npm run test:acceptance",
         "test:refreshenv": "refreshenv",
