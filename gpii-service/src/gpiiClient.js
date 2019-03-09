@@ -18,6 +18,7 @@
 "use strict";
 
 var child_process = require("child_process"),
+    crypto = require("crypto"),
     service = require("./service.js"),
     ipc = require("./gpii-ipc.js"),
     processHandling = require("./processHandling.js");
@@ -113,8 +114,39 @@ gpiiClient.requestHandlers.closing = function () {
     processHandling.dontRestartProcess(gpiiClient.ipcConnection.processKey);
 };
 
-gpiiClient.requestHandlers.getAccessToken = function () {
-    return service.getSecret();
+/**
+ * Gets the client credentials from the secrets file.
+ * @return {Object} The client credentials.
+ */
+gpiiClient.requestHandlers.getClientCredentials = function () {
+    var secrets = service.getSecrets();
+    return secrets && secrets.clientCredentials;
+};
+
+/**
+ * Signs a string or Buffer (or an array of such), using the secret.
+ *
+ * @param {String|Buffer} payload The thing to sign.
+ * @return {String} The HMAC digest of payload, as a hex string.
+ */
+gpiiClient.requestHandlers.sign = function (payload) {
+    var result = null;
+
+    var secrets = service.getSecrets();
+    var key = secrets && secrets.signKey;
+
+    if (key) {
+        var hmac = crypto.createHmac("sha256", key);
+
+        var payloads = Array.isArray(payload) ? payload : [payload];
+        payloads.forEach(function (item) {
+            hmac.update(item);
+        });
+
+        result = hmac.digest("hex");
+    }
+
+    return result;
 };
 
 /** @type {Boolean} true if the client is being shutdown */

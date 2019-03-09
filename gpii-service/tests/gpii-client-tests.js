@@ -101,6 +101,21 @@ gpiiClientTests.requestTests = [
                 }
             }
         }
+    },
+    {
+        id: "sign",
+        action: "sign",
+        data: "hello",
+        expect: "45be02a491dd3472deb1ec1b1a95ec50668e9b51d697cd060389a38d2c06be8d"
+    },
+    {
+        id: "client credentials",
+        action: "getClientCredentials",
+        data: undefined,
+        expect: {
+            "client_id": "pilot-computer",
+            "client_secret": "pilot-computer-secret"
+        }
     }
 ];
 
@@ -159,14 +174,9 @@ jqUnit.asyncTest("Test request handlers", function () {
     var tests = gpiiClientTests.requestTests;
     jqUnit.expect(tests.length * 3);
 
-    // Change to a local directory to stop cmd.exe complaining about being on a UNC path.
-    var currentDir = process.cwd();
-    process.chdir(process.env.HOME);
-
     var testIndex = -1;
     var nextTest = function () {
         if (++testIndex >= tests.length) {
-            process.chdir(currentDir);
             jqUnit.start();
             return;
         }
