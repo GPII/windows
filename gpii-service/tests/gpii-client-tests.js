@@ -87,7 +87,12 @@ gpiiClientTests.requestTests = [
         action: "execute",
         data: {
             command: "cmd.exe",
+            // Send something to stdout and stderr
             args: ["/c", "echo hello stdout & echo hello stderr 1>&2"],
+            options: {
+                // Set the working directory to prevent cmd.exe complaining about being on a UNC path.
+                cwd: process.env.SystemRoot || "C:\\"
+            },
             wait: true,
             capture: true
         },
