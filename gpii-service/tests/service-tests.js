@@ -68,14 +68,14 @@ jqUnit.test("Test config loader", function () {
 });
 
 jqUnit.test("Test secret loading", function () {
-    var secret = service.getSecret();
+    var secret = service.getSecrets();
     jqUnit.assertTrue("Secret should have been loaded", !!secret);
 
     var origFile = service.config.secretFile;
     try {
         // Try a secret file that does not exist
         service.config.secretFile = "does/not/exist";
-        var secret2 = service.getSecret();
+        var secret2 = service.getSecrets();
         jqUnit.assertNull("No secret should have been loaded", secret2);
     } finally {
         service.config.secretFile = origFile;
