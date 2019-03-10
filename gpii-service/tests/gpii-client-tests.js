@@ -18,7 +18,8 @@
 "use strict";
 
 var jqUnit = require("node-jqunit"),
-    gpiiClient = require("../src/gpiiClient.js");
+    gpiiClient = require("../src/gpiiClient.js"),
+    service = require("../src/service.js");
 
 var teardowns = [];
 
@@ -178,6 +179,8 @@ jqUnit.asyncTest("Test request handlers", function () {
 
     var tests = gpiiClientTests.requestTests;
     jqUnit.expect(tests.length * 3);
+
+    service.loadConfig();
 
     var testIndex = -1;
     var nextTest = function () {
