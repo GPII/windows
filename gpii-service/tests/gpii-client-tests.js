@@ -111,8 +111,12 @@ gpiiClientTests.requestTests = [
     {
         id: "sign",
         action: "sign",
-        data: "hello",
-        expect: "45be02a491dd3472deb1ec1b1a95ec50668e9b51d697cd060389a38d2c06be8d"
+        data: {
+            payload: "hello",
+            keyName: "site"
+        },
+        // sha256-hmac(hello, testing.gpii.net)
+        expect: "81ba311bd1c768eaeabccccc0c208bef1a3e3be1b1476b6e35a7c4464fba5bd5"
     },
     {
         id: "client credentials",

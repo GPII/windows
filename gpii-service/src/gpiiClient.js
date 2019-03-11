@@ -126,24 +126,29 @@ gpiiClient.requestHandlers.getClientCredentials = function () {
 /**
  * Signs a string or Buffer (or an array of such), using the secret.
  *
- * @param {String|Buffer} payload The thing to sign.
+ * @param {Object} request The signing request
+ * @param {String|Buffer} request.payload The thing to sign.
+ * @param {String} request.keyName Field name in the secrets file whose value is used as a key.
  * @return {String} The HMAC digest of payload, as a hex string.
  */
-gpiiClient.requestHandlers.sign = function (payload) {
+gpiiClient.requestHandlers.sign = function (request) {
     var result = null;
 
     var secrets = service.getSecrets();
-    var key = secrets && secrets.signKey;
+    var key = secrets && secrets[request.keyName];
 
     if (key) {
         var hmac = crypto.createHmac("sha256", key);
 
-        var payloads = Array.isArray(payload) ? payload : [payload];
+        var payloads = Array.isArray(request.payload) ? request.payload : [request.payload];
         payloads.forEach(function (item) {
             hmac.update(item);
         });
 
         result = hmac.digest("hex");
+    } else {
+        service.logError("Attempted to sign with a key named "
+            + request.keyName + ", but no such value exists in the secrets file");
     }
 
     return result;
