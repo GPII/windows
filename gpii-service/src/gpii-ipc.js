@@ -148,7 +148,8 @@ ipc.createPipe = function (pipeName, ipcConnection) {
 
                 p.then(function () {
                     if (ipcConnection) {
-                        ipc.servePipe(ipcConnection, pipeServer);
+                        // eslint-disable-next-line dot-notation
+                        ipc.servePipe(ipcConnection, pipeServer).catch(reject);
                     }
 
                     resolve(pipeServer);
