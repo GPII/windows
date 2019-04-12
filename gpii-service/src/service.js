@@ -151,15 +151,38 @@ service.start = function () {
 };
 
 /**
- * Stop the service.
+ * Stop the service, after shutting down the child processes.
  */
 service.stop = function () {
+
+    // Timeout waiting for things to shutdown.
+    var timer = setTimeout(service.stopNow, 10000);
+
     var promises = [];
+    service.logImportant("Shutting down");
     service.emit("stopping", promises);
+
     Promise.all(promises).then(function () {
-        service.emit("stop", promises);
-        os_service.stop();
+        clearTimeout(timer);
+        service.stopNow();
     });
+};
+
+/**
+ * Stop the service immediately. This function should not return.
+ */
+service.stopNow = function () {
+    service.logFatal("Stopping now");
+
+    // Ensure the process always terminates.
+    process.nextTick(process.exit);
+
+    try {
+        service.emit("stop");
+    } finally {
+        // This will end the process, and not return.
+        os_service.stop();
+    }
 };
 
 /**
