@@ -7,6 +7,4 @@ instrumented
 listeners
 reports
 /bin
-# Build folders of native VolumeControl solution
 gpii/node_modules/nativeSettingsHandler/nativeSolutions/VolumeControl/Release/
-gpii/node_modules/nativeSettingsHandler/nativeSolutions/VolumeControl/VolumeControl/Release/
