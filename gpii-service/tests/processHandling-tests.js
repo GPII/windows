@@ -542,9 +542,15 @@ jqUnit.asyncTest("Service start+stop", function () {
 
     // Mock process.exit - the call to this is expected, but not desired.
     var oldExit = process.exit;
+    var exitAsserted = false;
     process.exit = function () {
         console.log("process.exit()");
-        jqUnit.assert("process.exit");
+        if (!exitAsserted) {
+            // In order to stop the service from lingering, process.exit() could be called more than once (because
+            // during the test it doesn't really exit).
+            jqUnit.assert("process.exit");
+        }
+        exitAsserted = true;
     };
     teardowns.push(function () {
         process.exit = oldExit;
