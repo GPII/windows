@@ -19,12 +19,13 @@
     "dependencies": {
         "edge-js": "10.3.1",
         "ffi-napi": "2.4.3",
-        "gpii-universal": "0.3.0-dev.20190529T130102Z.a3fea390",
+        "gpii-universal": "0.3.0-dev.20190719T141931Z.47cf9177",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
         "ref-array": "1.1.2",
-        "string-argv": "0.0.2"
+        "string-argv": "0.0.2",
+        "rimraf": "2.6.2"
     },
     "devDependencies": {
         "eslint-config-fluid": "1.3.0",
