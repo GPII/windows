@@ -1,0 +1,34 @@
+{
+    "name": "gpii-service",
+    "version": "0.0.1",
+    "description": "Windows service to ensure GPII is running.",
+    "author": "GPII",
+    "license": "BSD-3-Clause",
+    "main": "index.js",
+    "bin": "index.js",
+    "scripts": {
+        "test": "node tests/index.js",
+        "start": "powershell \"Start-Process -Verb runas -Wait -FilePath node.exe -ArgumentList './index.js --config=service.dev.child.json5'",
+        "service-dev": "powershell \"if (test-path \\\\.\\pipe\\gpii-gpii) { echo 'Service is running' } else { Start-Process -Verb runas -FilePath node.exe -ArgumentList './index.js --config=service.dev.json5' }",
+        "service-install-dev": "node ./index.js --install --config=service.dev.json5",
+        "service-install": "node ./index.js --install --config=service.dev.child.json5",
+        "service-uninstall": "node ./index.js --uninstall",
+        "service-start": "sc start morphic-service",
+        "service-stop": "sc stop morphic-service"
+    },
+    "dependencies": {
+        "ffi-napi": "2.4.4",
+        "json5": "2.1.0",
+        "minimist": "1.2.0",
+        "os-service": "stegru/node-os-service#GPII-2338",
+        "ref-array-di": "1.2.1",
+        "ref-napi": "1.4.0",
+        "ref-struct-di": "1.1.0"
+    },
+    "pkg": {
+        "targets": [
+            "node10-win-x86"
+        ],
+        "assets": "config/service.json5"
+    }
+}
