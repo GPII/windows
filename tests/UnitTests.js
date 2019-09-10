@@ -17,7 +17,8 @@ https://github.com/gpii/universal/LICENSE.txt
 require("../index.js");
 
 require("../gpii/node_modules/displaySettingsHandler/test/testDisplaySettingsHandler.js");
-require("../gpii/node_modules/gpii-app-zoom/test/testAppZoom.js");
+// Commenting out App Zoom tests since these fail fairly often in CI and vagrant in electron - GPII-3802
+// require("../gpii/node_modules/gpii-app-zoom/test/testAppZoom.js");
 require("../gpii/node_modules/gpii-localisation/test/testLanguage.js");
 require("../gpii/node_modules/nativeSettingsHandler/test/testNativeSettingsHandler.js");
 require("../gpii/node_modules/processHandling/test/testProcessHandling");
