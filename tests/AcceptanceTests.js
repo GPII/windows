@@ -22,6 +22,7 @@ var fluid = require("gpii-universal"),
 gpii.loadTestingSupport();
 
 fluid.registerNamespace("gpii.acceptanceTesting.windows");
+fluid.logObjectRenderChars = 30000;
 
 require("../index.js");
 
