@@ -19,7 +19,7 @@
         "ffi-napi": "2.4.5",
         "gpii-universal": "0.3.0-dev.20190917T115342Z.cb3500e10",
         "@pokusew/pcsclite": "pokusew/node-pcsclite#pull/26/head",
-        "ref": "lxe/ref#node-12",
+        "ref": "javihernandez/ref#node-12",
         "ref-struct": "lxe/ref-struct#node-12",
         "ref-array": "lxe/ref-array#node-12",
         "string-argv": "0.0.2",
