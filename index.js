@@ -30,6 +30,13 @@ fluid.contextAware.makeChecks({
 var binPath = path.join(__dirname, "bin");
 process.env.path = binPath + ";" + process.env.path;
 
+// Use certificates from the Windows certificate stores [GPII-4186]
+var ca = require("win-ca/api");
+ca({
+    store: ["MY", "Root", "Trust", "CA"],
+    inject: "+"
+});
+
 require("./gpii/node_modules/WindowsUtilities/WindowsUtilities.js");
 require("./gpii/node_modules/processHandling/processHandling.js");
 require("./gpii/node_modules/displaySettingsHandler");
