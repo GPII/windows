@@ -33,3 +33,4 @@ require("../gpii/node_modules/windowMessages/test/windowMessagesTest.js");
 require("../gpii/node_modules/windowsMetrics/test/WindowsMetricsTests.js");
 require("../gpii/node_modules/windowsUtilities/test/WindowsUtilitiesTests.js");
 require("../gpii/node_modules/wmiSettingsHandler/test/testWmiSettingsHandler.js");
+require("../gpii/node_modules/gpii-office/test/ribbonTest.js");
