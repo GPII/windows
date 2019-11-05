@@ -17,7 +17,7 @@
     "dependencies": {
         "edge-js": "10.3.1",
         "ffi-napi": "2.4.3",
-        "gpii-universal": "sgithens/universal#edd516040abf1f6bba9f1d21794c03457d8e095e",
+        "gpii-universal": "sgithens/universal#6b0416d769e1ed24df96aa2f33842dbe4bea9ab2",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-array": "1.1.2",
