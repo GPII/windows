@@ -2,7 +2,8 @@
     "include": [
   	  "index.js",
 	  "gpii/node_modules/*/*.js",
-	  "gpii/node_modules/*/src/*.js"
+	  "gpii/node_modules/*/src/*.js",
+	  "service/src/*.js"
     ],
     "exclude": [
 	  "!**/node_modules/"
