@@ -16,7 +16,7 @@
  */
 
 "use strict";
-var os_service = require("os-service"),
+var os_service = require("@gpii/os-service"),
     fs = require("fs"),
     path = require("path"),
     logging = require("./src/logging.js"),
