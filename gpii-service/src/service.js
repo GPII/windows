@@ -17,7 +17,7 @@
 
 "use strict";
 
-var os_service = require("os-service"),
+var os_service = require("@gpii/os-service"),
     path = require("path"),
     fs = require("fs"),
     events = require("events"),
