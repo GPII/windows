@@ -199,9 +199,9 @@ TEST(GetSettingItem, GetKnownDelayedSetting) {
                     static_cast<IPropertyValue*>(blueLightSetting.Detach());
                 EXPECT_FALSE(blueLightProp == NULL);
 
-                boolean curVal = false;
+                boolean curVal { false };
                 blueLightProp->GetBoolean(&curVal);
-                EXPECT_EQ(curVal, false);
+                EXPECT_EQ(curVal, boolean { false });
             }
         }
     }
