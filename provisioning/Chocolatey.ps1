@@ -30,4 +30,14 @@ Invoke-Command $chocolatey "install python2 -y"
 Add-Path $python2Path $true
 refreshenv
 
+Invoke-Command $chocolatey "install nuget.commandline"
+refreshenv
+
+# Install the required ATL Library & WindowsSDK for SystemSettingsHandler
+Invoke-Command $chocolatey 'install --force -y vcbuildtools -ia "/InstallSelectableItems VisualCppBuildTools_ATLMFC_SDK;VisualCppBuildTools_NETFX_SDK"'
+refreshenv
+
+Invoke-Command $chocolatey "install windows-sdk-10.0 -y"
+refreshenv
+
 exit 0
