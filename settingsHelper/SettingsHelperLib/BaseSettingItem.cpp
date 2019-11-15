@@ -231,7 +231,6 @@ UINT BaseSettingItem::Invoke() {
     ICoreWindow* core = NULL;
     ICoreWindowStatic* spCoreWindowStatic;
     ICoreWindow* spCoreWindow;
-    ICoreWindowInterop* spCoreWindowInterop;
 
     HSTRING strIWindowClassId;
     WindowsCreateString(
