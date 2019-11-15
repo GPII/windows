@@ -13,9 +13,11 @@ Import-Module (Join-Path $scriptDir 'Provisioning.psm1') -Force -Verbose
 $msbuild = Get-MSBuild "4.0"
 
 # Build the settingsHelper solution
-nuget restore .\settingsHelper\SettingsHelper.sln -MSBuildVersion 4.0
+nuget restore .\settingsHelper\SettingsHelper.sln
+
 $settingsHelperDir = Join-Path $rootDir "settingsHelper"
-Invoke-Command $msbuild "SettingsHelper.sln /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`" /p:Configuration=Release /p:Platform=`"x64`"" $settingsHelperDir
+Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform=`"x64`"" $settingsHelperDir
+
 # Build the volumeControl solution
 $volumeControlDir = Join-Path $rootDir "gpii\node_modules\nativeSettingsHandler\nativeSolutions\VolumeControl"
 Invoke-Command $msbuild "VolumeControl.sln /p:Configuration=Release /p:Platform=`"x86`" /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $volumeControlDir

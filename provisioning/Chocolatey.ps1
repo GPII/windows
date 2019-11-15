@@ -37,7 +37,7 @@ refreshenv
 Invoke-Command $chocolatey 'install --force -y vcbuildtools -ia "/InstallSelectableItems VisualCppBuildTools_ATLMFC_SDK;VisualCppBuildTools_NETFX_SDK"'
 refreshenv
 
-Invoke-Command $chocolatey "install windows-sdk-10.0 -y"
+Invoke-Command $chocolatey "install windows-sdk-10-version-1809-all --version=10.0.17763.1 -y"
 refreshenv
 
 exit 0
