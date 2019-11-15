@@ -306,6 +306,14 @@ windows.waitForMultipleObjects = function (handles, timeout, waitAll) {
     });
 };
 
+windows.getElevatedToken = function (token) {
+    // The full token (with the extra privileges) is a linked token.
+    var tokenInfo = windows.getTokenInformation(token, winapi.TOKEN_INFORMATION_CLASS.TokenLinkedToken);
+    // Take the linked token from the buffer.
+    var linkedToken = tokenInfo.readInt32LE(0);
+    return linkedToken;
+};
+
 /**
  * Gets the security identifier (SID) from a user token.
  *
@@ -313,35 +321,44 @@ windows.waitForMultipleObjects = function (handles, timeout, waitAll) {
  * @return {*} The SID of the user.
  */
 windows.getSidFromToken = function (token) {
-    // winnt.h:
-    var TokenUser = 1;
+    var tokenInfo = windows.getTokenInformation(token, winapi.TOKEN_INFORMATION_CLASS.TokenUser);
+    // Take the SID from the buffer.
+    var TokenUserHeader = 2 * ref.types["int"].size;
+    var sid = tokenInfo.slice(TokenUserHeader);
+    return sid;
+};
 
+/**
+ * Gets some information about an access token. A wrapper for GetTokenInformation.
+ *
+ * @param {Number} token The access token.
+ * @param {Number} tokenInformationClass The type of information. A member of winapi.TOKEN_INFORMATION_CLASS.
+ * @return {Buffer} The token information structure.
+ */
+windows.getTokenInformation = function (token, tokenInformationClass) {
     var lengthBuffer = ref.alloc(winapi.types.DWORD);
     // // Get the length
-    var success = winapi.advapi32.GetTokenInformation(token, TokenUser, ref.NULL, 0, lengthBuffer);
+    var success = winapi.advapi32.GetTokenInformation(token, tokenInformationClass, ref.NULL, 0, lengthBuffer);
     if (!success) {
         var err = winapi.kernel32.GetLastError();
         // ERROR_INSUFFICIENT_BUFFER is expected.
-        if (err !== winapi.errorCodes.ERROR_INSUFFICIENT_BUFFER) {
-            throw winapi.error("GetTokenInformation", success);
+        if (err && err !== winapi.errorCodes.ERROR_INSUFFICIENT_BUFFER && err !== winapi.errorCodes.ERROR_BAD_LENGTH) {
+            throw winapi.error("GetTokenInformation", success, err);
         }
     }
 
     // GetTokenInformation fills a TOKEN_USER structure, which contains another struct containing a pointer to the SID
     // and a dword. The sid pointer points to a chunk of data, which is located after the struct.
     var length = lengthBuffer.deref();
-    var tokenUserBuffer = Buffer.alloc(length);
+    var tokenInfoBuffer = Buffer.alloc(length);
     // Get the sid data.
-    success = winapi.advapi32.GetTokenInformation(token, TokenUser, tokenUserBuffer, length, lengthBuffer);
+    success = winapi.advapi32.GetTokenInformation(token, tokenInformationClass, tokenInfoBuffer,
+        length, lengthBuffer);
     if (!success) {
         throw winapi.error("GetTokenInformation", success);
     }
 
-    // Take the SID from the buffer.
-    var TokenUserHeader = 2 * ref.types["int"].size;
-    var sid = tokenUserBuffer.slice(TokenUserHeader);
-
-    return sid;
+    return tokenInfoBuffer;
 };
 
 /**

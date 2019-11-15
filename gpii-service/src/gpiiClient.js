@@ -47,60 +47,81 @@ gpiiClient.requestHandlers = {};
  * @param {Object} request.options The options argument for child_process.spawn.
  * @param {Boolean} request.wait True to wait for the process to terminate before resolving.
  * @param {Boolean} request.capture True capture output to stdout/stderr members of the response; implies wait=true.
+ * @param {Boolean} request.desktop true to run in the desktop user.
  * @return {Promise} Resolves when the process has started, if wait=false, or when it's terminated.
  */
 gpiiClient.requestHandlers.execute = function (request) {
-    return new Promise(function (resolve, reject) {
-        if (request.capture) {
-            request.wait = true;
+    var promise;
+
+    if (request.desktop) {
+        var cmd = request.command;
+        if (request.args) {
+            if (Array.isArray(request.args) && request.args.length > 0) {
+                cmd += " " + request.args.join();
+            }
         }
-
-        // spawn is used instead of exec, to avoid using the shell and worry about escaping.
-        var child = child_process.spawn(request.command, request.args, request.options);
-
-        child.on("error", function (err) {
-            reject({
-                isError: true,
-                error: err
-            });
-        });
-
-        if (child.pid) {
-            var output = null;
+        var options = {
+            currentDir: request.options && request.options.cwd,
+            env: request.options && request.options.env,
+            elevated: true
+        };
+        var pid = ipc.execute(cmd, options);
+        promise = processHandling.monitorProcess(pid);
+    } else {
+        promise = new Promise(function (resolve, reject) {
             if (request.capture) {
-                output = {
-                    stdout: "",
-                    stderr: ""
-                };
-                child.stdout.on("data", function (data) {
-                    // Limit the output to ~1 million characters
-                    if (output.stdout.length < 0xfffff) {
-                        output.stdout += data;
-                    }
-                });
-                child.stderr.on("data", function (data) {
-                    if (output.stderr.length < 0xfffff) {
-                        output.stderr += data;
-                    }
-                });
+                request.wait = true;
             }
 
-            if (request.wait) {
-                child.on("exit", function (code, signal) {
-                    var result = {
-                        code: code,
-                        signal: signal
-                    };
-                    if (output) {
-                        result.output = output;
-                    }
-                    resolve(result);
+            // spawn is used instead of exec, to avoid using the shell and worry about escaping.
+            var child = child_process.spawn(request.command, request.args, request.options);
+
+            child.on("error", function (err) {
+                reject({
+                    isError: true,
+                    error: err
                 });
-            } else {
-                resolve({pid: child.pid});
+            });
+
+            if (child.pid) {
+                var output = null;
+                if (request.capture) {
+                    output = {
+                        stdout: "",
+                        stderr: ""
+                    };
+                    child.stdout.on("data", function (data) {
+                        // Limit the output to ~1 million characters
+                        if (output.stdout.length < 0xfffff) {
+                            output.stdout += data;
+                        }
+                    });
+                    child.stderr.on("data", function (data) {
+                        if (output.stderr.length < 0xfffff) {
+                            output.stderr += data;
+                        }
+                    });
+                }
+
+                if (request.wait) {
+                    child.on("exit", function (code, signal) {
+                        var result = {
+                            code: code,
+                            signal: signal
+                        };
+                        if (output) {
+                            result.output = output;
+                        }
+                        resolve(result);
+                    });
+                } else {
+                    resolve({pid: child.pid});
+                }
             }
-        }
-    });
+        });
+    }
+
+    return promise;
 };
 
 /**

@@ -329,6 +329,7 @@ ipc.validateClient = function (pipe, pid, timeout) {
  * user token could not be received. Should only be true if not running as a service.
  * @param {Object} options.env Additional environment key-value pairs.
  * @param {String} options.currentDir Current directory for the new process.
+ * @param {Boolean} options.elevated Run with elevated privileges.
  *
  * @return {Number} The pid of the new process.
  */
@@ -345,6 +346,18 @@ ipc.execute = function (command, options) {
 
         logging.warn("ipc.startProcess invoking as current user.");
         userToken = 0;
+    }
+
+    var runAsToken;
+    if (userToken && options.elevated) {
+        try {
+            runAsToken = windows.getElevatedToken(userToken);
+        } catch (err) {
+            runAsToken = 0;
+            logging.warn("getElevatedToken failed", err);
+        }
+    } else {
+        runAsToken = userToken;
     }
 
     var pid = null;
@@ -389,9 +402,17 @@ ipc.execute = function (command, options) {
         var processInfoBuf = new winapi.PROCESS_INFORMATION();
         processInfoBuf.ref().fill(0);
 
-        var ret = winapi.advapi32.CreateProcessAsUserW(userToken, ref.NULL, commandBuf, ref.NULL, ref.NULL,
-            !!options.inheritHandles, creationFlags, envBuf, currentDirectory, startupInfo.ref(), processInfoBuf.ref());
-
+        var ret;
+        if (options.elevated && !runAsToken) {
+            // There was a problem getting the elevated token (non-admin user), run as the current user.
+            ret = winapi.kernel32.CreateProcessW(ref.NULL, commandBuf, ref.NULL, ref.NULL,
+                !!options.inheritHandles, creationFlags, envBuf, currentDirectory,
+                startupInfo.ref(), processInfoBuf.ref());
+        } else {
+            ret = winapi.advapi32.CreateProcessAsUserW(runAsToken, ref.NULL, commandBuf, ref.NULL, ref.NULL,
+                !!options.inheritHandles, creationFlags, envBuf, currentDirectory,
+                startupInfo.ref(), processInfoBuf.ref());
+        }
         if (!ret) {
             throw winapi.error("CreateProcessAsUser");
         }

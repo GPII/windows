@@ -71,6 +71,7 @@ winapi.constants = {
 winapi.errorCodes = {
     ERROR_SUCCESS: 0,
     ERROR_ACCESS_DENIED: 5,
+    ERROR_BAD_LENGTH: 24,
     ERROR_INSUFFICIENT_BUFFER: 122,
     ERROR_NO_TOKEN: 1008,
     ERROR_PRIVILEGE_NOT_HELD: 1314
@@ -290,6 +291,21 @@ winapi.kernel32 = ffi.Library("kernel32", {
     // https://msdn.microsoft.com/library/ms724265
     "ExpandEnvironmentStringsW": [
         t.BOOL, [ t.LPTSTR, t.LPTSTR, t.UINT ]
+    ],
+    // https://docs.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw
+    "CreateProcessW": [
+        t.BOOL, [
+            t.LPTSTR,  // LPCTSTR               lpApplicationName,
+            t.LPTSTR,  // LPTSTR                lpCommandLine,
+            t.LP,      // LPSECURITY_ATTRIBUTES lpProcessAttributes,
+            t.LP,      // LPSECURITY_ATTRIBUTES lpThreadAttributes,
+            t.BOOL,    // BOOL                  bInheritHandles,
+            t.DWORD,   // DWORD                 dwCreationFlags,
+            t.LP,      // LPVOID                lpEnvironment,
+            t.LP,      // LPCTSTR               lpCurrentDirectory,
+            t.LP,      // LPSTARTUPINFO         lpStartupInfo,
+            t.LP       // LPPROCESS_INFORMATION lpProcessInformation
+        ]
     ]
 });
 
@@ -380,6 +396,13 @@ winapi.wtsapi32 = ffi.Library("wtsapi32", {
         t.BOOL, [ t.ULONG, t.LP ]
     ]
 });
+
+// https://docs.microsoft.com/en-gb/windows/win32/api/winnt/ne-winnt-token_information_class
+winapi.TOKEN_INFORMATION_CLASS = {
+    TokenUser: 1,
+    TokenLinkedToken: 19
+};
+
 
 /**
  * Returns an Error containing the arguments.
