@@ -305,6 +305,10 @@ HRESULT getInputPayload(pair<int, wchar_t**>* pInput, wstring& rPayloadStr) {
         );
 
         WaitForSingleObject(hInputReader, 1000);
+
+        if (!inputStream.empty()) {
+            rPayloadStr = inputStream;
+        }
     }
 
     return errCode;
