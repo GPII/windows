@@ -15,6 +15,7 @@ $msbuild = Get-MSBuild "4.0"
 # Build the settingsHelper solution
 nuget restore .\settingsHelper\SettingsHelper.sln
 
+$env:VisualStudioVersion = '15.0'
 $settingsHelperDir = Join-Path $rootDir "settingsHelper"
 Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform=`"x64`"" $settingsHelperDir
 
