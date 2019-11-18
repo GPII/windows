@@ -56,91 +56,116 @@ UINT SettingItem::GetValue(wstring id, ATL::CComPtr<IInspectable>& item) {
     if (this->setting == NULL) { return ERROR_INVALID_HANDLE_STATE; };
     if (id.empty()) { return E_INVALIDARG; };
 
-    HRESULT res = ERROR_SUCCESS;
-    BOOL isUpdating = false;
+    HRESULT errCode { ERROR_SUCCESS };
+    BOOL isUpdating { false };
+    HSTRING hId { NULL };
+    ATL::CComPtr<IInspectable> _item { NULL };
 
-    HSTRING hId = NULL;
-    res = WindowsCreateString(id.c_str(), static_cast<UINT32>(id.size()), &hId);
+    errCode = WindowsCreateString(id.c_str(), static_cast<UINT32>(id.size()), &hId);
+    if (errCode != ERROR_SUCCESS) { goto cleanup; }
 
-    IInspectable* curValue = NULL;
-    if (res == ERROR_SUCCESS) {
-        if (id == L"Value" || id == L"DynamicSettingsDatabaseValue") {
-            res = BaseSettingItem::GetValue(id, item);
+    if (id == L"Value" || id == L"DynamicSettingsDatabaseValue") {
+        errCode = BaseSettingItem::GetValue(id, _item);
+
+        if (errCode == ERROR_SUCCESS) {
+            item = _item;
+        }
+    } else {
+        // Access one of the inner Settings inside the
+        // DynamicSettingDatabase hold inside the setting.
+        wstring settingId {};
+        if (isSupportedDb(this->parentId)) {
+            settingId = this->parentId;
         } else {
-            // Access one of the inner Settings inside the DynamicSettingDatabase
-            // holded inside the setting.
-            wstring settingId {};
-            if (isSupportedDb(this->parentId)) {
-                settingId = this->parentId;
-            } else {
-                settingId = this->settingId;
-            }
-
-            if (isSupportedDb(settingId)) {
-                if (this->dbSettings.empty()) {
-                    DynamicSettingDatabase dynSettingDb {};
-                    res = loadSettingDatabase(settingId, *this, dynSettingDb);
-
-                    if (res == ERROR_SUCCESS) {
-                        res = dynSettingDb.GetDatabaseSettings(this->dbSettings);
-                    }
-                }
-
-                if (res == ERROR_SUCCESS) {
-                    for (auto& setting : this->dbSettings) {
-                        if (id == setting.settingId) {
-                            res = setting.GetValue(L"Value", item);
-                            break;
-                        }
-                    }
-                }
-            } else {
-                // TODO: Improve error code
-                res = E_INVALIDARG;
-            }
+            settingId = this->settingId;
         }
 
+        if (isSupportedDb(settingId)) {
+            if (this->dbSettings.empty()) {
+                DynamicSettingDatabase dynSettingDb {};
+                errCode = loadSettingDatabase(settingId, *this, dynSettingDb);
+
+                if (errCode == ERROR_SUCCESS) {
+                    errCode = dynSettingDb.GetDatabaseSettings(this->dbSettings);
+                }
+            }
+
+            if (errCode == ERROR_SUCCESS) {
+                for (auto& setting : this->dbSettings) {
+                    if (id == setting.settingId) {
+                        errCode = setting.GetValue(L"Value", _item);
+                        break;
+                    }
+                }
+            }
+
+            // The required DynamicDatabaseSetting hasn't been found
+            if (_item == NULL) {
+                errCode = E_INVALIDARG;
+            }
+        } else {
+            // TODO: Improve error code
+            errCode = E_INVALIDARG;
+        }
     }
 
-    return res;
+cleanup:
+    if (hId != NULL) { WindowsDeleteString(hId); }
+
+    return errCode;
+}
+
+HRESULT SettingItem::_SetValue(const wstring& id, const DbSettingItem& dbSetting, ATL::CComPtr<IPropertyValue>& item) {
+    HRESULT errCode { ERROR_SUCCESS };
+    BOOL completed { false };
+    BOOL isUpdating { true };
+    BOOL innerUpdating { false };
+    BOOL setInnerSetting { dbSetting.setting != NULL };
+
+    ATL::CComPtr<ITypedEventHandler<IInspectable*, HSTRING>> handler =
+        new ITypedEventHandler<IInspectable*, HSTRING>(&completed);
+    EventRegistrationToken token { 0 };
+
+    if (setInnerSetting) {
+        innerUpdating = true;
+    }
+
+    errCode = this->setting->add_SettingChanged(handler, &token);
+
+    if (errCode == ERROR_SUCCESS) {
+        errCode = BaseSettingItem::SetValue(id, item);
+
+        if (errCode == ERROR_SUCCESS) {
+            UINT it = 0;
+            while (completed != TRUE && isUpdating || innerUpdating) {
+                if (it < this->maxIt) {
+                    this->setting->get_IsUpdating(&isUpdating);
+                    if (setInnerSetting) {
+                        dbSetting.GetIsUpdating(&innerUpdating);
+                    }
+
+                    System::Threading::Thread::Sleep(100);
+                    it++;
+                } else {
+                    completed = true;
+                    errCode = ERROR_TIMEOUT;
+                }
+            }
+        }
+    }
+
+    this->setting->remove_SettingChanged(token);
+
+    return errCode;
 }
 
 HRESULT SettingItem::SetValue(const wstring& id, ATL::CComPtr<IPropertyValue>& item) {
     if (this->setting == NULL) { return ERROR_INVALID_HANDLE_STATE; };
 
-    HRESULT res { ERROR_SUCCESS };
+    HRESULT errCode { ERROR_SUCCESS };
 
     if (id == L"Value") {
-        BOOL completed = false;
-        BOOL isUpdating { true };
-        UINT maxIt { 10 };
-
-        ATL::CComPtr<ITypedEventHandler<IInspectable*, HSTRING>> handler =
-            new ITypedEventHandler<IInspectable*, HSTRING>(&completed);
-        EventRegistrationToken token { 0 };
-
-        res = this->setting->add_SettingChanged(handler, &token);
-
-        if (res == ERROR_SUCCESS) {
-            res = BaseSettingItem::SetValue(id, item);
-
-            if (res == ERROR_SUCCESS) {
-                UINT it = 0;
-                while (completed != TRUE && isUpdating == TRUE) {
-                    if (it < maxIt) {
-                        this->setting->get_IsUpdating(&isUpdating);
-                        System::Threading::Thread::Sleep(100);
-
-                        it++;
-                    } else {
-                        completed = true;
-                        res = ERROR_TIMEOUT;
-                    }
-                }
-            }
-        }
-
-        this->setting->remove_SettingChanged(token);
+        errCode = SettingItem::_SetValue(id, DbSettingItem {}, item);
     } else {
         // Access one of the inner Settings inside the DynamicSettingDatabase
         // holded inside the setting.
@@ -152,59 +177,36 @@ HRESULT SettingItem::SetValue(const wstring& id, ATL::CComPtr<IPropertyValue>& i
         }
 
         if (isSupportedDb(settingId)) {
+            BOOL applied { false };
+
             if (this->dbSettings.empty()) {
                 DynamicSettingDatabase dynSettingDb {};
-                res = loadSettingDatabase(settingId, *this, dynSettingDb);
+                errCode = loadSettingDatabase(settingId, *this, dynSettingDb);
 
-                if (res == ERROR_SUCCESS) {
-                    res = dynSettingDb.GetDatabaseSettings(this->dbSettings);
+                if (errCode == ERROR_SUCCESS) {
+                    errCode = dynSettingDb.GetDatabaseSettings(this->dbSettings);
                 }
             }
 
-            if (res == ERROR_SUCCESS) {
+            if (errCode == ERROR_SUCCESS) {
                 for (auto& setting : this->dbSettings) {
                     if (id == setting.settingId) {
-                        BOOL isUpdating { true };
-                        BOOL completed { false };
-                        BOOL innerUpdating { true };
-                        UINT maxIt { 10 };
-
-                        ATL::CComPtr<ITypedEventHandler<IInspectable*, HSTRING>> handler =
-                            new ITypedEventHandler<IInspectable*, HSTRING>(&completed);
-                        EventRegistrationToken token { 0 };
-
-                        res = this->setting->add_SettingChanged(handler, &token);
-
-                        res = setting.SetValue(L"Value", item);
-
-                        if (res == ERROR_SUCCESS) {
-                            UINT it = 0;
-                            while (completed != TRUE || isUpdating == TRUE || innerUpdating == TRUE) {
-                                if (it < maxIt) {
-                                    this->setting->get_IsUpdating(&isUpdating);
-                                    setting.GetIsUpdating(&innerUpdating);
-
-                                    System::Threading::Thread::Sleep(100);
-
-                                    it++;
-                                } else {
-                                    completed = true;
-                                    res = ERROR_TIMEOUT;
-                                }
-                            }
-                        }
-
-                        res = this->setting->remove_SettingChanged(token);
-
+                        errCode = SettingItem::_SetValue(id, setting, item);
+                        applied = TRUE;
                         break;
                     }
                 }
             }
+
+            // The required DynamicDatabaseSetting hasn't been found
+            if (applied == FALSE) {
+                errCode = E_INVALIDARG;
+            }
         } else {
             // TODO: Improve error code
-            res = E_INVALIDARG;
+            errCode = E_INVALIDARG;
         }
     }
 
-    return res;
+    return errCode;
 }

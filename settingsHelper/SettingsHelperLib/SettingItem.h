@@ -23,14 +23,30 @@ using namespace ABI::Windows::Foundation::Collections;
 
 struct SettingItem : BaseSettingItem {
 private:
+    /// <summary>
+    ///  Maximum number of times the delay for Getting/Setting
+    ///  a setting value is waited.
+    /// </summary>
+    UINT maxIt { 10 };
+    /// <summary>
+    ///  Lazy vector with DBSettingItems supported by the
+    ///  setting. This vector will be filled the first time this
+    ///  settings are requested.
+    /// </summary>
     vector<DbSettingItem> dbSettings {};
     /// <summary>
-    ///  This id specifies the parent setting of the current setting. This id is specially
-    ///  useful in situations where the setting is a setting from a Collection, in this case,
-    ///  we want to specify this Id as a way to know if we support accesing the inner db settings
-    ///  of this particular setting.
+    ///  This id specifies the parent setting of the current setting.
+    ///  This id is specially useful in situations where the setting
+    ///  is a setting from a Collection, in this case, we want
+    ///  to specify this Id as a way to know if we support accesing
+    ///  the inner db settings of this particular setting.
     /// </summary>
     wstring parentId {};
+    /// <summary>
+    ///  Private helper method encapsulating the waiting logic
+    ///  necessary for properly set a new setting a new value.
+    /// </summary>
+    HRESULT _SetValue(const wstring& id, const DbSettingItem& dbSetting, ATL::CComPtr<IPropertyValue>& item);
 
 public:
     using BaseSettingItem::BaseSettingItem;
