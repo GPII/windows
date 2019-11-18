@@ -330,18 +330,11 @@ HRESULT handlePayload(pair<int, wchar_t**>* pInput) {
         if (res == ERROR_SUCCESS) {
             for (const auto& action : operations) {
                 if (action.second == ERROR_SUCCESS) {
-                    SettingItem settingItem {};
-                    vector<wstring> settingIds {};
+                    Result actionResult {};
+                    res = handleAction(sAPI, action.first, actionResult);
 
-                    res = splitSettingPath(action.first.settingID, settingIds);
-
-                    if (res == ERROR_SUCCESS) {
-                        Result actionResult {};
-                        res = handleAction(sAPI, action.first, actionResult);
-
-                        // Result should contain the error in case of failure
-                        results.push_back(actionResult);
-                    }
+                    // Result should contain the error in case of failure
+                    results.push_back(actionResult);
                 } else {
                     wstring errMsg { invalidPayloadMsg(action.second) };
 
