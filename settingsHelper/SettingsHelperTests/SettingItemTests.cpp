@@ -366,6 +366,43 @@ TEST(GetSettingValue, GetColorFilterSettingValue) {
     }
 }
 
+TEST(GetSettingValue, GetInputTouchSensitivitySetting) {
+    HRESULT errCode { ERROR_SUCCESS };
+
+    wstring settingId { L"SystemSettings_Input_Touch_SetActivationTimeout" };
+    wstring settingDLL {};
+
+    errCode = getSettingDLL(settingId, settingDLL);
+    EXPECT_EQ(errCode, ERROR_SUCCESS);
+
+    if (errCode == ERROR_SUCCESS) {
+        SettingItem setting {};
+        errCode = sAPI.loadBaseSetting(settingId, setting);
+        EXPECT_EQ(errCode, ERROR_SUCCESS);
+
+        ATL::CComPtr<IInspectable> iValue { NULL };
+        errCode = setting.GetValue(L"Value", iValue);
+
+        if (errCode == ERROR_SUCCESS) {
+            ATL::CComPtr<IPropertyValue> pValue {
+                static_cast<IPropertyValue*>(
+                    static_cast<IInspectable*>(iValue.Detach())
+                )
+            };
+
+            VARIANT newVal {};
+            newVal.vt = VARENUM::VT_BSTR;
+            newVal.bstrVal = L"Medium sensitivity";
+
+            ATL::CComPtr<IPropertyValue> newPValue { NULL };
+            createPropertyValue(newVal, newPValue);
+
+            setting.SetValue(L"Value", newPValue);
+            EXPECT_EQ(errCode, ERROR_SUCCESS);
+        }
+    }
+}
+
 // TODO: Refactor doing something meaninful
 TEST(GetSettingValue, GetCollectionValues) {
     std::wstring settingId { L"SystemSettings_Notifications_AppList" };
