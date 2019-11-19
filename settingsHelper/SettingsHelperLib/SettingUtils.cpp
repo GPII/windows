@@ -195,7 +195,18 @@ HRESULT toString(const ATL::CComPtr<IPropertyValue>& propValue, wstring& rValueS
                     res = E_INVALIDARG;
                 }
             }
+        } else if (valueType == PropertyType::PropertyType_String) {
+            HSTRING innerString { NULL };
+
+            res = propValue->GetString(&innerString);
+            if (res == ERROR_SUCCESS) {
+                UINT32 innerStringSz { 0 };
+                LPCWSTR rawStr = WindowsGetStringRawBuffer(innerString, &innerStringSz);
+
+                rValueStr = wstring { rawStr,  innerStringSz };
+            }
         } else {
+            // TODO: Improve error message
             res = E_INVALIDARG;
         }
     }
