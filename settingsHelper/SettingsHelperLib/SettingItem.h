@@ -46,7 +46,7 @@ private:
     ///  Private helper method encapsulating the waiting logic
     ///  necessary for properly set a new setting a new value.
     /// </summary>
-    HRESULT _SetValue(const wstring& id, const DbSettingItem& dbSetting, ATL::CComPtr<IPropertyValue>& item);
+    HRESULT _SetValue(DbSettingItem& dbSetting, ATL::CComPtr<IPropertyValue>& item);
 
 public:
     using BaseSettingItem::BaseSettingItem;

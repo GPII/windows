@@ -102,6 +102,8 @@ UINT SettingItem::GetValue(wstring id, ATL::CComPtr<IInspectable>& item) {
             // The required DynamicDatabaseSetting hasn't been found
             if (_item == NULL) {
                 errCode = E_INVALIDARG;
+            } else {
+                item = _item;
             }
         } else {
             // TODO: Improve error code
@@ -115,7 +117,7 @@ cleanup:
     return errCode;
 }
 
-HRESULT SettingItem::_SetValue(const wstring& id, const DbSettingItem& dbSetting, ATL::CComPtr<IPropertyValue>& item) {
+HRESULT SettingItem::_SetValue(DbSettingItem& dbSetting, ATL::CComPtr<IPropertyValue>& item) {
     HRESULT errCode { ERROR_SUCCESS };
     BOOL completed { false };
     BOOL isUpdating { true };
@@ -133,7 +135,11 @@ HRESULT SettingItem::_SetValue(const wstring& id, const DbSettingItem& dbSetting
     errCode = this->setting->add_SettingChanged(handler, &token);
 
     if (errCode == ERROR_SUCCESS) {
-        errCode = BaseSettingItem::SetValue(id, item);
+        if (setInnerSetting) {
+            errCode = dbSetting.SetValue(L"Value", item);
+        } else {
+            errCode = BaseSettingItem::SetValue(L"Value", item);
+        }
 
         if (errCode == ERROR_SUCCESS) {
             UINT it = 0;
@@ -165,7 +171,7 @@ HRESULT SettingItem::SetValue(const wstring& id, ATL::CComPtr<IPropertyValue>& i
     HRESULT errCode { ERROR_SUCCESS };
 
     if (id == L"Value") {
-        errCode = SettingItem::_SetValue(id, DbSettingItem {}, item);
+        errCode = SettingItem::_SetValue(DbSettingItem {}, item);
     } else {
         // Access one of the inner Settings inside the DynamicSettingDatabase
         // holded inside the setting.
@@ -191,7 +197,7 @@ HRESULT SettingItem::SetValue(const wstring& id, ATL::CComPtr<IPropertyValue>& i
             if (errCode == ERROR_SUCCESS) {
                 for (auto& setting : this->dbSettings) {
                     if (id == setting.settingId) {
-                        errCode = SettingItem::_SetValue(id, setting, item);
+                        errCode = SettingItem::_SetValue(setting, item);
                         applied = TRUE;
                         break;
                     }
