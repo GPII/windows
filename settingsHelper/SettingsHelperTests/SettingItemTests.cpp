@@ -548,7 +548,7 @@ TEST(GetSettingValue, GetCollectionNestedSetting) {
     }
 }
 
-/*
+#if 0
 /// <summary>
 ///  NOTE: This test should remain commented, as it's only used for development purposes.
 ///
@@ -612,4 +612,4 @@ TEST(GetAllSettingsValues, GetAllPossibleSettings) {
 
     CoUninitialize();
 }
-*/
+#endif
