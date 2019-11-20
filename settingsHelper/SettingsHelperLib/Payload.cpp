@@ -1,3 +1,15 @@
+/**
+ * Datatypes representing payload and functions.
+ *
+ * Copyright 2019 Raising the Floor - US
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
 #include "stdafx.h"
 #include "Payload.h"
 #include "IPropertyValueUtils.h"
@@ -473,6 +485,16 @@ cleanup:
     return res;
 }
 
+BOOL isNumber(wstring resVal) {
+    wchar_t* end { NULL };
+    wcstol(resVal.c_str(), &end, 10);
+    return *end == 0;
+}
+
+BOOL isBoolean(wstring resVal) {
+    return resVal == L"true" || resVal == L"false";
+}
+
 //  ------------------------  Serialization  ----------------------------------
 
 HRESULT serializeResult(const Result& result, std::wstring& str) {
@@ -515,7 +537,16 @@ HRESULT serializeResult(const Result& result, std::wstring& str) {
         if (result.returnValue.empty()) {
             resultStr.append(L"null");
         } else {
-            resultStr.append(result.returnValue);
+            BOOL isNotString {
+                isNumber(result.returnValue) ||
+                isBoolean(result.returnValue)
+            };
+
+            if (isNotString) {
+                resultStr.append(result.returnValue);
+            } else {
+                resultStr.append(L"\"" + result.returnValue + L"\"");
+            }
         }
 
         // JSON object end

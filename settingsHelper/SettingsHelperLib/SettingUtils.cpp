@@ -1,3 +1,15 @@
+/**
+ * Utility functions to handle access settings values.
+ *
+ * Copyright 2019 Raising the Floor - US
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
 #include "stdafx.h"
 
 #include "Constants.h"
@@ -195,7 +207,18 @@ HRESULT toString(const ATL::CComPtr<IPropertyValue>& propValue, wstring& rValueS
                     res = E_INVALIDARG;
                 }
             }
+        } else if (valueType == PropertyType::PropertyType_String) {
+            HSTRING innerString { NULL };
+
+            res = propValue->GetString(&innerString);
+            if (res == ERROR_SUCCESS) {
+                UINT32 innerStringSz { 0 };
+                LPCWSTR rawStr = WindowsGetStringRawBuffer(innerString, &innerStringSz);
+
+                rValueStr = wstring { rawStr,  innerStringSz };
+            }
         } else {
+            // TODO: Improve error message
             res = E_INVALIDARG;
         }
     }

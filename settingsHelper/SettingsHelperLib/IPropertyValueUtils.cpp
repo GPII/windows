@@ -1,3 +1,15 @@
+/**
+ * Utilities for handling IPropertyValue types.
+ *
+ * Copyright 2019 Raising the Floor - US
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
 #include "stdafx.h"
 
 #include "IPropertyValueUtils.h"
@@ -293,8 +305,27 @@ HRESULT equals(ATL::CComPtr<IPropertyValue> fstProp, ATL::CComPtr<IPropertyValue
                         errCode = E_INVALIDARG;
                     }
                 }
+            } else if (fstPropType == PropertyType::PropertyType_String) {
+                HSTRING fstInnerString { NULL };
+                HSTRING sndInnerString { NULL };
+
+                errCode = fstProp->GetString(&fstInnerString);
+                if (errCode == ERROR_SUCCESS) {
+                    UINT32 innerStringSz { 0 };
+                    LPCWSTR rawStr = WindowsGetStringRawBuffer(fstInnerString, &innerStringSz);
+                    wstring fstStringValue { rawStr, innerStringSz };
+
+                    errCode = sndProp->GetString(&sndInnerString);
+
+                    if (errCode == ERROR_SUCCESS) {
+                        LPCWSTR rawStr = WindowsGetStringRawBuffer(sndInnerString, &innerStringSz);
+                        wstring sndStringValue { rawStr, innerStringSz };
+
+                        res = fstStringValue == sndStringValue;
+                    }
+                }
             } else {
-                // TODO: Improve error code
+                // TODO: Improve error message
                 errCode = E_NOTIMPL;
             }
         }

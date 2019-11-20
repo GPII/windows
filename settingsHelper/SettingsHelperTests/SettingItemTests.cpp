@@ -1,3 +1,15 @@
+/**
+ * Tests setting value accessing.
+ *
+ * Copyright 2019 Raising the Floor - US
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
 #include "pch.h"
 #include <SettingItem.h>
 #include <SettingUtils.h>
@@ -366,6 +378,43 @@ TEST(GetSettingValue, GetColorFilterSettingValue) {
     }
 }
 
+TEST(GetSettingValue, GetInputTouchSensitivitySetting) {
+    HRESULT errCode { ERROR_SUCCESS };
+
+    wstring settingId { L"SystemSettings_Input_Touch_SetActivationTimeout" };
+    wstring settingDLL {};
+
+    errCode = getSettingDLL(settingId, settingDLL);
+    EXPECT_EQ(errCode, ERROR_SUCCESS);
+
+    if (errCode == ERROR_SUCCESS) {
+        SettingItem setting {};
+        errCode = sAPI.loadBaseSetting(settingId, setting);
+        EXPECT_EQ(errCode, ERROR_SUCCESS);
+
+        ATL::CComPtr<IInspectable> iValue { NULL };
+        errCode = setting.GetValue(L"Value", iValue);
+
+        if (errCode == ERROR_SUCCESS) {
+            ATL::CComPtr<IPropertyValue> pValue {
+                static_cast<IPropertyValue*>(
+                    static_cast<IInspectable*>(iValue.Detach())
+                )
+            };
+
+            VARIANT newVal {};
+            newVal.vt = VARENUM::VT_BSTR;
+            newVal.bstrVal = L"Medium sensitivity";
+
+            ATL::CComPtr<IPropertyValue> newPValue { NULL };
+            createPropertyValue(newVal, newPValue);
+
+            setting.SetValue(L"Value", newPValue);
+            EXPECT_EQ(errCode, ERROR_SUCCESS);
+        }
+    }
+}
+
 // TODO: Refactor doing something meaninful
 TEST(GetSettingValue, GetCollectionValues) {
     std::wstring settingId { L"SystemSettings_Notifications_AppList" };
@@ -511,7 +560,7 @@ TEST(GetSettingValue, GetCollectionNestedSetting) {
     }
 }
 
-/*
+#if 0
 /// <summary>
 ///  NOTE: This test should remain commented, as it's only used for development purposes.
 ///
@@ -575,4 +624,4 @@ TEST(GetAllSettingsValues, GetAllPossibleSettings) {
 
     CoUninitialize();
 }
-*/
+#endif

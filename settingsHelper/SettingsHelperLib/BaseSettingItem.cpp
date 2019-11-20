@@ -1,3 +1,15 @@
+/**
+ * BaseSettingItem - a wrapper for ISettingItem.
+ *
+ * Copyright 2019 Raising the Floor - US
+ *
+ * Licensed under the New BSD license. You may not use this file except in
+ * compliance with this License.
+ *
+ * You may obtain a copy of the License at
+ * https://github.com/GPII/universal/blob/master/LICENSE.txt
+ */
+
 #include "stdafx.h"
 #include "BaseSettingItem.h"
 #include "ISettingsCollection.h"
@@ -134,33 +146,28 @@ UINT BaseSettingItem::GetValue(wstring id, ATL::CComPtr<IInspectable>& item) {
         if (res == ERROR_SUCCESS) {
             res = this->setting->get_IsUpdating(&isUpdating);
 
+            while (isUpdating == TRUE && res == ERROR_SUCCESS) {
+                System::Threading::Thread::Sleep(10);
+                res = this->setting->get_IsUpdating(&isUpdating);
+
+                if (res != ERROR_SUCCESS) {
+                    break;
+                }
+            }
+
+            HSTRING otherStr = NULL;
+            res = WindowsCreateString(id.c_str(), static_cast<UINT32>(id.size()), &otherStr);
+
+            curValue->Release();
+
+            // TODO: This second get is necessary for some settings, like
+            // "Collection" settings. For this ones the second get guarantees
+            // that the real value is the one received.
+            res = this->setting->GetValue(otherStr, &curValue);
             if (res == ERROR_SUCCESS) {
-                UINT it = 0;
-                UINT wait = timeout / retries;
-
-                while (isUpdating == TRUE && res == ERROR_SUCCESS) {
-                    System::Threading::Thread::Sleep(10);
-                    res = this->setting->get_IsUpdating(&isUpdating);
-
-                    if (res != ERROR_SUCCESS) {
-                        break;
-                    }
-                }
-
-                HSTRING otherStr = NULL;
-                res = WindowsCreateString(id.c_str(), static_cast<UINT32>(id.size()), &otherStr);
-
+                item.Attach(curValue);
+            } else {
                 curValue->Release();
-
-                // TODO: This second get is necessary for some settings, like
-                // "Collection" settings. For this ones the second get guarantees
-                // that the real value is the one received.
-                res = this->setting->GetValue(otherStr, &curValue);
-                if (res == ERROR_SUCCESS) {
-                    item.Attach(curValue);
-                } else {
-                    curValue->Release();
-                }
             }
         }
     }

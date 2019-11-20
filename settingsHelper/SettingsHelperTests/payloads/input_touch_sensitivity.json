@@ -1,0 +1,7 @@
+[
+    {
+        "settingID": "SystemSettings_Input_Touch_SetActivationTimeout",
+        "method": "GetValue",
+        "async": true
+    }
+]
