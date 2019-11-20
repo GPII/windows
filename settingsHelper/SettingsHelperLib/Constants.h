@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef _SAPI_CONSTANTS_HL�AKJ
-#define _SAPI_CONSTANTS_HL�AKJ
-
 #include <string>
 #include <vector>
 #include <map>
@@ -57,5 +54,3 @@ namespace constants {
     /// </summary>
     const map<wstring, vector<wstring>>& CoupledLibs();
 }
-
-#endif // _SAPI_CONSTANTS

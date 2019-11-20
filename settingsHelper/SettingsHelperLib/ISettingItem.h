@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef I__ISettingItem_H
-#define I__ISettingItem_H
-
 #include <roapi.h>
 #include <windows.foundation.h>
 #include <windows.ui.core.h>
@@ -85,5 +82,3 @@ public:
     int add_SettingChanged(ABI::Windows::Foundation::ITypedEventHandler<IInspectable *, HSTRING__ *>* eventHnd, EventRegistrationToken* token);
     int remove_SettingChanged(EventRegistrationToken token);
 };
-
-#endif // !I__ISettingItem_H

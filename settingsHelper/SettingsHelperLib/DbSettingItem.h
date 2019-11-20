@@ -13,9 +13,6 @@
 
 #pragma once
 
-#ifndef S__IDBSETTINGITEM_H
-#define S__IDBSETTINGITEM_H
-
 #include "BaseSettingItem.h"
 
 struct DbSettingItem : public BaseSettingItem {
@@ -23,5 +20,3 @@ struct DbSettingItem : public BaseSettingItem {
 
     DbSettingItem();
 };
-
-#endif // S__IDBSETTINGITEM_H

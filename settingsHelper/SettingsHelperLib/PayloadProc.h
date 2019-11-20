@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef _SPAYLOAD_PROCESSING_H
-#define _SPAYLOAD_PROCESSING_H
-
 #include <Windows.h>
 #include <windows.foundation.h>
 
@@ -190,5 +187,3 @@ HRESULT getInputPayload(pair<int, wchar_t**>* pInput, wstring& rPayloadStr);
 ///  ERROR_SUCCESS in case of success or one of the following error codes:
 /// </returns>
 HRESULT handlePayload(pair<int, wchar_t**>* pInput);
-
-#endif // !_SPAYLOAD_PROCESSING_H

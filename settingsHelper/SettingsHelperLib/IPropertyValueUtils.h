@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef F__IPropertyValueUtils_H
-#define F__IPropertyValueUtils_H
-
 #include <atlbase.h>
 #include <windows.foundation.h>
 
@@ -64,5 +61,3 @@ HRESULT createValueVariant(const wstring& value, PropertyType type, VARIANT& rVa
 ///     - E_NOTIMPL if the comparison if requested for non-supported IPropertyValue contents.
 /// </returns>
 HRESULT equals(ATL::CComPtr<IPropertyValue> fstProp, ATL::CComPtr<IPropertyValue> sndProp, BOOL& result);
-
-#endif // S__IPropertyValueUtils_H

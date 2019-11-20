@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef S__DYNAMICSETTINGSDATABASE_H
-#define S__DYNAMICSETTINGSDATABASE_H
-
 #include "IDynamicSettingsDatabase.h"
 #include "SettingItem.h"
 
@@ -41,5 +38,3 @@ public:
 BOOL isSupportedDb(const wstring& settingId);
 HRESULT loadSettingDatabase(const wstring& settingId, SettingItem& settingItem, DynamicSettingDatabase& dynSettingDatabase);
 HRESULT getSupportedDbSettings(const DynamicSettingDatabase& database, vector<wstring>& settingIds);
-
-#endif // S__DYNAMICSETTINGSDATABASE_H
