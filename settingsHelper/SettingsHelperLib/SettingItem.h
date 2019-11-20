@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef S__SettingItem_H
-#define S__SettingItem_H
-
 #include "BaseSettingItem.h"
 #include "DbSettingItem.h"
 
@@ -123,6 +120,3 @@ public:
     /// </returns>
     HRESULT SetValue(const wstring& id, ATL::CComPtr<IPropertyValue>& value);
 };
-
-
-#endif // S__SettingItem_H

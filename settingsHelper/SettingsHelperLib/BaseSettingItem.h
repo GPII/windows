@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef S__BASESETTINGITEM_H
-#define S__BASESETTINGITEM_H
-
 #include "ISettingItem.h"
 
 #include <atlbase.h>
@@ -180,6 +177,3 @@ public:
     /// <returns>An HRESULT error if the operation failed or ERROR_SUCCESS.</returns>
     UINT Invoke();
 };
-
-
-#endif // S__BASESETTINGITEM_H

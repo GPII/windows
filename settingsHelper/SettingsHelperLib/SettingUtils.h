@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef F__SettingUtils_H
-#define F__SettingUtils_H
-
 #include "SettingItem.h"
 
 #include <windows.foundation.h>
@@ -158,5 +155,3 @@ public:
     /// <returns></returns>
     friend HRESULT UnloadSettingsAPI(SettingAPI& rSAPI);
 };
-
-#endif // F__SettingUtils_H

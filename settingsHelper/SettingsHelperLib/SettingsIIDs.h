@@ -12,9 +12,6 @@
 
 #pragma once
 
-#ifndef I_SETTINGSIIDS_H
-#define I_SETTINGSIIDS_H
-
 #include <combaseapi.h>
 
 /// <summary>
@@ -127,5 +124,3 @@ IID IID_ISettingObservableVector {
         0x36
     }
 };
-
-#endif

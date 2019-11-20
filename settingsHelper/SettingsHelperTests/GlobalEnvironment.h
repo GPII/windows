@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef __GLOBAL_ENVIRONMNET_TEARDOWN_GTEST_HH
-#define __GLOBAL_ENVIRONMNET_TEARDOWN_GTEST_HH
-
 #include <gtest/gtest.h>
 #include <SettingUtils.h>
 
@@ -17,5 +14,3 @@ public:
     // Override this to define how to tear down the environment.
     virtual void TearDown();
 };
-
-#endif // !__GLOBAL_ENVIRONMNET_GTEST_HH
