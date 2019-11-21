@@ -1,4 +1,4 @@
-# GPII for Windows
+# GPII for Windows.
 
 Contains platform-specific components of the GPII architecture for Windows. See [http://gpii.net/](http://gpii.net/) for
 overall details of the GPII project. After checkout out using git, this project will require node.js and npm to be
