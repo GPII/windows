@@ -25,7 +25,7 @@ Invoke-Command $chocolatey "install nodejs.install --version $($nodeVersion) --f
 Invoke-Environment (Join-Path $nodePath "nodevars.bat")
 refreshenv
 
-$python2Path = "C:\tools\python2"
+$python2Path = "C:\Python27"
 Invoke-Command $chocolatey "install python2 -y"
 Add-Path $python2Path $true
 refreshenv
