@@ -63,6 +63,9 @@ To specify the config file, use the `--config` option when running or installing
 
 ### Config options
 
+*service.json*: The deployed version is in [%gpii-app/provisioning/service.json5](https://github.com/GPII/gpii-app/tree/master/provisioning)
+This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
+
 ```json5
 {
     "processes": {
@@ -97,10 +100,29 @@ To specify the config file, use the `--config` option when running or installing
     "logging": {
         /* Log level: FATAL, ERROR, WARN, INFO, or DEBUG */
         "level": "DEBUG"
-    }
+    },
+    // The file that contains the private site-specific information.
+    "secretFile": "%ProgramData%\\Morphic Credentials\\secret.txt"
 }
 ```
 
+*secret.json*: This gets installed by the Morphic Credentials Installer, at
+`%ProgramData%\\Morphic Credentials\\secret.txt`. It contains private data which is specific to the deployment site.
+[test-secret.json5](test-secret.json5) is used for development/testing.
+
+```json5
+{
+    // Unique identifier of the deployment site.
+    "site": "testing.gpii.net",
+    // The client credentials for GPII cloud.
+    "clientCredentials": {
+        "client_id": "example_id",
+        "client_secret": "exampleEps19vgFBOzH8AO9GnzDtN9PXNWWmb3nJ1"
+    },
+    // Entropy for generating a gpii key based on their account id.
+    "signKey": "exampleoFd2xBVrMOEbt5zCL7mZy7JOvsOOLT64y91sLKPfvKJYv0D69xTZRaqVLqXRPByUziyNz"
+}
+```
 
 ## Deployment
 
