@@ -94,7 +94,9 @@ service.loadConfig = function (dir, file) {
     }
 
     service.log("Loading config file", configFile);
-    service.config = JSON5.parse(fs.readFileSync(configFile));
+    var config = JSON5.parse(fs.readFileSync(configFile));
+    // Expand all environment %variables% within the config.
+    service.config = windows.expandEnvironmentStrings(config);
 
     // Change to the configured log level (if it's not passed via command line)
     if (!service.args.loglevel && service.config.logging && service.config.logging.level) {
@@ -114,8 +116,7 @@ service.getSecrets = function () {
     var secret = null;
 
     try {
-        var file = service.config.secretFile
-            && path.resolve(windows.expandEnvironmentStrings(service.config.secretFile));
+        var file = service.config.secretFile && path.resolve(service.config.secretFile);
         if (file) {
             service.log("Reading secrets from " + file);
             secret = JSON5.parse(fs.readFileSync(file));
