@@ -60,6 +60,19 @@ service.logWarn = logging.warn;
 service.logDebug = logging.debug;
 
 /**
+ * @typedef {Object} Config
+ * @property {Object<String,ProcessConfig>} processes Child process.
+ * @property {Object} logging Logging settings
+ * @property {String} secretFile The file containing site-specific information.
+ * @property {AutoUpdateConfig} autoUpdate Auto update settings.
+ */
+
+/**
+ * @type Config
+ */
+service.config = null;
+
+/**
  * Loads the config file, which may be found in the first of the following locations:
  * - The file parameter.
  * - "--config" command line option.
@@ -68,6 +81,7 @@ service.logDebug = logging.debug;
  *
  * @param {String} dir The directory form which relative paths are used.
  * @param {String} file [optional] The config file.
+ * @return {Config} The loaded configuration.
  */
 service.loadConfig = function (dir, file) {
     // Load the config file.
@@ -96,12 +110,14 @@ service.loadConfig = function (dir, file) {
     service.log("Loading config file", configFile);
     var config = JSON5.parse(fs.readFileSync(configFile));
     // Expand all environment %variables% within the config.
-    service.config = windows.expandEnvironmentStrings(config);
+    config = windows.expandEnvironmentStrings(config);
 
     // Change to the configured log level (if it's not passed via command line)
-    if (!service.args.loglevel && service.config.logging && service.config.logging.level) {
-        logging.setLogLevel(service.config.logging.level);
+    if (!service.args.loglevel && config.logging && config.logging.level) {
+        logging.setLogLevel(config.logging.level);
     }
+
+    return config;
 };
 
 /**
@@ -226,7 +242,7 @@ if (service.isExe) {
 process.chdir(dir);
 
 // Load the configuration
-service.loadConfig(dir);
+service.config = service.loadConfig(dir);
 
 
 module.exports = service;
