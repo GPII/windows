@@ -20,7 +20,7 @@
         "ffi-napi": "2.4.4",
         "json5": "2.1.0",
         "minimist": "1.2.0",
-        "@gpii/os-service": "^2.2.0",
+        "@gpii/os-service": "2.2.0",
         "ref-array-di": "1.2.1",
         "ref-napi": "1.4.0",
         "ref-struct-di": "1.1.0"
