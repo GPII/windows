@@ -10,5 +10,13 @@
     "logging": {
         "level": "DEBUG"
     },
-    "secretFile": "test-secret.json5"
+    "secretFile": "test-secret.json5",
+    "autoUpdate": {
+        "enabled": false,
+        "lastUpdatesFile": "%ProgramData%\\Morphic\\last-updates.json5",
+        "files": [{
+            url: "https://raw.githubusercontent.com/GPII/gpii-app/master/siteconfig.json5",
+            path: "%ProgramData%\\Morphic\\siteConfig.json5"
+        }],
+    }
 }

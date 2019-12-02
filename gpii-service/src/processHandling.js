@@ -63,7 +63,7 @@ processHandling.sessionChange = function (eventType) {
     switch (eventType) {
     case "session-logon":
         // User just logged on - start the processes.
-        processHandling.startChildProcesses();
+        service.isReady().then(processHandling.startChildProcesses);
         break;
     case "session-logoff":
         // User just logged off - stop the processes (windows should have done this already).

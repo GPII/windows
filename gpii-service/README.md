@@ -102,7 +102,23 @@ This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
         "level": "DEBUG"
     },
     // The file that contains the private site-specific information.
-    "secretFile": "%ProgramData%\\Morphic Credentials\\secret.txt"
+    "secretFile": "%ProgramData%\\Morphic Credentials\\secret.txt",
+
+    // Auto update of files
+    "autoUpdate": {
+        "enabled": false, // true to enable
+        // Where to store the 'last update' info
+        "lastUpdatesFile": "%ProgramData%\\Morphic\\last-updates.json5",
+        // The files to update
+        "files": [{
+            url: "https://raw.githubusercontent.com/GPII/gpii-app/master/siteconfig.json5",
+            path: "%ProgramData%\\Morphic\\siteConfig.json5",
+            isJSON: true // Perform JSON/JSON5 validation before overwriting
+         }, {
+            url: "https://example.com/${site}", // `site` field of the secrets file
+            path: "example.json"
+         }],
+    }
 }
 ```
 

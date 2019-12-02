@@ -24,5 +24,6 @@ require("./windows.js");
 require("./gpii-ipc.js");
 require("./processHandling.js");
 require("./gpiiClient.js");
+require("./configUpdater.js");
 
 service.start();
