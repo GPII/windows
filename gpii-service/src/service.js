@@ -64,6 +64,7 @@ service.logDebug = logging.debug;
  * @property {Object<String,ProcessConfig>} processes Child process.
  * @property {Object} logging Logging settings
  * @property {String} secretFile The file containing site-specific information.
+ * @property {String} siteConfigFile The site-config file.
  * @property {AutoUpdateConfig} autoUpdate Auto update settings.
  */
 
@@ -132,6 +133,31 @@ service.loadConfig = function (dir, file) {
 };
 
 /**
+ * Loads a JSON/JSON5 file, parsing the content.
+ *
+ * @param {String} file Path to the file.
+ * @param {String} description A descriptive name of the file, for logging.
+ * @return {Object|null} The de-serialised file, or null on error.
+ */
+service.loadJSON = function (file, description) {
+    var obj = null;
+
+    try {
+        file = file && path.resolve(file);
+        if (file) {
+            service.log("Reading", description, file);
+            obj = JSON5.parse(fs.readFileSync(file));
+        } else {
+            service.logError("The path for", description, "is not configured");
+        }
+    } catch (e) {
+        service.logWarn("Unable to read", description, file, e);
+    }
+
+    return obj ? obj : null;
+};
+
+/**
  * The site-specific secrets file.
  * @typedef {Object} SecretFile
  * @property {String} site Site identifier ("domain").
@@ -148,21 +174,27 @@ service.loadConfig = function (dir, file) {
  * @return {SecretFile} The secret, or null if the secret could not be read. This shouldn't be logged.
  */
 service.getSecrets = function () {
-    var secret = null;
+    return service.loadJSON(service.config.secretFile, "secrets file");
+};
 
-    try {
-        var file = service.config.secretFile && path.resolve(service.config.secretFile);
-        if (file) {
-            service.log("Reading secrets from " + file);
-            secret = JSON5.parse(fs.readFileSync(file));
-        } else {
-            service.logError("The secrets file is not configured");
-        }
-    } catch (e) {
-        service.logWarn("Unable to read the secrets file " + service.config.secretFile, e);
-    }
+/**
+ * Loads the site-config file, from `service.config.siteConfigFile`.
+ *
+ * siteConfigFile can be an array, where the first successful loaded file is returned.
+ *
+ * @return {Object} The de-serialised site-config file.
+ */
+service.getSiteConfig = function () {
+    var files = Array.isArray(service.config.siteConfigFile)
+        ? service.config.siteConfigFile
+        : [service.config.siteConfigFile];
+    var result = null;
 
-    return secret ? secret : null;
+    files.some(function (file) {
+        result = service.loadJSON(file, "site-config file");
+        return result;
+    });
+    return result;
 };
 
 /**

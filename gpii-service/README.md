@@ -118,6 +118,26 @@ This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
             url: "https://example.com/${site}", // `site` field of the secrets file
             path: "example.json"
          }],
+    },
+    // The path to the site config - The first successfully loaded file in the list is used
+    "siteConfigFile": [
+        "%ProgramData%\\Morphic\\siteConfig.json5",
+        "%ProgramFiles(x86)%\\Morphic\\windows\\resources\\app\\siteConfig.json5",
+        "%ProgramFiles%\\Morphic\\windows\\resources\\app\\siteConfig.json5"
+    ],
+    // Set an environment variable based on the "metricsSwitch" value in the site config file 
+    "gpiiConfig": {
+        // The environment variable name
+        "env": "NODE_ENV",
+        // The metricsSwitch value, and the value to set environment variable
+        // Morphic + metrics:
+        "on:on": "app.testing.metrics",
+        // No metrics or morphic:
+        "off:off": "app.disable", // A special case: Morphic does not get started. 
+        // Metrics only:
+        "off:on": "app.metrics",
+        // No metrics:
+        "on:off": "app.testing"
     }
 }
 ```
