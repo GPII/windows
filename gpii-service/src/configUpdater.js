@@ -167,58 +167,63 @@ configUpdater.updateFile = function (update, lastUpdate) {
     var togo = Object.assign({}, lastUpdate);
     var downloadHash, localHash;
 
-    var downloadOptions;
-    var hashPromise;
-    if (fs.existsSync(update.path)) {
-        // Hash the existing file.
-        hashPromise = configUpdater.hashFile(update.path, "sha512")["catch"](function (err) {
-            service.log("updateFile: hash failed", err);
-        }).then(function (hash) {
-            localHash = hash;
+    var url = configUpdater.expand(update.url, service.getSecrets());
+    if (url) {
+        var downloadOptions;
+        var hashPromise;
+        if (fs.existsSync(update.path)) {
+            // Hash the existing file.
+            hashPromise = configUpdater.hashFile(update.path, "sha512")["catch"](function (err) {
+                service.log("updateFile: hash failed", err);
+            }).then(function (hash) {
+                localHash = hash;
+            });
+
+            if (!update.always) {
+                // Ask the server to only send the file if it's newer.
+                downloadOptions = {
+                    date: lastUpdate.date,
+                    etag: lastUpdate.etag
+                };
+            }
+        }
+
+        // Download the file.
+        var tempFile = path.join(os.tmpdir(), "morphic-update." + Math.random());
+        var downloadPromise = configUpdater.downloadFile(url, tempFile, downloadOptions).then(function (result) {
+            if (!result.notModified) {
+                // Validate the JSON
+                var p = update.isJSON
+                    ? configUpdater.validateJSON(tempFile)
+                    : Promise.resolve(true);
+                return p.then(function (isValid) {
+                    if (isValid) {
+                        downloadHash = result.hash;
+                        togo.etag = result.etag;
+                        togo.date = result.date;
+                    }
+                });
+            }
+        }, function (err) {
+            service.logWarn("updateFile: download failed", err);
         });
 
-        if (!update.always) {
-            // Ask the server to only send the file if it's newer.
-            downloadOptions = {
-                date: lastUpdate.date,
-                etag: lastUpdate.etag
-            };
-        }
+        return Promise.all([downloadPromise, hashPromise]).then(function () {
+            var updatePromise;
+            // Only perform the update if the file is different, to avoid needlessly overwriting the backup.
+            if (downloadHash && downloadHash !== localHash) {
+                updatePromise = configUpdater.applyUpdate(tempFile, update.path).then(function (backupPath) {
+                    togo.previous = backupPath;
+                    return togo;
+                });
+            }
+
+            return updatePromise || togo;
+        });
+    } else {
+        service.log("Not updating " + update.path + ": no url");
+        return Promise.resolve(togo);
     }
-
-    // Download the file.
-    var url = configUpdater.expand(update.url, service.getSecrets());
-    var tempFile = path.join(os.tmpdir(), "morphic-update." + Math.random());
-    var downloadPromise = configUpdater.downloadFile(url, tempFile, downloadOptions).then(function (result) {
-        if (!result.notModified) {
-            // Validate the JSON
-            var p = update.isJSON
-                ? configUpdater.validateJSON(tempFile)
-                : Promise.resolve(true);
-            return p.then(function (isValid) {
-                if (isValid) {
-                    downloadHash = result.hash;
-                    togo.etag = result.etag;
-                    togo.date = result.date;
-                }
-            });
-        }
-    }, function (err) {
-        service.logWarn("updateFile: download failed", err);
-    });
-
-    return Promise.all([downloadPromise, hashPromise]).then(function () {
-        var updatePromise;
-        // Only perform the update if the file is different, to avoid needlessly overwriting the backup.
-        if (downloadHash && downloadHash !== localHash) {
-            updatePromise = configUpdater.applyUpdate(tempFile, update.path).then(function (backupPath) {
-                togo.previous = backupPath;
-                return togo;
-            });
-        }
-
-        return updatePromise || togo;
-    });
 };
 
 /**
@@ -231,21 +236,33 @@ configUpdater.updateFile = function (update, lastUpdate) {
  *
  * @param {String} unexpanded The input string, containing zero or more expanders.
  * @param {Object} sourceObject The object which the paths in the expanders refer to.
+ * @param {String} alwaysExpand `true` to make expanders that resolve to null/undefined resolve to an empty
+ *  string, otherwise the function returns null.
  * @return {String} The input string, with the expanders replaced by the value of the field they refer to.
  */
-configUpdater.expand = function (unexpanded, sourceObject) {
+configUpdater.expand = function (unexpanded, sourceObject, alwaysExpand) {
+    var unresolved = false;
     // Replace all occurences of "${...}"
-    return unexpanded.replace(/\$\{([^?}]*)(\?([^}]*))?\}/g, function (match, expression, defaultGroup, defaultValue) {
+    var result = unexpanded.replace(/\$\{([^?}]*)(\?([^}]*))?\}/g, function (match, expression, defaultGroup, defaultValue) {
         // Resolve the path to a field, deep in the object.
         var value = expression.split(".").reduce(function (parent, property) {
             return (parent && parent.hasOwnProperty(property)) ? parent[property] : undefined;
         }, sourceObject);
 
-        if (value === undefined || typeof(value) === "object") {
-            value = defaultValue === undefined ? "" : defaultValue;
+        if (value === undefined || (typeof(value) === "object")) {
+            if (defaultGroup) {
+                value = defaultValue;
+            }
+            if (value === undefined || value === null) {
+                if (!alwaysExpand) {
+                    unresolved = true;
+                }
+                value = "";
+            }
         }
         return value;
     });
+    return unresolved ? null : result;
 };
 
 /**

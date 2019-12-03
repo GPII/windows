@@ -27,6 +27,7 @@ if (!global.fluid) {
     require("./processHandling-tests.js");
     require("./pipe-messaging-tests.js");
     require("./gpii-client-tests.js");
+    require("./configUpdater-tests.js");
     return;
 }
 

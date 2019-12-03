@@ -109,9 +109,11 @@ configUpdaterTests.expandTests = [
             "${a}${a}": "AA",
             "1${a}2${c.b}3": "1A2CB3",
             "${b.a}": "BA",
-            "${b.x}": "",
+            "${b.x}": ["", null],
+            "12${b.x}34": ["1234", null],
+            "12${a}34${b.x}56": ["12A3456", null],
             "${c.c.d}": "CCD",
-            "${b.c.d}": "",
+            "${b.c.d}": ["", null],
 
             "${d}": "${a}",
             "${e}": "${c.b}",
@@ -139,7 +141,7 @@ configUpdaterTests.expandTests = [
             "${a?": "${a?",
             "$": "$",
             "$${a}": "$A",
-            "${}": ""
+            "${}": ["", null]
         }
     },
     {
@@ -147,8 +149,9 @@ configUpdaterTests.expandTests = [
         tests: {
             "": "",
             "a": "a",
-            "${a}": "",
-            "${a.b.c}": "",
+            "${a}": ["", null],
+            "${a.b.c}": ["", null],
+            "${a?}": "",
             "${a?XX}": "XX"
         }
     },
@@ -157,8 +160,8 @@ configUpdaterTests.expandTests = [
         tests: {
             "": "",
             "a": "a",
-            "${a}": "",
-            "${a.b.c}": "",
+            "${a}": ["", null],
+            "${a.b.c}": ["", null],
             "${a?XX}": "XX"
         }
     }
@@ -546,6 +549,26 @@ configUpdaterTests.updateFileTests = [
         }
     },
     {
+        id: "no update (no url)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld,
+                etag: "the last ETag value"
+            },
+            content: "old",
+            url: ""
+        },
+        response: null,
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld,
+                etag: "the last ETag value"
+            },
+            request: null,
+            content: "old"
+        }
+    },
+    {
         id: "no update (with body)",
         input: {
             lastUpdate: {
@@ -864,9 +887,18 @@ jqUnit.test("expand tests", function () {
         console.log("expand object:", test.obj);
         for (var unexpanded in test.tests) {
             var expect = test.tests[unexpanded];
-            var result = configUpdater.expand(unexpanded, test.obj);
-            console.log(unexpanded, result);
-            jqUnit.assertEquals("result of expand must match the expected result for " + unexpanded, expect, result);
+
+            if (!Array.isArray(expect)) {
+                expect = [expect, expect];
+            }
+
+            var result = configUpdater.expand(unexpanded, test.obj, true);
+            jqUnit.assertEquals("result of expand(alwaysExpand=true) must match the expected result for " + unexpanded,
+                expect[0], result);
+
+            var result2 = configUpdater.expand(unexpanded, test.obj, false);
+            jqUnit.assertEquals("result of expand(alwaysExpand=false) must match the expected result for " + unexpanded,
+                expect[1], result2);
         }
     });
 });
@@ -1147,7 +1179,7 @@ jqUnit.asyncTest("Test updateFile", function () {
             /** @type {AutoUpdateFile} */
             var file = {
                 path: configUpdaterTests.getTempFile("updateFile"),
-                url: localUrl + index,
+                url: test.input.hasOwnProperty("url") ? test.input.url : localUrl + index,
                 isJSON: test.input.isJSON,
                 always: test.input.always
             };
@@ -1173,6 +1205,11 @@ jqUnit.asyncTest("Test updateFile", function () {
                 // Check the file has been updated as expected.
                 configUpdaterTests.assertFile("Target file should contain the expected content",
                     test.expect.content, file.path);
+
+                if (!test.expect.request) {
+                    // For tests with no requests, the request assertion isn't hit.
+                    jqUnit.assert("no request");
+                }
 
             }, jqUnit.fail);
 
