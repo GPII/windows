@@ -63,6 +63,9 @@ To specify the config file, use the `--config` option when running or installing
 
 ### Config options
 
+*service.json*: The deployed version is in [%gpii-app/provisioning/service.json5](https://github.com/GPII/gpii-app/tree/master/provisioning)
+This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
+
 ```json5
 {
     "processes": {
@@ -97,10 +100,65 @@ To specify the config file, use the `--config` option when running or installing
     "logging": {
         /* Log level: FATAL, ERROR, WARN, INFO, or DEBUG */
         "level": "DEBUG"
+    },
+    // The file that contains the private site-specific information.
+    "secretFile": "%ProgramData%\\Morphic Credentials\\secret.txt",
+
+    // Auto update of files
+    "autoUpdate": {
+        "enabled": false, // true to enable
+        // Where to store the 'last update' info
+        "lastUpdatesFile": "%ProgramData%\\Morphic\\last-updates.json5",
+        // The files to update
+        "files": [{
+            url: "https://raw.githubusercontent.com/GPII/gpii-app/master/siteconfig.json5",
+            path: "%ProgramData%\\Morphic\\siteConfig.json5",
+            isJSON: true // Perform JSON/JSON5 validation before overwriting
+         }, {
+            url: "https://example.com/${site}", // `site` field of the secrets file
+            path: "example.json"
+         }],
+    },
+    // The path to the site config - The first successfully loaded file in the list is used
+    "siteConfigFile": [
+        "%ProgramData%\\Morphic\\siteConfig.json5",
+        "%ProgramFiles(x86)%\\Morphic\\windows\\resources\\app\\siteConfig.json5",
+        "%ProgramFiles%\\Morphic\\windows\\resources\\app\\siteConfig.json5"
+    ],
+    // Set an environment variable based on the "metricsSwitch" value in the site config file 
+    "gpiiConfig": {
+        // The environment variable name
+        "env": "NODE_ENV",
+        // The metricsSwitch value, and the value to set environment variable
+        // Morphic + metrics:
+        "on:on": "app.testing.metrics",
+        // No metrics or morphic:
+        "off:off": "app.disable", // A special case: Morphic does not get started. 
+        // Metrics only:
+        "off:on": "app.metrics",
+        // No metrics:
+        "on:off": "app.testing"
     }
 }
 ```
 
+*secret.json*: This gets installed by the Morphic Credentials Installer, at
+`%ProgramData%\\Morphic Credentials\\secret.txt`. It contains private data which is specific to the deployment site.
+[test-secret.json5](test-secret.json5) is used for development/testing.
+
+```json5
+{
+    // Unique identifier of the deployment site.
+    "site": "testing.gpii.net",
+    // The client credentials for GPII cloud.
+    "clientCredentials": {
+        "client_id": "example_id",
+        "client_secret": "exampleEps19vgFBOzH8AO9GnzDtN9PXNWWmb3nJ1"
+    },
+    // Entropy for generating a gpii key based on their account id.
+    "signKey": "exampleoFd2xBVrMOEbt5zCL7mZy7JOvsOOLT64y91sLKPfvKJYv0D69xTZRaqVLqXRPByUziyNz"
+}
+```
 
 ## Deployment
 

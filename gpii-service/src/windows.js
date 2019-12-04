@@ -429,15 +429,21 @@ windows.setPipePermissions = function (pipeName) {
 };
 
 /**
- * Expands the environment variables in a string, which are surrounded by '%'.
+ * Expands the environment variables in a string (or strings deep within an object), which are surrounded by '%'.
  * For example, the input string of "%SystemRoot%\System32" returns "C:\Windows\System32".
  *
- * @param {String} input The input string.
- * @return {String} The input string with the environment variables expanded.
+ * @param {String|Object} input The input string, or an object.
+ * @return {String|Object} The input string, or an object, with the environment variables expanded.
  */
 windows.expandEnvironmentStrings = function (input) {
     var result;
-    if (input && input.length > 0) {
+
+    if (windows.isPlainObject(input)) {
+        result = Array.isArray(input) ? [] : {};
+        for (var key in input) {
+            result[key] = windows.expandEnvironmentStrings(input[key]);
+        }
+    } else if (input && input.length > 0) {
         var inputBuffer = winapi.stringToWideChar(input);
         // Initial buffer of MAX_PATH should be big enough for most cases (assuming this function is called for paths).
         var len = Math.max(winapi.constants.MAX_PATH + 1, input.length + 20);
@@ -455,10 +461,27 @@ windows.expandEnvironmentStrings = function (input) {
 
         result = winapi.stringFromWideChar(outputBuffer);
     } else {
-        result = "";
+        result = input;
     }
 
     return result;
+};
+
+/** Taken from fluid.isPlainObject
+ * Determines whether the supplied object is a plain JSON-forming container - that is, it is either a plain Object
+ * or a plain Array. Note that this differs from jQuery's isPlainObject which does not pass Arrays.
+ * @param {Any} totest - The object to be tested
+ * @param {Boolean} [strict] - (optional) If `true`, plain Arrays will fail the test rather than passing.
+ * @return {Boolean} - `true` if `totest` is a plain object, `false` otherwise.
+ */
+windows.isPlainObject = function (totest, strict) {
+    var string = Object.prototype.toString.call(totest);
+    if (string === "[object Array]") {
+        return !strict;
+    } else if (string !== "[object Object]") {
+        return false;
+    } // FLUID-5226: This inventive strategy taken from jQuery detects whether the object's prototype is directly Object.prototype by virtue of having an "isPrototypeOf" direct member
+    return !totest.constructor || !totest.constructor.prototype || Object.prototype.hasOwnProperty.call(totest.constructor.prototype, "isPrototypeOf");
 };
 
 module.exports = windows;
