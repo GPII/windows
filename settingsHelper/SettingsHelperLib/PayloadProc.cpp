@@ -46,19 +46,33 @@ HRESULT handleSettingAction(
                 }
             }
 
-            errCode = equals(propValue, paramValue, equalProps);
+            // Check if a conversion is needed for IPropertyValue param
+            ATL::CComPtr<IPropertyValue> convParamValue { NULL };
+            PropertyType propType { PropertyType::PropertyType_Empty };
+            propValue->get_Type(&propType);
 
-            if (errCode == ERROR_SUCCESS) {
-                if (!equalProps) {
-                    errCode = setting.SetValue(valueId, paramValue);
-                }
+            auto parserKey = propParsers().find(propType);
+            if (parserKey != propParsers().end()) {
+                errCode = parserKey->second(paramValue, convParamValue);
+            } else {
+                convParamValue = paramValue;
             }
 
             if (errCode == ERROR_SUCCESS) {
-                errCode = toString(propValue, resValueStr);
+                errCode = equals(propValue, convParamValue, equalProps);
 
                 if (errCode == ERROR_SUCCESS) {
-                    rVal = resValueStr;
+                    if (!equalProps) {
+                        errCode = setting.SetValue(valueId, convParamValue);
+                    }
+                }
+
+                if (errCode == ERROR_SUCCESS) {
+                    errCode = toString(propValue, resValueStr);
+
+                    if (errCode == ERROR_SUCCESS) {
+                        rVal = resValueStr;
+                    }
                 }
             }
         } else {
@@ -81,10 +95,10 @@ wstring serializeReturnValues(vector<pair<wstring, wstring>> settingsValues) {
     for (const auto& setting : settingsValues) {
         // Create result value
         valueResult.append(L"{ ");
-        valueResult.append(L"idElem: \"");
+        valueResult.append(L"\"elemId\": \"");
         valueResult.append(setting.first);
         valueResult.append(L"\", ");
-        valueResult.append(L"elemVal: ");
+        valueResult.append(L"\"elemVal\": ");
         valueResult.append(setting.second);
         valueResult.append(L" }");
 
@@ -118,41 +132,43 @@ HRESULT handleCollectionAction(
         tgtElemIds.push_back(tgtElem.oIdVal.first);
     }
 
-    vector<pair<wstring,wstring>> settingsValues {};
-    vector<SettingItem> colSettings {};
-    errCode = sAPI.getCollectionSettings(tgtElemIds, setting, colSettings);
-
-    if (errCode == ERROR_SUCCESS) {
-        for (auto& setting : colSettings) {
-            wstring rStrVal {};
-            errCode = handleSettingAction(valueId, action, setting, rStrVal);
-
-            if (errCode == ERROR_SUCCESS) {
-                settingsValues.push_back({ setting.settingId, rStrVal });
-            } else {
-                std::wostringstream errCodeStr {};
-                errCodeStr << std::hex << errCode;
-
-                rResult = Result {
-                    action.settingID,
-                    true,
-                    L"Action over collection setting '" +
-                    setting.settingId +
-                    L"' failed with error code '0x" + errCodeStr.str(),
-                    L""
-                };
-                break;
-            }
-        }
-    }
-
-    if (settingsValues.empty() == false && errCode == ERROR_SUCCESS) {
-        wstring valueResult { serializeReturnValues(settingsValues) };
+    if (tgtElemIds.empty()) {
+        errCode = E_INVALIDARG;
+        rResult = Result { action.settingID, true, L"No target elements of the collection where supplied.", L"" };
+    } else {
+        vector<pair<wstring,wstring>> settingsValues {};
+        vector<SettingItem> colSettings {};
+        errCode = sAPI.getCollectionSettings(tgtElemIds, setting, colSettings);
 
         if (errCode == ERROR_SUCCESS) {
-            rResult = Result { action.settingID, false, L"", valueResult };
+            for (auto& setting : colSettings) {
+                wstring rStrVal {};
+                errCode = handleSettingAction(valueId, action, setting, rStrVal);
+
+                if (errCode == ERROR_SUCCESS) {
+                    settingsValues.push_back({ setting.settingId, rStrVal });
+                } else {
+                    std::wostringstream errCodeStr {};
+                    errCodeStr << std::hex << errCode;
+
+                    rResult = Result {
+                        action.settingID,
+                        true,
+                        L"Action over collection setting '" +
+                        setting.settingId +
+                        L"' failed with error code '0x" + errCodeStr.str(),
+                        L""
+                    };
+                    break;
+                }
+            }
         } else {
-            rResult = Result { action.settingID, true, L"Failed to get the collection settings.", L"" };
+            rResult = Result { action.settingID, true, L"Failed to get the settings collection elements.", L"" };
+        }
+
+        if (settingsValues.empty() == false && errCode == ERROR_SUCCESS) {
+            wstring valueResult { serializeReturnValues(settingsValues) };
+            rResult = Result { action.settingID, false, L"", valueResult };
         }
     }
 
@@ -179,7 +195,7 @@ HRESULT getSettingPath(const Action& action, SettingPath& rPath) {
 
 HRESULT handleAction(SettingAPI& sAPI, Action action, Result& rResult) {
     HRESULT errCode { ERROR_SUCCESS };
-    Result result {};
+    wstring errMsg {};
 
     SettingPath settingPath {};
     errCode = getSettingPath(action, settingPath);
@@ -194,12 +210,7 @@ HRESULT handleAction(SettingAPI& sAPI, Action action, Result& rResult) {
 
             if (errCode == ERROR_SUCCESS) {
                 if (baseType == SettingType::SettingCollection) {
-                    Result result {};
-                    errCode = handleCollectionAction(sAPI, settingPath.second, action, baseSetting, result);
-
-                    if (errCode == ERROR_SUCCESS) {
-                        rResult = result;
-                    }
+                    handleCollectionAction(sAPI, settingPath.second, action, baseSetting, rResult);
                 } else {
                     wstring rVal {};
                     errCode = handleSettingAction(settingPath.second, action, baseSetting, rVal);
@@ -207,19 +218,29 @@ HRESULT handleAction(SettingAPI& sAPI, Action action, Result& rResult) {
                     if (errCode == ERROR_SUCCESS) {
                         rResult = Result { action.settingID, false, L"", rVal };
                     } else {
-                        std::wostringstream errCodeStr {};
-                        errCodeStr << std::hex << errCode;
-
-                        rResult = Result {
-                            action.settingID,
-                            true,
-                            L"Failed to apply setting - ErrorCode: '0x" + errCodeStr.str() + L"'",
-                            L""
-                        };
+                        errMsg = L"Failed to apply setting - ErrorCode: '0x";
                     }
                 }
+            } else {
+                errMsg = L"Failed to get 'Setting Type' - ErrorCode: '0x";
             }
+        } else {
+            errMsg = L"Failed to load 'BaseSetting' - ErrorCode: '0x";
         }
+    } else {
+        errMsg = L"Failed to get 'SettingPath' - ErrorCode: '0x";
+    }
+
+    if (errCode != ERROR_SUCCESS) {
+        std::wostringstream errCodeStr {};
+        errCodeStr << std::hex << errCode;
+
+        rResult = Result {
+            action.settingID,
+            true,
+            errMsg + errCodeStr.str() + L"'",
+            L""
+        };
     }
 
     return errCode;
