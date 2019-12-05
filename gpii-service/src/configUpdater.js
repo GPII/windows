@@ -242,26 +242,31 @@ configUpdater.updateFile = function (update, lastUpdate) {
  */
 configUpdater.expand = function (unexpanded, sourceObject, alwaysExpand) {
     var unresolved = false;
+    var result;
     // Replace all occurences of "${...}"
-    var result = unexpanded.replace(/\$\{([^?}]*)(\?([^}]*))?\}/g, function (match, expression, defaultGroup, defaultValue) {
-        // Resolve the path to a field, deep in the object.
-        var value = expression.split(".").reduce(function (parent, property) {
-            return (parent && parent.hasOwnProperty(property)) ? parent[property] : undefined;
-        }, sourceObject);
+    if (unexpanded === null || unexpanded === undefined) {
+        result = null;
+    } else {
+        result = unexpanded.replace(/\$\{([^?}]*)(\?([^}]*))?\}/g, function (match, expression, defaultGroup, defaultValue) {
+            // Resolve the path to a field, deep in the object.
+            var value = expression.split(".").reduce(function (parent, property) {
+                return (parent && parent.hasOwnProperty(property)) ? parent[property] : undefined;
+            }, sourceObject);
 
-        if (value === undefined || (typeof(value) === "object")) {
-            if (defaultGroup) {
-                value = defaultValue;
-            }
-            if (value === undefined || value === null) {
-                if (!alwaysExpand) {
-                    unresolved = true;
+            if (value === undefined || (typeof (value) === "object")) {
+                if (defaultGroup) {
+                    value = defaultValue;
                 }
-                value = "";
+                if (value === undefined || value === null) {
+                    if (!alwaysExpand) {
+                        unresolved = true;
+                    }
+                    value = "";
+                }
             }
-        }
-        return value;
-    });
+            return value;
+        });
+    }
     return unresolved ? null : result;
 };
 
