@@ -33,17 +33,17 @@ const vector<pair<wstring, vector<wstring>>> supportedDynamicSettings {
     {
         L"SystemSettings_QuietMoments_On_Full_Screen_Mode",
         {
-            L"SystemSettings_QuietMoments_Presentation_Mode_Enabled",
-            L"SystemSettings_QuietMoments_Presentation_Mode_Profile",
-            L"SystemSettings_QuietMoments_Presentation_Mode_ShouldShowNotification"
+            L"SystemSettings_QuietMoments_Full_Screen_Mode_Enabled",
+            L"SystemSettings_QuietMoments_Full_Screen_Mode_Profile",
+            L"SystemSettings_QuietMoments_Full_Screen_Mode_ShouldShowNotification"
         },
     },
     {
         L"SystemSettings_QuietMoments_On_Game_Mode",
         {
-            L"SystemSettings_QuietMoments_Presentation_Mode_Enabled",
-            L"SystemSettings_QuietMoments_Presentation_Mode_Profile",
-            L"SystemSettings_QuietMoments_Presentation_Mode_ShouldShowNotification"
+            L"SystemSettings_QuietMoments_Game_Mode_Enabled",
+            L"SystemSettings_QuietMoments_Game_Mode_Profile",
+            L"SystemSettings_QuietMoments_Game_Mode_ShouldShowNotification"
         }
     },
     {

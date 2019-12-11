@@ -182,7 +182,7 @@ HRESULT toString(const ATL::CComPtr<IPropertyValue>& propValue, wstring& rValueS
                     res = getInnerString(sysDateTimeStr, dateTimeStr);
 
                     if (res == ERROR_SUCCESS) {
-                        rValueStr = dateTimeStr;
+                        rValueStr = L"\"" + dateTimeStr + L"\"";
                     }
                 } catch (System::Exception^) {
                     res = E_INVALIDARG;
@@ -201,7 +201,7 @@ HRESULT toString(const ATL::CComPtr<IPropertyValue>& propValue, wstring& rValueS
                     res = getInnerString(sysTimeSpanStr, timeSpanStr);
 
                     if (res == ERROR_SUCCESS) {
-                        rValueStr = timeSpanStr;
+                        rValueStr = L"\"" + timeSpanStr + L"\"";
                     }
                 } catch (System::Exception^) {
                     res = E_INVALIDARG;
@@ -215,7 +215,7 @@ HRESULT toString(const ATL::CComPtr<IPropertyValue>& propValue, wstring& rValueS
                 UINT32 innerStringSz { 0 };
                 LPCWSTR rawStr = WindowsGetStringRawBuffer(innerString, &innerStringSz);
 
-                rValueStr = wstring { rawStr,  innerStringSz };
+                rValueStr = L"\"" + wstring { rawStr, innerStringSz } + L"\"";
             }
         } else {
             // TODO: Improve error message
@@ -469,7 +469,6 @@ HRESULT SettingAPI::loadBaseSetting(const std::wstring& settingId, SettingItem& 
     }
 
     try {
-
         // TODO: Recheck the condition of failing loaded DLL.
         DWORD lastError = ERROR_SUCCESS;
         DWORD preGetLastError = GetLastError();
