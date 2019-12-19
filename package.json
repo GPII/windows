@@ -40,6 +40,9 @@
         "rimraf": "2.6.2",
         "shelljs": "0.8.1"
     },
+    "os": [
+        "win32"
+    ],
     "license": "BSD-3-Clause",
     "keywords": [
         "gpii",
