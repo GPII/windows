@@ -469,7 +469,6 @@ HRESULT SettingAPI::loadBaseSetting(const std::wstring& settingId, SettingItem& 
     }
 
     try {
-        // TODO: Recheck the condition of failing loaded DLL.
         DWORD lastError = ERROR_SUCCESS;
         DWORD preGetLastError = GetLastError();
         GetSettingFunc getSetting = (GetSettingFunc)GetProcAddress(lib, "GetSetting");
@@ -486,13 +485,35 @@ HRESULT SettingAPI::loadBaseSetting(const std::wstring& settingId, SettingItem& 
             res = getSetting(hSettingId, &setting, 0);
 
             BOOL isUpdating { true };
-            // ColorFilter setting doesn't update this field when ready.
-            BOOL isEnabled { true };
-            // IsApplicable' may cause segfault in certain settings.
-            BOOL isApplicable { true };
 
+            // Counter for the number of times trying to load the setting.
             UINT counter = 0;
-            while (isUpdating) {//  || (isEnabled == false )) { // && isApplicable == false)) {
+
+            // NOTE: Dangerous properties
+            // ================================================================
+            // NOTE: ColorFilter setting doesn't update this field when ready.
+            //  + BOOL isEnabled { true };
+            // NOTE: IsApplicable' may cause segfault in certain settings.
+            //  + BOOL isApplicable { true };
+            //
+            // Both the 'isEnable' and 'isApplicable' properties work for most
+            // of the settings when trying to detect when the setting is
+            // ready. However, they produce serious errors in certain ones
+            // like segfaults, or not chaning their values, which invalidates
+            // the detection logic, for that reason, they should be never used
+            // for this purpose.
+            //
+            // When checking is the setting was ready the previous logic used
+            // was:
+            //  ```
+            //   (isUpdating || (isEnabled == false && isApplicable == false)
+            //  ```
+            //
+            // And the verification that the operation completed successfully was:
+            // ```
+            //   (res == ERROR_SUCCESS && isUpdating == FALSE && isApplicable == TRUE && isEnable == TRUE)
+            // ```
+            while (isUpdating) { //  || (isEnabled == false && isApplicable == false)) {
                 // Timer
                 // ==========
                 if (counter > 10) {
@@ -503,11 +524,9 @@ HRESULT SettingAPI::loadBaseSetting(const std::wstring& settingId, SettingItem& 
                 }
 
                 setting->get_IsUpdating(&isUpdating);
-                // setting->get_IsApplicable(&isApplicable);
-                // setting->get_IsEnabled(&isEnabled);
             }
 
-            if (res == ERROR_SUCCESS && isApplicable == TRUE && isEnabled == TRUE && isUpdating == FALSE) {
+            if (res == ERROR_SUCCESS && isUpdating == FALSE) { // isApplicable == TRUE && isEnable == TRUE) {
                 ATL::CComPtr<ISettingItem> comSetting { NULL };
                 comSetting.Attach(setting);
                 settingItem = SettingItem { settingId, comSetting };
@@ -607,15 +626,15 @@ HRESULT SettingAPI::getCollectionSettings(const vector<wstring>& ids, SettingIte
 HRESULT SettingAPI::getCollectionSettings(SettingItem& collSetting, vector<SettingItem>& rSettings) {
     if (this->baseLibrary == NULL) { return ERROR_INVALID_HANDLE_STATE; };
 
-    HRESULT errCode { ERROR_SUCCESS };
-    UINT32 vectorSize { 0 };
-
     SettingType type { SettingType::Empty };
-    errCode = collSetting.GetSettingType(&type);
+    collSetting.GetSettingType(&type);
     if (type != SettingType::SettingCollection) {
         // TODO: Change with more meaningful error
         return E_INVALIDARG;
     }
+
+    HRESULT errCode { ERROR_SUCCESS };
+    UINT32 vectorSize { 0 };
 
     ATL::CComPtr<IInspectable> collection = NULL;
     errCode = collSetting.GetValue(L"Value", collection);
@@ -644,7 +663,7 @@ HRESULT SettingAPI::getCollectionSettings(SettingItem& collSetting, vector<Setti
                     HSTRING hCurSettingId { NULL };
                     errCode = pCurSetting->get_Id(&hCurSettingId);
 
-                    if (errCode) {
+                    if (errCode == ERROR_SUCCESS) {
                         UINT32 length { 0 };
                         LPCWSTR pStrBuffer { WindowsGetStringRawBuffer(hCurSettingId, &length) };
                         std::wstring id { pStrBuffer };
