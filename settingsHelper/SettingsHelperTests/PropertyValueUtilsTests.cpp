@@ -1,5 +1,5 @@
 /**
- * Tests function utilities.
+ * Tests for PropertyValue utility functions.
  *
  * Copyright 2019 Raising the Floor - US
  *
