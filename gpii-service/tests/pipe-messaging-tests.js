@@ -36,7 +36,6 @@ jqUnit.module("GPII pipe tests", {
 
 // Test gotData by sending packets using difference chunk sizes.
 jqUnit.test("Test gotData", function () {
-
     var fakeSocket = new EventEmitter();
     var session = messaging.createSession(fakeSocket);
 
@@ -216,6 +215,11 @@ jqUnit.asyncTest("Test requests", function () {
             expectResolve: false
         },
         {
+            action: "error",
+            reply: "the error (Error object)",
+            expectResolve: false
+        },
+        {
             action: "throw",
             reply: {value: "the error"},
             expectResolve: false
@@ -244,6 +248,8 @@ jqUnit.asyncTest("Test requests", function () {
                 return Promise.reject(req.reply);
             case "throw":
                 throw req.reply;
+            case "error":
+                throw new Error(req.reply);
             }
         };
 
@@ -275,7 +281,11 @@ jqUnit.asyncTest("Test requests", function () {
                 sendRequest();
             }, function (err) {
                 jqUnit.assertFalse("promise should reject for this test" + suffix, currentTest.expectResolve);
-                jqUnit.assertDeepEq("rejection value must be the expected" + suffix, currentTest.reply, err);
+                if (currentTest.action === "error") {
+                    jqUnit.assertDeepEq("error message must be the expected" + suffix, currentTest.reply, err.message);
+                } else {
+                    jqUnit.assertDeepEq("rejection value must be the expected" + suffix, currentTest.reply, err);
+                }
                 sendRequest();
             });
         };

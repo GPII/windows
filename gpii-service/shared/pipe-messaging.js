@@ -226,7 +226,7 @@ Session.prototype.handleRequest = function (message) {
     }, function (err) {
         var e = null;
         if (err instanceof Error) {
-            // Error doesn't serialise
+            // Error doesn't serialise (nor does it work with Object.assign)
             e = {};
             Object.getOwnPropertyNames(err).forEach(function (a) {
                 e[a] = err[a];

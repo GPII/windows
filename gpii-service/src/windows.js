@@ -447,12 +447,13 @@ windows.expandEnvironmentStrings = function (input) {
         var inputBuffer = winapi.stringToWideChar(input);
         // Initial buffer of MAX_PATH should be big enough for most cases (assuming this function is called for paths).
         var len = Math.max(winapi.constants.MAX_PATH + 1, input.length + 20);
-        var outputBuffer = Buffer.alloc(len);
+        var outputBuffer = Buffer.alloc((len + 1) * 2);
         // Expand the variables
         var requiredSize = winapi.kernel32.ExpandEnvironmentStringsW(inputBuffer, outputBuffer, len);
         if (requiredSize > len) {
             // Initial buffer is too small - call again with the correct size.
             len = requiredSize;
+            outputBuffer = Buffer.alloc((len + 1) * 2);
             requiredSize = winapi.kernel32.ExpandEnvironmentStringsW(inputBuffer, outputBuffer, len);
         }
         if (requiredSize === 0) {
