@@ -1,5 +1,6 @@
-/*
- * User listeners.
+/* Entry point for when the GPII windows service starts.
+ * This should be executed when the service has already started, otherwise a delay in the loading may cause the system
+ * to think it's not responding to the start signal.
  *
  * Copyright 2017 Raising the Floor - International
  *
@@ -17,9 +18,11 @@
  */
 
 "use strict";
+var service = require("./service.js");
 
-require("./src/userListeners.js");
-require("./src/pcsc.js");
-require("./src/proximity.js");
-require("./src/usb.js");
-require("./src/windowsLogin.js");
+require("./windows.js");
+require("./gpii-ipc.js");
+require("./processHandling.js");
+require("./gpiiClient.js");
+
+service.start();
