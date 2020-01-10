@@ -133,7 +133,10 @@ service.loadConfig = function (dir, file) {
 };
 
 /**
- * Loads a JSON/JSON5 file, parsing the content.
+ * Gets the secrets, which is the data stored in the secrets file.
+ *
+ * The secret is installed in a separate installer, which could occur after Morphic was installed. Also, the secret
+ * may be later updated. Because of this, the secret is read each time it is used.
  *
  * @param {String} file Path to the file.
  * @param {String} description A descriptive name of the file, for logging.
