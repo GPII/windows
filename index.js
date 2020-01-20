@@ -48,6 +48,7 @@ require("./gpii/node_modules/wmiSettingsHandler");
 require("./gpii/node_modules/gpii-localisation");
 require("./gpii/node_modules/gpii-office");
 require("./gpii/node_modules/gpii-userInput");
+require("./gpii/node_modules/gpii-service-handler");
 require("./gpii/node_modules/gpii-windowManagement");
 
 module.exports = fluid;
