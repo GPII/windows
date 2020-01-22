@@ -55,11 +55,10 @@ jqUnit.test("Test config loader", function () {
 
     // Check a config file will be loaded if the process is running as a service
     try {
-        service.config = null;
         service.isService = true;
-        service.loadConfig(testDir);
+        var config = service.loadConfig(testDir);
         jqUnit.assertTrue("config should be loaded when running as a service",
-            service.config && service.config.testLoaded);
+            config && config.testLoaded);
     } finally {
         // Ensure the next user of service.js gets a clean one
         delete require.cache[require.resolve("../src/service.js")];

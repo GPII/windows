@@ -20,7 +20,9 @@
 var service = require("./service.js"),
     ipc = require("./gpii-ipc.js"),
     windows = require("./windows.js"),
-    winapi = require("./winapi.js");
+    winapi = require("./winapi.js"),
+    path = require("path"),
+    fs = require("fs");
 
 var processHandling = {};
 module.exports = processHandling;
@@ -113,10 +115,53 @@ processHandling.getProcessList = function (allProcesses) {
 
     return processes;
 };
+
+/**
+ * Hide or show the morphic desktop icon, depending on the value of the metrics switch.
+ * When hiding, they're moved from C:\Users\Public\Desktop to C:\ProgramData\Morphic\Icons. Showing will move them back.
+ * This needs to be performed by the service, because they're owned by administrator.
+ */
+processHandling.toggleDesktopIcons = function () {
+    var config = processHandling.getGpiiConfig();
+    var morphicHide = config && config.value && config.value.startsWith("off:");
+
+    var iconFiles = [ "Morphic QuickStrip.lnk", "Reset to Standard.lnk" ];
+
+    var desktopPath = path.join(process.env.PUBLIC || "C:\\Users\\Public", "Desktop");
+    var stashPath = path.join(process.env.PROGRAMDATA || "C:\\ProgramData", "Morphic");
+
+
+    iconFiles.forEach(function (file) {
+
+        var desktop = path.join(desktopPath, file);
+        var stashed = path.join(stashPath, file);
+
+        service.logDebug("Setting desktop icon: ", desktop, stashed, morphicHide ? "hide" : "show");
+
+        try {
+            // Ensure there's a copy in the stash location
+            if (!fs.existsSync(stashed)) {
+                fs.copyFileSync(desktop, stashed);
+            }
+
+            if (morphicHide) {
+                // Remove the desktop icon
+                if (fs.existsSync(desktop)) {
+                    fs.unlinkSync(desktop);
+                }
+            }
+        } catch (e) {
+            service.logError("Error setting desktop icon", e.message, e);
+        }
+    });
+};
+
 /**
  * Starts the configured processes.
  */
 processHandling.startChildProcesses = function () {
+
+    processHandling.toggleDesktopIcons();
 
     var processes = processHandling.getProcessList();
 
