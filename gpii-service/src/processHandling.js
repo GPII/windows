@@ -144,12 +144,17 @@ processHandling.toggleDesktopIcons = function () {
                 fs.copyFileSync(desktop, stashed);
             }
 
+            var iconExists = fs.existsSync(desktop);
             if (morphicHide) {
                 // Remove the desktop icon
-                if (fs.existsSync(desktop)) {
+                if (iconExists) {
                     fs.unlinkSync(desktop);
                 }
+            } else if (!iconExists) {
+                // Copy it back from the stash
+                fs.copyFileSync(stashed, desktop);
             }
+
         } catch (e) {
             service.logError("Error setting desktop icon", e.message, e);
         }
