@@ -22,6 +22,7 @@ var jqUnit = require("node-jqunit"),
     http = require("http"),
     JSON5 = require("json5"),
     path = require("path"),
+    URL = require("url").URL,
     fs = require("fs");
 
 var configUpdater = require("../src/configUpdater.js");
@@ -742,6 +743,146 @@ configUpdaterTests.updateFileTests = [
             },
             content: "old"
         }
+    },
+    {
+        id: "updated (expander in url)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: "${site}"
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?testing.gpii.net"
+        }
+    },
+    {
+        id: "updated (multiple urls, no expanders, uses first)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: ["it-worked", "you-broke-it"]
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?it-worked"
+        }
+    },
+    {
+        id: "updated (multiple urls, with expander, uses first)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: ["it-worked-${site}", "you-broke-it"]
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?it-worked-testing.gpii.net"
+        }
+    },
+    {
+        id: "updated (multiple urls, with expander, uses second)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: ["you-broke-it-${stupidValue}", "it-worked-${site}", "you-broke-it-last"]
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?it-worked-testing.gpii.net"
+        }
+    },
+    {
+        id: "no update (multiple urls)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld,
+                etag: "the last ETag value"
+            },
+            content: "old",
+            url: ["", "${stupidValue}", ""]
+        },
+        response: null,
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld,
+                etag: "the last ETag value"
+            },
+            request: null,
+            content: "old"
+        }
     }
 ];
 
@@ -1156,13 +1297,20 @@ jqUnit.asyncTest("Test updateFile", function () {
 
     var server = http.createServer();
     server.listen(0, "127.0.0.1");
+    var localUrl;
 
     // Respond to requests using the details from the test's response object.
     server.on("request", function (req, res) {
-        var index = parseInt(req.url.substr(1));
+        var url = new URL(localUrl + req.url.substr(1));
+        var index = parseInt(url.pathname.substr(1));
         var test = configUpdaterTests.updateFileTests[index];
         var suffix = " - test.id: " + test.id;
 
+        if (url.search || test.expect.search) {
+            jqUnit.expect(1);
+            jqUnit.assertEquals("URL search must match the expected value" + suffix,
+                test.expect.search, url.search);
+        }
         // Check the request headers
         var checkHeaders = {};
         for (var key in test.expect.request) {
@@ -1185,7 +1333,7 @@ jqUnit.asyncTest("Test updateFile", function () {
     });
 
     server.on("listening", function () {
-        var localUrl = "http://" + server.address().address + ":" + server.address().port + "/";
+        localUrl = "http://" + server.address().address + ":" + server.address().port + "/";
         console.log("http server listening on " + localUrl);
 
         var promises = configUpdaterTests.updateFileTests.map(function (test, index) {
@@ -1198,6 +1346,17 @@ jqUnit.asyncTest("Test updateFile", function () {
                 isJSON: test.input.isJSON,
                 always: test.input.always
             };
+
+            if (test.input.urlQuery) {
+                if (Array.isArray(test.input.urlQuery)) {
+                    var urls = test.input.urlQuery.map(function (query) {
+                        return file.url + "?" + query;
+                    });
+                    file.url = urls;
+                } else {
+                    file.url += "?" + test.input.urlQuery;
+                }
+            }
 
             var lastUpdate = Object.assign({}, test.input.lastUpdate);
 

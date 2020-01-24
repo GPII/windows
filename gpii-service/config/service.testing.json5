@@ -11,6 +11,7 @@
         "level": "DEBUG"
     },
     "secretFile": "test-secret.json5",
+    "package.json": "tests/test-package.json",
     "autoUpdate": {
         "enabled": false
     }

@@ -191,7 +191,24 @@ configUpdater.updateFile = function (update, lastUpdate) {
     var togo = Object.assign({}, lastUpdate);
     var downloadHash, localHash;
 
-    var url = configUpdater.expand(update.url, service.getSecrets());
+    var expanderSource = Object.assign({
+        version: service.config.morphicVersion,
+        siteConfig: service.getSiteConfig()
+    }, service.getSecrets());
+
+    var url;
+    if (Array.isArray(update.url)) {
+        // Use the first url that resolves
+        for (var i = 0; i < update.url.length; i++) {
+            url = configUpdater.expand(update.url[i], expanderSource);
+            if (url) {
+                break;
+            }
+        }
+    } else {
+        url = configUpdater.expand(update.url, expanderSource);
+    }
+
     if (url) {
         var downloadOptions;
         var hashPromise;

@@ -103,6 +103,8 @@ This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
     },
     // The file that contains the private site-specific information.
     "secretFile": "%ProgramData%\\Morphic Credentials\\secret.txt",
+    // The gpii-app package.json file (default: "resources/app/package.json")
+    "package.json": "resources/app/package.json",
 
     // Auto update of files
     "autoUpdate": {
@@ -119,7 +121,26 @@ This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
             path: "%ProgramData%\\Morphic\\siteConfig.json5",
             isJSON: true // Perform JSON/JSON5 validation before overwriting
          }, {
+            // ${Expanders} can be used to take fields from the secrets file.
+            // See configUpdater.js:configUpdater.expand for syntax.
+            // In addition, there is:
+            // ${version}: "version" field of gpii-app package.json.
+            // ${siteConfig.xyz}: "xyz" field of the current siteConfig (at the time of download).
             url: "https://example.com/${site}", // `site` field of the secrets file
+            path: "example.json"
+         }, {
+            // If an ${expander} resolves to null, the entire string will resolve to null.
+            // With this in mind, multiple urls can be specified so fallbacks can be used
+            // when the information isn't available.
+            // (note: if there's a download error, the next one is NOT used)
+            url: [
+                // If the site config has a `updateUrl` value, this url is used.
+                "${siteConfig.updateUrl}",
+                // If the secrets contains a `site` field, this url is used.
+                "https://example.com/${site}",
+                // Otherwise, this url is used.
+                "https://example.com/default",
+            ],
             path: "example.json"
          }],
     },
