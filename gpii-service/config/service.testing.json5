@@ -12,6 +12,7 @@
     },
     "secretFile": "test-secret.json5",
     "package.json": "tests/test-package.json",
+    "siteConfigFile": "tests/test-siteConfig.json",
     "autoUpdate": {
         "enabled": false
     }

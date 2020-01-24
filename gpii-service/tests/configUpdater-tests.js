@@ -775,6 +775,66 @@ configUpdaterTests.updateFileTests = [
         }
     },
     {
+        id: "updated (expander in url, ${version})",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: "${version}"
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?testing-1.2.3"
+        }
+    },
+    {
+        id: "updated (expander in url, ${siteConfig.xxx})",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: "${siteConfig.someValue}"
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?value-from-site-config"
+        }
+    },
+    {
         id: "updated (multiple urls, no expanders, uses first)",
         input: {
             lastUpdate: {
@@ -835,13 +895,18 @@ configUpdaterTests.updateFileTests = [
         }
     },
     {
-        id: "updated (multiple urls, with expander, uses second)",
+        id: "updated (multiple urls, with expander, uses third)",
         input: {
             lastUpdate: {
                 date: configUpdaterTests.testDateOld
             },
             content: "old",
-            urlQuery: ["you-broke-it-${stupidValue}", "it-worked-${site}", "you-broke-it-last"]
+            urlQuery: [
+                "you-broke-it-${stupidValue}",
+                "you-broke-it-again-${siteConfig.stupid}",
+                "it-worked-${site}",
+                "you-broke-it-last"
+            ]
         },
         response: {
             statusCode: 200,
