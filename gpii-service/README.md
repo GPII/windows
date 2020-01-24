@@ -109,6 +109,10 @@ This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
         "enabled": false, // true to enable
         // Where to store the 'last update' info
         "lastUpdatesFile": "%ProgramData%\\Morphic\\last-updates.json5",
+        // Number of times to retry a failed update (default: 3).
+        "retries": 3,
+        // Milliseconds to wait after failure (default: 5000).
+        "retryDelay": 5000,
         // The files to update
         "files": [{
             url: "https://raw.githubusercontent.com/GPII/gpii-app/master/siteconfig.json5",
@@ -169,7 +173,7 @@ The installer will install and start the service.
 
 ## Command line options
 
-`index.js` recognises the following command-line arguments 
+`index.js` recognises the following command-line arguments
 
 ```
  --install     Install the Windows Service.

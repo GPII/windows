@@ -757,6 +757,9 @@ configUpdaterTests.updateAllTest = {
                 },
                 file4: {
                     id: "4"
+                },
+                file5: {
+                    id: "5"
                 }
             }
         },
@@ -764,10 +767,18 @@ configUpdaterTests.updateAllTest = {
             {url: "1", path: "file1"},
             {url: undefined, path: "file2"},
             {url: "3", path: "file3", error: true},
-            {url: "4", path: "file4"}
+            {url: "4", path: "file4"},
+            {url: "5", path: "file5", retry: 3}
         ]
     },
     expect: {
+        updateAttempts: [
+            "file1",
+            "file2",
+            "file3", "file3", "file3", "file3", "file3", "file3",
+            "file4",
+            "file5", "file5", "file5"
+        ],
         lastUpdates: {
             files: {
                 file1: {
@@ -782,6 +793,10 @@ configUpdaterTests.updateAllTest = {
                     handled: true
                 },
                 file2: {
+                    handled: true
+                },
+                file5: {
+                    id: "5",
                     handled: true
                 }
             }
@@ -1230,13 +1245,14 @@ jqUnit.asyncTest("Test updateFile", function () {
 jqUnit.asyncTest("Test updateAll", function () {
 
     var test = configUpdaterTests.updateAllTest;
-    jqUnit.expect(test.input.autoUpdateFiles.length + 2);
+    jqUnit.expect(2);
 
     var service = require("../src/service.js");
     service.config.autoUpdate = {
         enabled: true,
         files: test.input.autoUpdateFiles,
-        lastUpdatesFile: configUpdaterTests.getTempFile("lastUpdatesFile")
+        lastUpdatesFile: configUpdaterTests.getTempFile("lastUpdatesFile"),
+        retryDelay: 1
     };
 
     var files = [];
@@ -1246,23 +1262,32 @@ jqUnit.asyncTest("Test updateAll", function () {
         configUpdater.updateFile = updateFileOrig;
     });
 
+    var retryCount = {};
+
     // Check that updateFile gets called for every updated file, with the correct data.
     configUpdater.updateFile = function (update, lastUpdate) {
         files.push(update.path);
+        jqUnit.expect(1);
         jqUnit.assertEquals("update argument must correspond with the correct lastUpdate", update.url, lastUpdate.id);
-        return update.error
+
+        var error = update.error;
+
+        if (update.retry) {
+            var retries = retryCount[update.path] || 0;
+            retryCount[update.path] = ++retries;
+            error = retries < update.retry;
+        }
+        return (error)
             ? Promise.reject({isError: true})
             : Promise.resolve(Object.assign({}, lastUpdate, {handled:true}));
     };
 
     // Save the data, to ensure the file gets loaded in updateAll
     configUpdater.saveLastUpdates(test.input.lastUpdates).then(function () {
-        return configUpdater.updateAll().then(function () {
+        return configUpdater.updateAll(5).then(function () {
             // Check every file was processed.
-            var allFiles = service.config.autoUpdate.files.map(function (file) {
-                return file.path;
-            });
-            jqUnit.assertDeepEq("updateFile should be called for every file", allFiles.sort(), files.sort());
+            jqUnit.assertDeepEq("updateFile should be called for every file",
+                test.expect.updateAttempts.sort(), files.sort());
 
             // Check that the last-updates file had been written to.
             return configUpdater.loadLastUpdates().then(function (lastUpdates) {
