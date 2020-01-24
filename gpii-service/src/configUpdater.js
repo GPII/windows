@@ -171,6 +171,9 @@ configUpdater.updateAll = function (retries, failedOnly) {
         });
 
         return Promise.all(promises).then(function () {
+            failed = failed || service.config.autoUpdate.files.some(function (file) {
+                return file.failed;
+            });
             configUpdater.saveLastUpdates(lastUpdates);
             // retry the failed ones
             if (failed && retries && retries > 0) {
@@ -253,6 +256,7 @@ configUpdater.updateFile = function (update, lastUpdate) {
                 });
             }
         }, function (err) {
+            update.failed = true;
             service.logWarn("updateFile: download failed", err);
         });
 
@@ -436,10 +440,20 @@ configUpdater.downloadFile = function (url, localPath, options) {
             headers["If-Modified-Since"] = options.date;
         }
 
-        var req = request.get({
-            url: url,
-            headers: headers
-        });
+        var req;
+        try {
+            req = request.get({
+                url: url,
+                headers: headers
+            });
+        } catch (e) {
+            reject({
+                isError: true,
+                message: "Unable to download from " + url  + ": " + e.message,
+                url: url,
+                exception: e
+            });
+        }
 
         req.on("error", function (err) {
             reject({

@@ -96,7 +96,7 @@ logging.doLog = function (level, args) {
                 return argOut;
             }).join(" ");
 
-            fs.appendFileSync(logging.logFile, text);
+            fs.appendFileSync(logging.logFile, text + "\n");
         } else {
             console.log.apply(console, args);
         }

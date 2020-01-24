@@ -26,7 +26,7 @@
         "%ProgramFiles(x86)%\\Morphic\\windows\\resources\\app\\siteConfig.json5",
         "%ProgramFiles%\\Morphic\\windows\\resources\\app\\siteConfig.json5"
     ],
-    "gpii-config": {
+    "gpiiConfig": {
         "env": "NODE_ENV_EXAMPLE", // set to "NODE_ENV" when starting gpii-app
         // Morphic + metrics:
         "on:on": "app.testing.metrics",
