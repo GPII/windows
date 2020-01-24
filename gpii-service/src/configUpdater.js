@@ -32,6 +32,13 @@ var service = require("./service.js"),
 var configUpdater = {};
 module.exports = configUpdater;
 
+// Use certificates from the Windows certificate stores [GPII-4186]
+var ca = require("win-ca/api");
+ca({
+    store: ["MY", "Root", "Trust", "CA"],
+    inject: "+"
+});
+
 /**
  * Configuration for the config auto update.
  * @typedef {Object} AutoUpdateConfig
