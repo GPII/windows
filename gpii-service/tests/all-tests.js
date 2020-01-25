@@ -21,13 +21,13 @@
 
 if (!global.fluid) {
     // In child process.
-    require("./service-tests.js");
     require("./windows-tests.js");
     require("./gpii-ipc-tests.js");
     require("./processHandling-tests.js");
     require("./pipe-messaging-tests.js");
     require("./gpii-client-tests.js");
     require("./configUpdater-tests.js");
+    require("./service-tests.js");
     return;
 }
 
