@@ -64,8 +64,10 @@ service.logDebug = logging.debug;
  * @property {Object<String,ProcessConfig>} processes Child process.
  * @property {Object} logging Logging settings
  * @property {String} secretFile The file containing site-specific information.
+ * @property {String} package.json The package.json file for gpii-app.
  * @property {String} siteConfigFile The site-config file.
  * @property {AutoUpdateConfig} autoUpdate Auto update settings.
+ * @property {String} morphicVersion [generated] The version field from gpii-app's package.json.
  */
 
 /**
@@ -78,7 +80,8 @@ service.config = {
     },
     autoUpdate: {
         lastUpdatesFile: path.join(process.env.ProgramData, "Morphic/last-updates.json5")
-    }
+    },
+    "package.json": "resources/app/package.json"
 };
 
 /**
@@ -128,6 +131,10 @@ service.loadConfig = function (dir, file) {
     if (!service.args.loglevel && config.logging && config.logging.level) {
         logging.setLogLevel(config.logging.level);
     }
+
+    // Get the gpii-app version
+    var packageJson = service.loadJSON(config["package.json"], "package.json file");
+    config.morphicVersion = packageJson && packageJson.version;
 
     return config;
 };

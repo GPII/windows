@@ -103,19 +103,44 @@ This gets installed in `c:\Program Files (x86)\Morphic\windows\service.json5`.
     },
     // The file that contains the private site-specific information.
     "secretFile": "%ProgramData%\\Morphic Credentials\\secret.txt",
+    // The gpii-app package.json file (default: "resources/app/package.json")
+    "package.json": "resources/app/package.json",
 
     // Auto update of files
     "autoUpdate": {
         "enabled": false, // true to enable
         // Where to store the 'last update' info
         "lastUpdatesFile": "%ProgramData%\\Morphic\\last-updates.json5",
+        // Number of times to retry a failed update (default: 3).
+        "retries": 3,
+        // Milliseconds to wait after failure (default: 5000).
+        "retryDelay": 5000,
         // The files to update
         "files": [{
             url: "https://raw.githubusercontent.com/GPII/gpii-app/master/siteconfig.json5",
             path: "%ProgramData%\\Morphic\\siteConfig.json5",
             isJSON: true // Perform JSON/JSON5 validation before overwriting
          }, {
+            // ${Expanders} can be used to take fields from the secrets file.
+            // See configUpdater.js:configUpdater.expand for syntax.
+            // In addition, there is:
+            // ${version}: "version" field of gpii-app package.json.
+            // ${siteConfig.xyz}: "xyz" field of the current siteConfig (at the time of download).
             url: "https://example.com/${site}", // `site` field of the secrets file
+            path: "example.json"
+         }, {
+            // If an ${expander} resolves to null, the entire string will resolve to null.
+            // With this in mind, multiple urls can be specified so fallbacks can be used
+            // when the information isn't available.
+            // (note: if there's a download error, the next one is NOT used)
+            url: [
+                // If the site config has a `updateUrl` value, this url is used.
+                "${siteConfig.updateUrl}",
+                // If the secrets contains a `site` field, this url is used.
+                "https://example.com/${site}",
+                // Otherwise, this url is used.
+                "https://example.com/default",
+            ],
             path: "example.json"
          }],
     },
@@ -169,7 +194,7 @@ The installer will install and start the service.
 
 ## Command line options
 
-`index.js` recognises the following command-line arguments 
+`index.js` recognises the following command-line arguments
 
 ```
  --install     Install the Windows Service.

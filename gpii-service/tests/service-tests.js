@@ -37,6 +37,11 @@ jqUnit.test("Test config loader", function () {
     // service.js should already have called service.config.
     jqUnit.assertNotNull("service.config is called on startup", service.config);
 
+    // Check the package.json was read from
+    var packageJson = require("./test-package.json");
+    jqUnit.assertEquals("Version from package.json should be in the config",
+        packageJson.version, service.config.morphicVersion);
+
     // Create a temporary config file.
     var testDir = path.join(os.tmpdir(), "gpii-service-test" + Math.random());
     var testFile = path.join(testDir, "service.json5");

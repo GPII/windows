@@ -21,6 +21,7 @@ var jqUnit = require("node-jqunit"),
     path = require("path"),
     child_process = require("child_process"),
     processHandling = require("../src/processHandling.js"),
+    service = require("../src/service.js"),
     windows = require("../src/windows.js"),
     winapi = require("../src/winapi.js");
 
@@ -297,7 +298,7 @@ processHandlingTests.waitForMutex = function (mutexName, timeout) {
 // Tests getProcessList
 jqUnit.test("testing getProcessList", function () {
 
-    var service = require("../src/service.js");
+
     var getSiteConfig = service.getSiteConfig;
 
     try {
@@ -630,8 +631,6 @@ jqUnit.asyncTest("Test unmonitorProcess", function () {
 // Test starting and stopping the service
 jqUnit.asyncTest("Service start+stop", function () {
     jqUnit.expect(1);
-
-    var service = require("../src/service.js");
 
     var mutexName = "gpii-test-" + Math.random().toString(32);
 

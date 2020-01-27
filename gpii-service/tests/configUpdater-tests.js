@@ -22,6 +22,7 @@ var jqUnit = require("node-jqunit"),
     http = require("http"),
     JSON5 = require("json5"),
     path = require("path"),
+    URL = require("url").URL,
     fs = require("fs");
 
 var configUpdater = require("../src/configUpdater.js");
@@ -742,6 +743,211 @@ configUpdaterTests.updateFileTests = [
             },
             content: "old"
         }
+    },
+    {
+        id: "updated (expander in url)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: "${site}"
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?testing.gpii.net"
+        }
+    },
+    {
+        id: "updated (expander in url, ${version})",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: "${version}"
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?testing-1.2.3"
+        }
+    },
+    {
+        id: "updated (expander in url, ${siteConfig.xxx})",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: "${siteConfig.someValue}"
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?value-from-site-config"
+        }
+    },
+    {
+        id: "updated (multiple urls, no expanders, uses first)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: ["it-worked", "you-broke-it"]
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?it-worked"
+        }
+    },
+    {
+        id: "updated (multiple urls, with expander, uses first)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: ["it-worked-${site}", "you-broke-it"]
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?it-worked-testing.gpii.net"
+        }
+    },
+    {
+        id: "updated (multiple urls, with expander, uses third)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld
+            },
+            content: "old",
+            urlQuery: [
+                "you-broke-it-${stupidValue}",
+                "you-broke-it-again-${siteConfig.stupid}",
+                "it-worked-${site}",
+                "you-broke-it-last"
+            ]
+        },
+        response: {
+            statusCode: 200,
+            headers: {
+                "Last-Modified": configUpdaterTests.testDate
+            },
+            body: "new"
+        },
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDate,
+                etag: undefined,
+                previous: true
+            },
+            request: {
+                "if-modified-since": configUpdaterTests.testDateOld,
+                "if-none-match": undefined
+            },
+            content: "new",
+            search: "?it-worked-testing.gpii.net"
+        }
+    },
+    {
+        id: "no update (multiple urls)",
+        input: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld,
+                etag: "the last ETag value"
+            },
+            content: "old",
+            url: ["", "${stupidValue}", ""]
+        },
+        response: null,
+        expect: {
+            lastUpdate: {
+                date: configUpdaterTests.testDateOld,
+                etag: "the last ETag value"
+            },
+            request: null,
+            content: "old"
+        }
     }
 ];
 
@@ -757,6 +963,9 @@ configUpdaterTests.updateAllTest = {
                 },
                 file4: {
                     id: "4"
+                },
+                file5: {
+                    id: "5"
                 }
             }
         },
@@ -764,10 +973,18 @@ configUpdaterTests.updateAllTest = {
             {url: "1", path: "file1"},
             {url: undefined, path: "file2"},
             {url: "3", path: "file3", error: true},
-            {url: "4", path: "file4"}
+            {url: "4", path: "file4"},
+            {url: "5", path: "file5", retry: 3}
         ]
     },
     expect: {
+        updateAttempts: [
+            "file1",
+            "file2",
+            "file3", "file3", "file3", "file3", "file3", "file3",
+            "file4",
+            "file5", "file5", "file5"
+        ],
         lastUpdates: {
             files: {
                 file1: {
@@ -782,6 +999,10 @@ configUpdaterTests.updateAllTest = {
                     handled: true
                 },
                 file2: {
+                    handled: true
+                },
+                file5: {
+                    id: "5",
                     handled: true
                 }
             }
@@ -1141,13 +1362,20 @@ jqUnit.asyncTest("Test updateFile", function () {
 
     var server = http.createServer();
     server.listen(0, "127.0.0.1");
+    var localUrl;
 
     // Respond to requests using the details from the test's response object.
     server.on("request", function (req, res) {
-        var index = parseInt(req.url.substr(1));
+        var url = new URL(localUrl + req.url.substr(1));
+        var index = parseInt(url.pathname.substr(1));
         var test = configUpdaterTests.updateFileTests[index];
         var suffix = " - test.id: " + test.id;
 
+        if (url.search || test.expect.search) {
+            jqUnit.expect(1);
+            jqUnit.assertEquals("URL search must match the expected value" + suffix,
+                test.expect.search, url.search);
+        }
         // Check the request headers
         var checkHeaders = {};
         for (var key in test.expect.request) {
@@ -1170,7 +1398,7 @@ jqUnit.asyncTest("Test updateFile", function () {
     });
 
     server.on("listening", function () {
-        var localUrl = "http://" + server.address().address + ":" + server.address().port + "/";
+        localUrl = "http://" + server.address().address + ":" + server.address().port + "/";
         console.log("http server listening on " + localUrl);
 
         var promises = configUpdaterTests.updateFileTests.map(function (test, index) {
@@ -1183,6 +1411,17 @@ jqUnit.asyncTest("Test updateFile", function () {
                 isJSON: test.input.isJSON,
                 always: test.input.always
             };
+
+            if (test.input.urlQuery) {
+                if (Array.isArray(test.input.urlQuery)) {
+                    var urls = test.input.urlQuery.map(function (query) {
+                        return file.url + "?" + query;
+                    });
+                    file.url = urls;
+                } else {
+                    file.url += "?" + test.input.urlQuery;
+                }
+            }
 
             var lastUpdate = Object.assign({}, test.input.lastUpdate);
 
@@ -1230,13 +1469,14 @@ jqUnit.asyncTest("Test updateFile", function () {
 jqUnit.asyncTest("Test updateAll", function () {
 
     var test = configUpdaterTests.updateAllTest;
-    jqUnit.expect(test.input.autoUpdateFiles.length + 2);
+    jqUnit.expect(2);
 
     var service = require("../src/service.js");
     service.config.autoUpdate = {
         enabled: true,
         files: test.input.autoUpdateFiles,
-        lastUpdatesFile: configUpdaterTests.getTempFile("lastUpdatesFile")
+        lastUpdatesFile: configUpdaterTests.getTempFile("lastUpdatesFile"),
+        retryDelay: 1
     };
 
     var files = [];
@@ -1246,23 +1486,32 @@ jqUnit.asyncTest("Test updateAll", function () {
         configUpdater.updateFile = updateFileOrig;
     });
 
+    var retryCount = {};
+
     // Check that updateFile gets called for every updated file, with the correct data.
     configUpdater.updateFile = function (update, lastUpdate) {
         files.push(update.path);
+        jqUnit.expect(1);
         jqUnit.assertEquals("update argument must correspond with the correct lastUpdate", update.url, lastUpdate.id);
-        return update.error
+
+        var error = update.error;
+
+        if (update.retry) {
+            var retries = retryCount[update.path] || 0;
+            retryCount[update.path] = ++retries;
+            error = retries < update.retry;
+        }
+        return (error)
             ? Promise.reject({isError: true})
             : Promise.resolve(Object.assign({}, lastUpdate, {handled:true}));
     };
 
     // Save the data, to ensure the file gets loaded in updateAll
     configUpdater.saveLastUpdates(test.input.lastUpdates).then(function () {
-        return configUpdater.updateAll().then(function () {
+        return configUpdater.updateAll(5).then(function () {
             // Check every file was processed.
-            var allFiles = service.config.autoUpdate.files.map(function (file) {
-                return file.path;
-            });
-            jqUnit.assertDeepEq("updateFile should be called for every file", allFiles.sort(), files.sort());
+            jqUnit.assertDeepEq("updateFile should be called for every file",
+                test.expect.updateAttempts.sort(), files.sort());
 
             // Check that the last-updates file had been written to.
             return configUpdater.loadLastUpdates().then(function (lastUpdates) {

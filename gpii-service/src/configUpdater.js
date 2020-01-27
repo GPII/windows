@@ -32,12 +32,21 @@ var service = require("./service.js"),
 var configUpdater = {};
 module.exports = configUpdater;
 
+// Use certificates from the Windows certificate stores [GPII-4186]
+var ca = require("win-ca/api");
+ca({
+    store: ["MY", "Root", "Trust", "CA"],
+    inject: "+"
+});
+
 /**
  * Configuration for the config auto update.
  * @typedef {Object} AutoUpdateConfig
  * @property {Boolean} enabled `true` to enable automatic config updates.
  * @property {String} lastUpdatesFile The path to the last updates file.
  * @property {Array<AutoUpdateFile>} files The files to update.
+ * @property {Number} retries Number of times to retry a failed update (default: 3).
+ * @property {Number} retryDelay Milliseconds to wait after failure (default: 1000).
  */
 /**
  * @typedef {Object} AutoUpdateFile
@@ -127,19 +136,32 @@ configUpdater.saveLastUpdates = function (lastUpdates, path) {
 
 /**
  * Updates all of the files in the auto update configuration (config.autoUpdate).
+ * @param {Number} retries Number of times to retry a failed update (default: 3).
+ * @param {Boolean} failedOnly Only update the ones that have failed on a previous call.
  * @return {Promise<unknown>} Resolves when complete (even if some fail).
  */
-configUpdater.updateAll = function () {
+configUpdater.updateAll = function (retries, failedOnly) {
     service.logImportant("Checking for configuration updates");
     return configUpdater.loadLastUpdates().then(function (lastUpdates) {
+        var failed = false;
         if (!lastUpdates.files) {
             lastUpdates.files = {};
         }
 
-        var promises = service.config.autoUpdate.files.map(function (file) {
+        var updates = service.config.autoUpdate.files;
+        if (failedOnly) {
+            updates = updates.filter(function (file) {
+                return file.failed;
+            });
+        }
+
+        var promises = updates.map(function (file) {
             var lastUpdate = lastUpdates.files[file.path] || {};
+            delete file.failed;
 
             return configUpdater.updateFile(file, lastUpdate)["catch"](function (err) {
+                file.failed = true;
+                failed = true;
                 service.logWarn("updateFile error", err);
             }).then(function (newLastUpdate) {
                 if (newLastUpdate) {
@@ -149,7 +171,19 @@ configUpdater.updateAll = function () {
         });
 
         return Promise.all(promises).then(function () {
+            failed = failed || service.config.autoUpdate.files.some(function (file) {
+                return file.failed;
+            });
             configUpdater.saveLastUpdates(lastUpdates);
+            // retry the failed ones
+            if (failed && retries && retries > 0) {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        service.log("Retrying failed downloads", retries);
+                        configUpdater.updateAll(retries - 1, true).then(resolve, reject);
+                    }, service.config.autoUpdate.retryDelay || 5000);
+                }) ;
+            }
         });
     });
 };
@@ -167,7 +201,24 @@ configUpdater.updateFile = function (update, lastUpdate) {
     var togo = Object.assign({}, lastUpdate);
     var downloadHash, localHash;
 
-    var url = configUpdater.expand(update.url, service.getSecrets());
+    var expanderSource = Object.assign({
+        version: service.config.morphicVersion,
+        siteConfig: service.getSiteConfig()
+    }, service.getSecrets());
+
+    var url;
+    if (Array.isArray(update.url)) {
+        // Use the first url that resolves
+        for (var i = 0; i < update.url.length; i++) {
+            url = configUpdater.expand(update.url[i], expanderSource);
+            if (url) {
+                break;
+            }
+        }
+    } else {
+        url = configUpdater.expand(update.url, expanderSource);
+    }
+
     if (url) {
         var downloadOptions;
         var hashPromise;
@@ -205,6 +256,7 @@ configUpdater.updateFile = function (update, lastUpdate) {
                 });
             }
         }, function (err) {
+            update.failed = true;
             service.logWarn("updateFile: download failed", err);
         });
 
@@ -388,10 +440,20 @@ configUpdater.downloadFile = function (url, localPath, options) {
             headers["If-Modified-Since"] = options.date;
         }
 
-        var req = request.get({
-            url: url,
-            headers: headers
-        });
+        var req;
+        try {
+            req = request.get({
+                url: url,
+                headers: headers
+            });
+        } catch (e) {
+            reject({
+                isError: true,
+                message: "Unable to download from " + url  + ": " + e.message,
+                url: url,
+                exception: e
+            });
+        }
 
         req.on("error", function (err) {
             reject({
@@ -528,5 +590,5 @@ configUpdater.validateJSON = function (file) {
 };
 
 if (service.config.autoUpdate.enabled) {
-    service.readyWhen(configUpdater.updateAll());
+    service.readyWhen(configUpdater.updateAll(service.config.autoUpdate.retries || 3));
 }
