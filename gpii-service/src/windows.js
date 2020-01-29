@@ -478,4 +478,15 @@ windows.expandEnvironmentStrings = function (input) {
     return result;
 };
 
+/**
+ * Gets the exit code of a terminated process.
+ * @param {Number} handle The handle.
+ * @return {Number} The exit code.
+ */
+windows.getProcessExitCode = function (handle) {
+    var exitCodeBuf = ref.alloc(winapi.types.DWORD);
+    winapi.kernel32.GetExitCodeProcess(handle, exitCodeBuf);
+    return exitCodeBuf.deref();
+};
+
 module.exports = windows;

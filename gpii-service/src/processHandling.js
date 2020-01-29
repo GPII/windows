@@ -361,9 +361,16 @@ processHandling.monitorProcess = function (pid) {
 
     return new Promise(function (resolve, reject) {
         // Get the process handle.
-        var processHandle = winapi.kernel32.OpenProcess(winapi.constants.SYNCHRONIZE, 0, pid);
+        var access = winapi.constants.SYNCHRONIZE | winapi.constants.PROCESS_QUERY_LIMITED_INFORMATION;
+        var processHandle = winapi.kernel32.OpenProcess(access, 0, pid);
+
         if (processHandle === winapi.NULL) {
-            reject(windows.win32Error("OpenProcess"));
+            // Unable to get a handle, so retry without PROCESS_QUERY_LIMITED_INFORMATION. This just means the
+            // will not be available.
+            processHandle = winapi.kernel32.OpenProcess(winapi.constants.SYNCHRONIZE, 0, pid);
+            if (processHandle === winapi.NULL) {
+                reject(windows.win32Error("OpenProcess"));
+            }
         }
 
         processHandling.lastProcess = {
@@ -450,7 +457,11 @@ processHandling.startWait = function () {
             } else {
                 // Remove it from the list, and resolve.
                 processHandling.unmonitorProcess(proc, true);
-                proc.resolve(proc.pid);
+                var exitCode = windows.getProcessExitCode(handle);
+                proc.resolve({
+                    pid: proc.pid,
+                    exitCode: exitCode
+                });
             }
             // Start waiting again.
             processHandling.startWait();

@@ -292,6 +292,10 @@ winapi.kernel32 = ffi.Library("kernel32", {
     "ExpandEnvironmentStringsW": [
         t.BOOL, [ t.LPTSTR, t.LPTSTR, t.UINT ]
     ],
+    // https://docs.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-getexitcodeprocess
+    "GetExitCodeProcess": [
+        t.BOOL, [ t.HANDLE, t.LPDWORD ]
+    ],
     // https://docs.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw
     "CreateProcessW": [
         t.BOOL, [

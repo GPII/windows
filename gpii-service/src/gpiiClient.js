@@ -106,7 +106,7 @@ gpiiClient.requestHandlers.execute = function (request) {
                 if (request.wait) {
                     child.on("exit", function (code, signal) {
                         var result = {
-                            code: code,
+                            exitCode: code,
                             signal: signal
                         };
                         if (output) {
@@ -141,7 +141,7 @@ gpiiClient.requestHandlers.closing = function () {
  */
 gpiiClient.requestHandlers.getClientCredentials = function () {
     var secrets = service.getSecrets();
-    return secrets && secrets.clientCredentials;
+    return null;//secrets && secrets.clientCredentials;
 };
 
 /**
@@ -157,7 +157,7 @@ gpiiClient.requestHandlers.sign = function (request) {
 
     var secrets = service.getSecrets();
     var key = secrets && secrets[request.keyName];
-
+key = null;
     if (key) {
         var hmac = crypto.createHmac("sha256", key);
 
