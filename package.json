@@ -7,6 +7,8 @@
     "homepage": "http://gpii.net/",
     "scripts": {
         "pretest": "node node_modules/rimraf/bin.js coverage/* reports/*",
+        "service": "npm --prefix ./gpii-service/ run service-dev",
+        "start": "npm run service && node ./gpii.js",
         "test": "npm run test:refreshenv && npm run test:unit && npm run test:acceptance",
         "test:refreshenv": "refreshenv",
         "test:acceptance": "set GPII_TEST_COUCH_USE_EXTERNAL=TRUE && nyc node.exe ./tests/AcceptanceTests.js builtIn",
@@ -17,7 +19,7 @@
     "dependencies": {
         "edge-js": "10.3.1",
         "ffi-napi": "2.4.3",
-        "gpii-universal": "0.3.0-dev.20190719T141931Z.47cf9177",
+        "gpii-universal": "0.3.0-dev.20191211T142911Z.0af24fabe",
         "@pokusew/pcsclite": "0.4.18",
         "ref": "1.3.4",
         "ref-struct": "1.1.0",
@@ -31,12 +33,15 @@
         "fluid-grunt-eslint": "18.1.2",
         "gpii-grunt-lint-all": "1.0.5",
         "grunt": "1.0.3",
-        "lodash": "^4.17.11",
+        "lodash": "4.17.15",
         "node-jqunit": "1.1.8",
-        "nyc": "13.0.1",
+        "nyc": "14.1.1",
         "rimraf": "2.6.2",
         "shelljs": "0.8.1"
     },
+    "os": [
+        "win32"
+    ],
     "license": "BSD-3-Clause",
     "keywords": [
         "gpii",
