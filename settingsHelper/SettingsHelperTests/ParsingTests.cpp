@@ -50,7 +50,7 @@ TEST(ParseJSONPayload, parseSampleJSON) {
 
     std::wstring sMainContent{ pMainContent };
 
-    EXPECT_EQ(std::wstring(L"Hello World"), sMainContent);
+    EXPECT_EQ(sMainContent, std::wstring(L"Hello World"));
 }
 
 TEST(ParseJSONPayload, parseExamplePayload) {
