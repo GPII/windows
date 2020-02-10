@@ -1,6 +1,9 @@
 /**
  * Utilities for handling IPropertyValue types.
  *
+ * This file provides several utility functions for doing some boilerplate
+ * operations over the IPropertyValue interfaces.
+ *
  * Copyright 2019 Raising the Floor - US
  *
  * Licensed under the New BSD license. You may not use this file except in
