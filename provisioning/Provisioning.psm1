@@ -48,17 +48,35 @@ Function Invoke-Command {
 Function Get-MSBuild {
   Param (
     [Parameter(Mandatory=$true)]
-    [string] $version
+    [string] $visualStudioVersion
   )
 
-  # TODO: Check version validity.
-  # Valid versions are [2.0, 3.5, 4.0]
+  # NOTE: this function is compatible with Visual Studio 2017+
 
-  $dotNetVersion = $version
-  $regKey = "HKLM:\software\Microsoft\MSBuild\ToolsVersions\$dotNetVersion"
-  $regProperty = "MSBuildToolsPath"
+  # Valid Visual Studio versions options are [15.0, "[15.0,16.0)", etc.]
 
-  $msbuild = Join-Path -path (Get-ItemProperty $regKey).$regProperty -childpath "msbuild.exe"
+  # Find the path vswhere (which installed with Visual Studio 2017 or Build Tools 2017 or later)
+  if (${Env:ProgramFiles(x86)}) {
+    $vswhere = Join-Path ${Env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+  } else {
+    $vswhere = Join-Path ${Env:ProgramFiles} "Microsoft Visual Studio\Installer\vswhere.exe"
+  }
+
+  if (!$vswhere) {
+    throw "Visual Studio $($visualStudioVersion) or Build Tools $($visualStudioVersion) were not found."
+  }
+
+  # courtesy of Microsoft: https://github.com/microsoft/vswhere/wiki/Find-MSBuild/62adac8eb22431fa91d94e03503d76d48a74939c
+  $path = &$vswhere -version $visualStudioVersion -products * -requires Microsoft.Component.MSBuild -property installationPath
+  if ($path) {
+    $msbuild = Join-Path $path 'MSBuild\Current\Bin\MSBuild.exe'
+    if (-not (test-path $msbuild)) {
+      $msbuild = join-path $path 'MSBuild\15.0\Bin\MSBuild.exe'
+      if (-not (test-path $msbuild)) {
+        throw "MSBuild from Visual Studio $($visualStudioVersion) or Build Tools $($visualStudioVersion) could not be found"
+      }
+    }
+  }
 
   return $msbuild
 }
