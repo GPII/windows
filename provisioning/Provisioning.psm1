@@ -51,16 +51,8 @@ Function Get-MSBuild {
     [string] $visualStudioVersion
   )
 
-  # NOTE: this function is compatible with Visual Studio 2017+
-
-  # Valid Visual Studio versions options are [15.0, "[15.0,16.0)", etc.]
-
-  # Find the path vswhere (which installed with Visual Studio 2017 or Build Tools 2017 or later)
-  if (${Env:ProgramFiles(x86)}) {
-    $vswhere = Join-Path ${Env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
-  } else {
-    $vswhere = Join-Path ${Env:ProgramFiles} "Microsoft Visual Studio\Installer\vswhere.exe"
-  }
+  # Find the path to vswhere (which installed with Visual Studio 2017 or Build Tools 2017 or later)
+  $vswhere = Get-VSWhere
 
   if (!$vswhere) {
     throw "Visual Studio $($visualStudioVersion) or Build Tools $($visualStudioVersion) were not found."
@@ -79,6 +71,49 @@ Function Get-MSBuild {
   }
 
   return $msbuild
+}
+
+Function Get-CSharpCompiler {
+  Param (
+    [Parameter(Mandatory=$true)]
+    [string] $visualStudioVersion
+  )
+
+  # Find the path to vswhere (which installed with Visual Studio 2017 or Build Tools 2017 or later)
+  $vswhere = Get-VSWhere
+
+  if (!$vswhere) {
+    throw "Visual Studio $($visualStudioVersion) or Build Tools $($visualStudioVersion) were not found."
+  }
+
+  # adapted from: https://github.com/microsoft/vswhere/wiki/Find-MSBuild/62adac8eb22431fa91d94e03503d76d48a74939c
+  $path = &$vswhere -version $visualStudioVersion -products * -requires Microsoft.VisualStudio.Component.Roslyn.Compiler -property installationPath
+  if ($path) {
+    $csc = Join-Path $path 'MSBuild\Current\Bin\Roslyn\csc.exe'
+    if (-not (test-path $csc)) {
+      $csc = join-path $path 'MSBuild\15.0\Bin\Roslyn\csc.exe'
+      if (-not (test-path $csc)) {
+        throw "csc from Visual Studio $($visualStudioVersion) or Build Tools $($visualStudioVersion) could not be found"
+      }
+    }
+  }
+
+  return $csc
+}
+
+Function Get-VSWhere {
+  # NOTE: this function is compatible with Visual Studio 2017+
+
+  # Valid Visual Studio versions options are [15.0, "[15.0,16.0)", etc.]
+
+  # Find the path to vswhere (which installed with Visual Studio 2017 or Build Tools 2017 or later)
+  if (${Env:ProgramFiles(x86)}) {
+    $vswhere = Join-Path ${Env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+  } else {
+    $vswhere = Join-Path ${Env:ProgramFiles} "Microsoft Visual Studio\Installer\vswhere.exe"
+  }
+
+  return $vswhere
 }
 
 Function Invoke-Environment {
@@ -126,5 +161,6 @@ Function Add-Path {
 
 Export-ModuleMember -Function Invoke-Command
 Export-ModuleMember -Function Get-MSBuild
+Export-ModuleMember -Function Get-CSharpCompiler
 Export-ModuleMember -Function Invoke-Environment
 Export-ModuleMember -Function Add-Path

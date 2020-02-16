@@ -18,8 +18,14 @@ $programFilesPath = ${Env:ProgramFiles}
 # Include main Provisioning module.
 Import-Module (Join-Path $scriptDir 'Provisioning.psm1') -Force -Verbose
 
-# Capture the full file path of MSBuild; we will accept any version >=15.0 and <16.0 (i.e. VS2017)
-$msbuild = Get-MSBuild "[15.0,16.0)"
+# For Microsoft's build tools, we will accept any version >=15.0 and <16.0 (i.e. VS2017)
+$visualStudioVersion = "[15.0,16.0)"
+
+# Capture the full file path of MSBuild 
+$msbuild = Get-MSBuild $visualStudioVersion
+
+# Capture the full file path of the C# compiler
+$csc = Get-CSharpCompiler $visualStudioVersion
 
 # Build the settings helper
 $settingsHelperDir = Join-Path $rootDir "settingsHelper"
@@ -30,7 +36,6 @@ Invoke-Command $msbuild "VolumeControl.sln /p:Configuration=Release /p:Platform=
 
 # Build the process test helper
 $testProcessHandlingDir = Join-Path $rootDir "gpii\node_modules\processHandling\test"
-$csc = Join-Path -Path (Split-Path -Parent $msbuild) csc.exe
 Invoke-Command $csc "/target:exe /out:test-window.exe test-window.cs" $testProcessHandlingDir
 
 # Build the Windows Service
