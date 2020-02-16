@@ -23,7 +23,7 @@ $msbuild = Get-MSBuild "[15.0,16.0)"
 
 # Build the settings helper
 $settingsHelperDir = Join-Path $rootDir "settingsHelper"
-Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform=`"Any CPU`" /p:FrameworkPathOverride=`"C:\$($programFilesX86Path)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $settingsHelperDir
+Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform=`"Any CPU`" /p:FrameworkPathOverride=`"$($programFilesX86Path)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $settingsHelperDir
 
 $volumeControlDir = Join-Path $rootDir "gpii\node_modules\nativeSettingsHandler\nativeSolutions\VolumeControl"
 Invoke-Command $msbuild "VolumeControl.sln /p:Configuration=Release /p:Platform=`"x86`" /p:FrameworkPathOverride=`"$($programFilesX86Path)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1`"" $volumeControlDir
