@@ -1,4 +1,5 @@
 /node_modules/
+/gpii-service/node_modules/
 .vagrant
 package-lock.json
 **/test/*.exe
@@ -7,3 +8,4 @@ instrumented
 listeners
 reports
 /bin
+gpii/node_modules/nativeSettingsHandler/nativeSolutions/VolumeControl/Release/
