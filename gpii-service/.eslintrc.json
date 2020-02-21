@@ -1,0 +1,7 @@
+{
+    "extends": "eslint-config-fluid",
+    "env": {
+        "node": true,
+        "es6": true
+    }
+}
