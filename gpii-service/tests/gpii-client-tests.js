@@ -113,10 +113,29 @@ gpiiClientTests.requestTests = [
         action: "sign",
         data: {
             payload: "hello",
-            keyName: "site"
+            siteSpecific: "site"
         },
-        // sha256-hmac(hello, testing.gpii.net)
-        expect: "81ba311bd1c768eaeabccccc0c208bef1a3e3be1b1476b6e35a7c4464fba5bd5"
+        // sha256-hmac(hello@testing.gpii.net, secret)
+        expect: "8a0aa7fd6346c155ceb5a7a2e234cf92036a77d492a549558c6ddffc0e8ebfb0"
+    },
+    {
+        id: "sign (no site id)",
+        action: "sign",
+        data: {
+            payload: "hello"
+        },
+        // sha256-hmac(hello, secret)
+        expect: "45be02a491dd3472deb1ec1b1a95ec50668e9b51d697cd060389a38d2c06be8d"
+    },
+    {
+        id: "sign (unknown site id)",
+        action: "sign",
+        data: {
+            payload: "hello",
+            siteSpecific: "unknown-field"
+        },
+        // sha256-hmac(hello, secret)
+        expect: "45be02a491dd3472deb1ec1b1a95ec50668e9b51d697cd060389a38d2c06be8d"
     },
     {
         id: "client credentials",
