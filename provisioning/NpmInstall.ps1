@@ -25,5 +25,10 @@ $csc = Join-Path -Path (Split-Path -Parent $msbuild) csc.exe
 Invoke-Command $csc "/target:exe /out:test-window.exe test-window.cs" $testProcessHandlingDir
 
 # Build the Windows Service
-$serviceDir = Join-Path $rootDir "gpii-service"
-Invoke-Command "npm" "install" $serviceDir
+try
+{
+    subst q: (Join-Path $rootDir "gpii-service")
+    Invoke-Command "npm" "install" q:
+} finally {
+    subst /d q:
+}
