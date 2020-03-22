@@ -1,0 +1,14 @@
+// Development configuration, auto starts GPII.
+{
+    "processes": {
+        "gpii": {
+            "command": "node ../gpii.js",
+            "ipc": "gpii",
+            "autoRestart": true
+        }
+    },
+    "logging": {
+        "level": "DEBUG"
+    },
+    "secretFile": "test-secret.json5"
+}

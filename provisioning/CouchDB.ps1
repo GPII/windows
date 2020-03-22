@@ -29,7 +29,7 @@ Function iwr-Retry {
     )
 
     $retryCount = 0
-    $completed = false
+    $completed = $false
     $response = $null
 
     while (-not $completed) {
