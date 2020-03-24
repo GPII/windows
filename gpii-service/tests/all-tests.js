@@ -19,7 +19,11 @@
 // The service tests are ran in a separate process to the rest of GPII. This not only ensures it's isolated from GPII,
 // but also prevents having to re-build to be ran under electron for the gpii-app tests.
 
-if (!global.fluid) {
+if (process.versions.electron) {
+    // The service code never gets executed in election, so there's no value in testing this.
+    console.log("Skipping gpii-service tests while running in electron");
+    return;
+} else if (!global.fluid) {
     // In child process.
     require("./windows-tests.js");
     require("./gpii-ipc-tests.js");

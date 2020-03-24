@@ -55,7 +55,7 @@
         "evented"
     ],
     "repository": "git://github.com/GPII/windows.git",
-    "main": "./gpii.js",
+    "main": "./index.js",
     "engines": {
         "node": ">=6.3.1"
     }
