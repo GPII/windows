@@ -5,6 +5,8 @@ overall details of the GPII project. After checkout out using git, this project 
 installed - please consult [Setting Up Your Development Environment](http://wiki.gpii.net/w/Setting_Up_Your_Development_Environment)
 for installation instructions.
 
+Testing Windows Sanity
+
 ## Building
 
 This package depends on node 8.x (LTS).
