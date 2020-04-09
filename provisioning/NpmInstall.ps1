@@ -18,7 +18,7 @@ nuget restore .\settingsHelper\SettingsHelper.sln
 $env:VisualStudioVersion = '15.0'
 $settingsHelperDir = Join-Path $rootDir "settingsHelper"
 
-Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform=`"x64`"" $settingsHelperDir
+Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform=`"x64`" /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1`"" $settingsHelperDir
 ## Original from master
 ## Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform=`"Any CPU`" /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1`"" $settingsHelperDir
 
