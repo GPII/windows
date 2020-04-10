@@ -1,4 +1,5 @@
 /node_modules/
+/gpii-service/node_modules/
 .vagrant
 package-lock.json
 **/test/*.exe
