@@ -38,14 +38,16 @@ jqUnit.module("GPII Service processHandling tests", {
     }
 });
 
-processHandlingTests.testData.processList = {
+processHandlingTests.testData.processList = fluid.freezeRecursive({
     allProcesses: {
         proc1: {command: "p1"},
         proc2: {command: "p2", disabled: true},
         proc3: {command: "p3", disabled: false},
         proc4: {command: "p4", ipc: "gpii"},
         proc5: {command: "p5", ipc: "other"},
-        proc6: {command: "p6"}
+        proc6: {command: "p6"},
+        proc7: {command: "p7", ipc: "gpii", env: {"A": "B"}},
+        proc8: {command: "p8", env: {"A": "B"}}
     },
     tests: [
         {
@@ -56,7 +58,9 @@ processHandlingTests.testData.processList = {
                 {key: "proc3", command: "p3", disabled: false},
                 {key: "proc4", command: "p4", ipc: "gpii"},
                 {key: "proc5", command: "p5", ipc: "other"},
-                {key: "proc6", command: "p6"}
+                {key: "proc6", command: "p6"},
+                {key: "proc7", command: "p7", ipc: "gpii", env: {"A": "B"}},
+                {key: "proc8", command: "p8", env: {"A": "B"}}
             ]
         },
         {
@@ -76,7 +80,9 @@ processHandlingTests.testData.processList = {
                 {key: "proc3", command: "p3", disabled: false},
                 {key: "proc4", command: "p4", ipc: "gpii", env: {"NODE_ENV": "app.testing.metrics"}},
                 {key: "proc5", command: "p5", ipc: "other"},
-                {key: "proc6", command: "p6"}
+                {key: "proc6", command: "p6"},
+                {key: "proc7", command: "p7", ipc: "gpii", env: {"A": "B", "NODE_ENV": "app.testing.metrics"}},
+                {key: "proc8", command: "p8", env: {"A": "B"}}
             ]
         },
         {
@@ -94,8 +100,11 @@ processHandlingTests.testData.processList = {
             expect: [
                 {key: "proc1", command: "p1"},
                 {key: "proc3", command: "p3", disabled: false},
+                // no proc4: gpii is off
                 {key: "proc5", command: "p5", ipc: "other"},
-                {key: "proc6", command: "p6"}
+                {key: "proc6", command: "p6"},
+                // no proc7: gpii is off
+                {key: "proc8", command: "p8", env: {"A": "B"}}
             ]
         },
         {
@@ -115,11 +124,13 @@ processHandlingTests.testData.processList = {
                 {key: "proc3", command: "p3", disabled: false},
                 {key: "proc4", command: "p4", ipc: "gpii"},
                 {key: "proc5", command: "p5", ipc: "other"},
-                {key: "proc6", command: "p6"}
+                {key: "proc6", command: "p6"},
+                {key: "proc7", command: "p7", ipc: "gpii", env: {"A": "B"}},
+                {key: "proc8", command: "p8", env: {"A": "B"}}
             ]
         }
     ]
-};
+});
 
 processHandlingTests.testData.startChildProcess = [
     // Shouldn't restart if stopChildProcess is used.
@@ -297,8 +308,7 @@ processHandlingTests.waitForMutex = function (mutexName, timeout) {
 
 // Tests getProcessList
 jqUnit.test("testing getProcessList", function () {
-
-
+    require("../src/gpiiClient.js");
     var getSiteConfig = service.getSiteConfig;
 
     try {
@@ -308,8 +318,11 @@ jqUnit.test("testing getProcessList", function () {
             };
             service.config.gpiiConfig = test.gpiiConfig;
             var result = processHandling.getProcessList(processHandlingTests.testData.processList.allProcesses);
+            var expect = test.expect.map(function (p) {
+                return Object.assign({env:{}}, p);
+            });
             jqUnit.assertDeepEq("getProcessList should return the expected processes (test.id:" + test.id + ")",
-                test.expect, result);
+                expect, result);
         });
     } finally {
         service.getSiteConfig = getSiteConfig;
