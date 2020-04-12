@@ -291,7 +291,7 @@ jqUnit.asyncTest("Test isProcessRunning", function () {
             }
         }
 
-        child.on("close", function () {
+        child.on("exit", function () {
             setTimeout(function () {
                 running = processHandling.isProcessRunning(child.pid);
                 jqUnit.assertFalse("Child process should not be running after kill" + assertSuffix, running);
