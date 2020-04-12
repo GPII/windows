@@ -21,7 +21,7 @@
         "json5": "2.1.0",
         "mkdirp": "0.5.1",
         "minimist": "1.2.0",
-        "@gpii/os-service": "2.2.0",
+        "@gpii/os-service": "stegru/node-os-service#GPII-3934",
         "ref-array-di": "1.2.1",
         "ref-napi": "1.4.0",
         "ref-struct-di": "1.1.0",
