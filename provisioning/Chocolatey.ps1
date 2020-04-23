@@ -16,7 +16,7 @@ $chocolatey = "$env:ChocolateyInstall\bin\choco.exe" -f $env:SystemDrive
 
 $nodePath = "C:\Program Files (x86)\nodejs"
 $nodeVersion = "10.11.0"
-Invoke-Command $chocolatey "install nodejs.install --version $($nodeVersion) --forcex86 -y"
+Invoke-Command $chocolatey "install nodejs.install --version $($nodeVersion) --forcex86 -y --no-progress"
 # TODO: Correct path and automatically added is this one
 # C:\Users\vagrant\AppData\Roaming\npm review it.
 #Add-Path $nodePath $true
@@ -26,7 +26,7 @@ Invoke-Environment (Join-Path $nodePath "nodevars.bat")
 refreshenv
 
 $python2Path = "C:\tools\python2"
-Invoke-Command $chocolatey "install python2 -y"
+Invoke-Command $chocolatey "install python2 -y --no-progress"
 Add-Path $python2Path $true
 refreshenv
 
