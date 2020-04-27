@@ -1,0 +1,13 @@
+[
+    {
+        "settingID": "SystemSettings_QuietMoments_On_Scheduled_Mode.SystemSettings_QuietMoments_Scheduled_Mode_StartTime",
+        "method": "SetValue",
+        "parameters": [
+            "8:00:00"
+        ]
+    },
+    {
+        "settingID": "SystemSettings_QuietMoments_On_Scheduled_Mode.SystemSettings_QuietMoments_Scheduled_Mode_StartTime",
+        "method": "GetValue"
+    }
+]
