@@ -1,38 +1,54 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.28307.645
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsHelper", "SettingsHelper\SettingsHelper.csproj", "{82260B87-860B-4AD4-B508-5AFAA72B7FF0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SettingsHelperLib", "SettingsHelperLib\SettingsHelperLib.vcxproj", "{5950CFD8-254D-41B9-A743-ECA34C2AD788}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7F9BE9EE-5BC0-43C4-B5B1-0D080433778F}"
-	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SettingsHelperTests", "SettingsHelperTests\SettingsHelperTests.vcxproj", "{D938B6BB-3085-4A39-AF75-8F4E339CC23D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{E72D6C81-93F1-4B13-BEAD-93AB8B96572A}"
-	ProjectSection(SolutionItems) = preProject
-		examples\magnifier.json = examples\magnifier.json
-		examples\night-light.json = examples\night-light.json
-		examples\orientation.json = examples\orientation.json
-		examples\taskbar.json = examples\taskbar.json
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SettingsHelperApp", "SettingsHelperApp\SettingsHelperApp.vcxproj", "{23C9A7E4-FEC8-4948-A232-809044EB871B}"
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{82260B87-860B-4AD4-B508-5AFAA72B7FF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{82260B87-860B-4AD4-B508-5AFAA72B7FF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{82260B87-860B-4AD4-B508-5AFAA72B7FF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{82260B87-860B-4AD4-B508-5AFAA72B7FF0}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {DE3A50A9-67A8-42F5-AA26-9A7A74496DB7}
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|x64 = Debug|x64
+        Debug|x86 = Debug|x86
+        Release|x64 = Release|x64
+        Release|x86 = Release|x86
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Debug|x64.ActiveCfg = Debug|x64
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Debug|x64.Build.0 = Debug|x64
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Debug|x86.ActiveCfg = Debug|Win32
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Debug|x86.Build.0 = Debug|Win32
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Release|x64.ActiveCfg = Release|x64
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Release|x64.Build.0 = Release|x64
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Release|x86.ActiveCfg = Release|Win32
+        {5950CFD8-254D-41B9-A743-ECA34C2AD788}.Release|x86.Build.0 = Release|Win32
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Debug|x64.ActiveCfg = Debug|x64
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Debug|x64.Build.0 = Debug|x64
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Debug|x86.ActiveCfg = Debug|Win32
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Debug|x86.Build.0 = Debug|Win32
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Release|x64.ActiveCfg = Release|x64
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Release|x64.Build.0 = Release|x64
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Release|x86.ActiveCfg = Release|Win32
+        {D938B6BB-3085-4A39-AF75-8F4E339CC23D}.Release|x86.Build.0 = Release|Win32
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Debug|x64.ActiveCfg = Debug|x64
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Debug|x64.Build.0 = Debug|x64
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Debug|x86.ActiveCfg = Debug|Win32
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Debug|x86.Build.0 = Debug|Win32
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Release|x64.ActiveCfg = Release|x64
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Release|x64.Build.0 = Release|x64
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Release|x86.ActiveCfg = Release|Win32
+        {23C9A7E4-FEC8-4948-A232-809044EB871B}.Release|x86.Build.0 = Release|Win32
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+    GlobalSection(ExtensibilityGlobals) = postSolution
+                SolutionGuid = {18672BF6-20DA-4184-B947-45EC9ACDD423}
+                                SolutionGuid = {7E8828CD-C502-44DC-934A-803E13AA5090}
+                        SolutionGuid = {234D8C77-BC56-4A33-9214-B9391D1606FF}
+        SolutionGuid = {98E79CF4-B371-4A98-9C84-1EEEA1B41C17}
+    EndGlobalSection
 EndGlobal
