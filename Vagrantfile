@@ -15,6 +15,7 @@ Vagrant.configure(2) do |config|
       latest.vm.box = "gpii-ops/windows10-#{flavour}-eval-x64-universal"
       latest.vm.provider :virtualbox do |vm|
         vm.gui = true
+        vm.linked_clone = true
         vm.customize ["modifyvm", :id, "--memory", ram]
         vm.customize ["modifyvm", :id, "--cpus", cpus]
         vm.customize ["modifyvm", :id, "--vram", "256"]
