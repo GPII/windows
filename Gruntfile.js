@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         lintAll: {
             sources: {
                 md:    [ "./*.md","./gpii/*.md", "./settingsHelper/**/*.md"],
-                js:    ["./gpii/**/*.js", "./tests/**/*.js", "./*.js"],
+                js:    ["./gpii/**/*.js", "./tests/**/*.js", "./*.js", "./service/src/**/*.js", "./service/tests/**/*.js"],
                 json:  ["./gpii/**/*.json", "./tests/**/*.json", "./settingsHelper/**/*.json", "./*.json"],
                 json5: ["./gpii/**/*.json5", "./tests/**/*.json5", "./*.json5"],
                 other: ["./.*"]
