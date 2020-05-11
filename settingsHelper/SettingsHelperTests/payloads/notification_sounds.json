@@ -1,0 +1,21 @@
+[
+    {
+        "settingID": "SystemSettings_Notifications_AppList.SystemSettings_Notifications_AppNotifications",
+        "method": "SetValue",
+        "parameters": [
+            {
+                "elemId": "Settings",
+                "elemVal": false
+            }
+        ]
+    },
+    {
+        "settingID": "SystemSettings_Notifications_AppList.SystemSettings_Notifications_AppNotifications",
+        "method": "GetValue",
+        "parameters": [
+            {
+                "elemId": "Settings"
+            }
+        ]
+    }
+]
