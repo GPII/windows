@@ -20,8 +20,8 @@
         "gpii-universal": "0.3.0-dev.20190917T115342Z.cb3500e10",
         "@pokusew/pcsclite": "0.6.0",
         "ref": "javihernandez/ref#8e793d551617e126c42f744cc55682dfee268281",
-        "ref-struct": "javihernandez/ref-struct#node-12",
-        "ref-array": "javihernandez/ref-array#node-12",
+        "ref-struct": "javihernandez/ref-struct#GPII-4140",
+        "ref-array": "javihernandez/ref-array#GPII-4140",
         "string-argv": "0.0.2",
         "rimraf": "2.6.2"
     },
