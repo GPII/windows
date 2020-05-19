@@ -1,0 +1,7 @@
+[
+    {
+        "settingID": "SystemSettings_Accessibility_Keyboard_WarningEnabled",
+        "method": "GetValue",
+        "async": true
+    }
+]
