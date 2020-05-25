@@ -485,16 +485,6 @@ cleanup:
     return res;
 }
 
-BOOL isNumber(wstring resVal) {
-    wchar_t* end { NULL };
-    wcstol(resVal.c_str(), &end, 10);
-    return *end == 0;
-}
-
-BOOL isBoolean(wstring resVal) {
-    return resVal == L"true" || resVal == L"false";
-}
-
 //  ------------------------  Serialization  ----------------------------------
 
 HRESULT serializeResult(const Result& result, std::wstring& str) {
@@ -537,16 +527,7 @@ HRESULT serializeResult(const Result& result, std::wstring& str) {
         if (result.returnValue.empty()) {
             resultStr.append(L"null");
         } else {
-            BOOL isNotString {
-                isNumber(result.returnValue) ||
-                isBoolean(result.returnValue)
-            };
-
-            if (isNotString) {
-                resultStr.append(result.returnValue);
-            } else {
-                resultStr.append(L"\"" + result.returnValue + L"\"");
-            }
+            resultStr.append(result.returnValue);
         }
 
         // JSON object end

@@ -560,6 +560,42 @@ TEST(GetSettingValue, GetCollectionNestedSetting) {
     }
 }
 
+TEST(GetSettingValue, GetNotificationMaxCollectionItems) {
+    std::wstring settingId {
+        L"SystemSettings_Notifications_AppList.Settings.SystemSettings_Notifications_AppNotificationMaxCollapsedGroupItemCountSetting"
+    };
+    HRESULT res { ERROR_SUCCESS };
+
+    vector<wstring> settingIds {};
+    res = splitSettingPath(settingId, settingIds);
+    EXPECT_EQ(res, ERROR_SUCCESS);
+
+    {
+        SettingItem baseSetting {};
+        res = sAPI.loadBaseSetting(settingIds.front(), baseSetting);
+        EXPECT_EQ(res, ERROR_SUCCESS);
+
+        SettingItem colSetting {};
+        res = sAPI.getCollectionSetting(settingIds[1], baseSetting, colSetting);
+        EXPECT_EQ(res, ERROR_SUCCESS);
+
+        ATL::CComPtr<IInspectable> iValue;
+        res = colSetting.GetValue(settingIds[2], iValue);
+        ATL::CComPtr<IPropertyValue> pValue {
+            static_cast<IPropertyValue*>(
+                static_cast<IInspectable*>(iValue.Detach())
+            )
+        };
+
+        PropertyType propType { PropertyType::PropertyType_Empty };
+        pValue->get_Type(&propType);
+
+        HSTRING hValue { NULL };
+        pValue->GetString(&hValue);
+        EXPECT_EQ(propType, PropertyType::PropertyType_String);
+    }
+}
+
 #if 0
 /// <summary>
 ///  NOTE: This test should remain commented, as it's only used for development purposes.

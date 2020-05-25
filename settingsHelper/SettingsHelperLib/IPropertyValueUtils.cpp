@@ -20,6 +20,129 @@
 #pragma comment (lib, "WindowsApp.lib")
 
 using std::wstring;
+using ATL::CComPtr;
+
+HRESULT convertToTimeSpan(const CComPtr<IPropertyValue>& strProp, ATL::CComPtr<IPropertyValue>& rValue) {
+    if (strProp == NULL) { return E_INVALIDARG; }
+
+    // Check that parameter is of proper type
+    PropertyType strType { PropertyType::PropertyType_Empty };
+    strProp->get_Type(&strType);
+    if (strType != PropertyType::PropertyType_String) { return E_INVALIDARG; }
+
+    HRESULT errCode { ERROR_SUCCESS };
+    IPropertyValueStatics* propValueFactory { NULL };
+    HSTRING rTimeClass { NULL };
+    HSTRING strValue { NULL };
+
+    // IPropertyValue to be created
+    IPropertyValue* cPropValue = NULL;
+
+    errCode = WindowsCreateString(
+        RuntimeClass_Windows_Foundation_PropertyValue,
+        static_cast<UINT32>(wcslen(RuntimeClass_Windows_Foundation_PropertyValue)),
+        &rTimeClass
+    );
+    if (errCode != ERROR_SUCCESS) { goto cleanup; }
+    errCode = GetActivationFactory(rTimeClass, &propValueFactory);
+
+    // Get the source IPropertyValue inner string
+    strProp->GetString(&strValue);
+
+    try {
+        // Get inner string raw buffer
+        UINT32 bufSize { 0 };
+        PCWSTR bufWSTR { WindowsGetStringRawBuffer(strValue, &bufSize) };
+
+        System::String^ timeSpanStr = gcnew System::String(bufWSTR);
+        System::Globalization::CultureInfo^ culture = gcnew System::Globalization::CultureInfo { L"en-US" };
+        System::TimeSpan^ timeSpan = System::TimeSpan::Parse(timeSpanStr, culture);
+
+        // Get a representation that can be stored in a IPropertyValue
+        UINT64 duration = timeSpan->Ticks;
+        ABI::Windows::Foundation::TimeSpan abiTimeSpan;
+        abiTimeSpan.Duration = duration;
+
+        propValueFactory->CreateTimeSpan(abiTimeSpan, reinterpret_cast<IInspectable**>(&cPropValue));
+    } catch (System::Exception^) {
+        errCode = E_INVALIDARG;
+    }
+
+    if (errCode == ERROR_SUCCESS) {
+        rValue.Attach(cPropValue);
+    }
+
+cleanup:
+    if (rTimeClass != NULL) { WindowsDeleteString(rTimeClass); }
+    if (propValueFactory != NULL) { propValueFactory->Release(); }
+
+    return errCode;
+}
+
+HRESULT convertToDate(const CComPtr<IPropertyValue>& strProp, ATL::CComPtr<IPropertyValue>& rValue) {
+    if (strProp == NULL) { return E_INVALIDARG; }
+
+    // Check that parameter is of proper type
+    PropertyType strType { PropertyType::PropertyType_Empty };
+    strProp->get_Type(&strType);
+    if (strType != PropertyType::PropertyType_String) { return E_INVALIDARG; }
+
+    HRESULT errCode { ERROR_SUCCESS };
+    IPropertyValueStatics* propValueFactory { NULL };
+    HSTRING rTimeClass { NULL };
+    HSTRING strValue { NULL };
+
+    // IPropertyValue to be created
+    IPropertyValue* cPropValue = NULL;
+
+    errCode = WindowsCreateString(
+        RuntimeClass_Windows_Foundation_PropertyValue,
+        static_cast<UINT32>(wcslen(RuntimeClass_Windows_Foundation_PropertyValue)),
+        &rTimeClass
+    );
+    if (errCode != ERROR_SUCCESS) { goto cleanup; }
+    errCode = GetActivationFactory(rTimeClass, &propValueFactory);
+    if (errCode != ERROR_SUCCESS) { goto cleanup; }
+
+    // Get the source IPropertyValue inner string
+    strProp->GetString(&strValue);
+
+    try {
+        // Get inner string raw buffer
+        UINT32 bufSize { 0 };
+        PCWSTR bufWSTR { WindowsGetStringRawBuffer(strValue, &bufSize) };
+
+        System::String^ timeDateStr = gcnew System::String(bufWSTR);
+        System::Globalization::CultureInfo^ culture = gcnew System::Globalization::CultureInfo { L"en-US" };
+
+        System::DateTime^ dateTime = System::DateTime::Parse(timeDateStr, culture, System::Globalization::DateTimeStyles::AssumeUniversal);
+        ABI::Windows::Foundation::DateTime abiDateTime;
+        abiDateTime.UniversalTime = dateTime->Ticks;
+
+        propValueFactory->CreateDateTime(abiDateTime, reinterpret_cast<IInspectable**>(&cPropValue));
+    } catch (System::Exception^) {
+        errCode = E_INVALIDARG;
+    }
+
+    if (errCode == ERROR_SUCCESS) {
+        rValue.Attach(cPropValue);
+    }
+
+cleanup:
+    if (rTimeClass != NULL) { WindowsDeleteString(rTimeClass); }
+    if (propValueFactory != NULL) { propValueFactory->Release(); }
+
+    return errCode;
+}
+
+const map<PropertyType, PropParserPtr>& propParsers() {
+    static const map<PropertyType, PropParserPtr> propParsers {
+        { PropertyType::PropertyType_TimeSpan, &convertToTimeSpan },
+        { PropertyType::PropertyType_DateTime, &convertToDate }
+    };
+
+    return propParsers;
+}
 
 HRESULT createPropertyValue(const VARIANT& value, ATL::CComPtr<IPropertyValue>& rValue) {
     HRESULT res = { ERROR_SUCCESS };
@@ -42,50 +165,14 @@ HRESULT createPropertyValue(const VARIANT& value, ATL::CComPtr<IPropertyValue>& 
         res = propValueFactory->CreateBoolean(static_cast<boolean>(value.boolVal), reinterpret_cast<IInspectable**>(&cPropValue));
     } else if (value.vt == VARENUM::VT_BSTR) {
         BSTR bStrValue = value.bstrVal;
-        BOOL processed = false;
 
-        try {
-            System::String^ timeSpanStr = gcnew System::String(bStrValue);
-            System::Globalization::CultureInfo^ culture = gcnew System::Globalization::CultureInfo { L"en-US" };
-            System::TimeSpan^ timeSpan = System::TimeSpan::Parse(timeSpanStr, culture);
+        HSTRING newHValue = NULL;
+        res = WindowsCreateString(bStrValue, static_cast<UINT32>(wcslen(bStrValue)), &newHValue);
 
-            // Get a representation that can be stored in a IPropertyValue
-            UINT64 duration = timeSpan->Ticks;
-            ABI::Windows::Foundation::TimeSpan abiTimeSpan;
-            abiTimeSpan.Duration = duration;
-
-            propValueFactory->CreateTimeSpan(abiTimeSpan, reinterpret_cast<IInspectable**>(&cPropValue));
-
-            // Set the processed flag
-            processed = true;
-        } catch (System::Exception^) {}
-
-        if (!processed) {
-            try {
-                // If it's not a TimeSpan, check if it's a Date
-                System::String^ timeDateStr = gcnew System::String(bStrValue);
-                System::Globalization::CultureInfo^ culture = gcnew System::Globalization::CultureInfo { L"en-US" };
-
-                System::DateTime^ dateTime = System::DateTime::Parse(timeDateStr, culture, System::Globalization::DateTimeStyles::AssumeUniversal);
-                ABI::Windows::Foundation::DateTime abiDateTime;
-                abiDateTime.UniversalTime = dateTime->Ticks;
-
-                propValueFactory->CreateDateTime(abiDateTime, reinterpret_cast<IInspectable**>(&cPropValue));
-                // Set the processed flag
-                processed = true;
-            } catch (System::Exception^) {}
+        if (res == ERROR_SUCCESS) {
+            res = propValueFactory->CreateString(newHValue, reinterpret_cast<IInspectable**>(&cPropValue));
         }
-
-        if (!processed) {
-            HSTRING newHValue = NULL;
-            res = WindowsCreateString(bStrValue, static_cast<UINT32>(wcslen(bStrValue)), &newHValue);
-
-            if (res == ERROR_SUCCESS) {
-                res = propValueFactory->CreateString(newHValue, reinterpret_cast<IInspectable**>(&cPropValue));
-            }
-            WindowsDeleteString(newHValue);
-        }
-
+        WindowsDeleteString(newHValue);
     } else if (value.vt == VARENUM::VT_UINT) {
         res = propValueFactory->CreateUInt32(value.uintVal, reinterpret_cast<IInspectable**>(&cPropValue));
     } else if (value.vt == VARENUM::VT_R8) {

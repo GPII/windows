@@ -16,9 +16,16 @@
 #include <windows.foundation.h>
 
 #include <string>
+#include <map>
 
 using namespace ABI::Windows::Foundation;
 using std::wstring;
+using std::map;
+
+using PropParser = HRESULT(const ATL::CComPtr<IPropertyValue>&, ATL::CComPtr<IPropertyValue>&);
+using PropParserPtr = PropParser*;
+
+const map<PropertyType, PropParserPtr>& propParsers();
 
 /// <summary>
 ///  Create an IPropertyValue from a VARIANT.
@@ -55,9 +62,24 @@ HRESULT createValueVariant(const wstring& value, PropertyType type, VARIANT& rVa
 /// <param name="fstProp">The first IPropertyValue to be compared.</param>
 /// <param name="sndProp">The second IPropertyValue to be compared.</param>
 /// <param name="rResult">A reference to a bool containing the result of the operation.</param>
+/// <returns>
 ///  ERROR_SUCCESS in case of success or one of the following error codes:
 ///     - E_INVALIDARG if one of the IPropertyValues isn't properly initialized
 ///       its contents can't be retrieved.
 ///     - E_NOTIMPL if the comparison if requested for non-supported IPropertyValue contents.
 /// </returns>
 HRESULT equals(ATL::CComPtr<IPropertyValue> fstProp, ATL::CComPtr<IPropertyValue> sndProp, BOOL& result);
+/// <summary>
+///  Converts a IPropertyValue containing a String into a one containing a TimeSpan.
+/// </summary>
+/// <param name="strProp">The IPropertyValue to be converted into a TimeSpan.</param>
+/// <param name="rValue">A reference to be filled with the created TimeSpan IPropertyValue.</param>
+/// <returns> ERROR_SUCCESS in case of success or E_INVALIDARG in case of failure. </returns>
+HRESULT convertToTimeSpan(const CComPtr<IPropertyValue>& strProp, ATL::CComPtr<IPropertyValue>& rValue);
+/// <summary>
+///  Converts a IPropertyValue containing a String into a one containing a DateTime.
+/// </summary>
+/// <param name="strProp">The IPropertyValue to be converted into a DateTime.</param>
+/// <param name="rValue">A reference to be filled with the created DateTime IPropertyValue.</param>
+/// <returns> ERROR_SUCCESS in case of success or E_INVALIDARG in case of failure. </returns>
+HRESULT convertToDate(const CComPtr<IPropertyValue>& strProp, ATL::CComPtr<IPropertyValue>& rValue);

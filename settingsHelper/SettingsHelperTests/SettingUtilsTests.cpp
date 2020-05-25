@@ -125,22 +125,27 @@ TEST(CreatePropertyValue, CreateTimeSpanFromString) {
 
     std::wstring settingDLL { L"11:00:01" };
     VARIANT propVarValue {};
-    ATL::CComPtr<IPropertyValue> iPropValue = NULL;
-    PropertyType iPropValueType = PropertyType::PropertyType_Empty;
+    ATL::CComPtr<IPropertyValue> sPropValue { NULL };
+    PropertyType sPropValueType { PropertyType::PropertyType_Empty };
+    ATL::CComPtr<IPropertyValue> iPropValue { NULL };
 
     // Create the proper VARIANT
     propVarValue.vt = VARENUM::VT_BSTR;
     propVarValue.bstrVal = const_cast<BSTR>(settingDLL.c_str());
 
     // Create the corresponding IPropertyValue from the VARIANT contents
-    res = createPropertyValue(propVarValue, iPropValue);
+    res = createPropertyValue(propVarValue, sPropValue);
+    EXPECT_EQ(res, ERROR_SUCCESS);
+
+    // Convert the String IPropertyValue to TimeSpan
+    res = convertToTimeSpan(sPropValue, iPropValue);
     EXPECT_EQ(res, ERROR_SUCCESS);
 
     // Check the returned PropertyType
-    HSTRING iPropTimeSpan = NULL;
-    res = iPropValue->get_Type(&iPropValueType);
+    PropertyType iPropTimeSpan { PropertyType::PropertyType_Empty };
+    res = iPropValue->get_Type(&iPropTimeSpan);
     EXPECT_EQ(res, ERROR_SUCCESS);
-    EXPECT_EQ(iPropValueType, PropertyType::PropertyType_TimeSpan);
+    EXPECT_EQ(iPropTimeSpan, PropertyType::PropertyType_TimeSpan);
 
     TimeSpan abiRetTypeSpan { 0 };
     res = iPropValue->GetTimeSpan(&abiRetTypeSpan);
@@ -162,22 +167,27 @@ TEST(CreatePropertyValue, CreateDateFromString) {
 
     std::wstring settingDLL { L"5/1/2008 6:00:00 AM +00:00" };
     VARIANT propVarValue {};
-    ATL::CComPtr<IPropertyValue> iPropValue = NULL;
-    PropertyType iPropValueType = PropertyType::PropertyType_Empty;
+    ATL::CComPtr<IPropertyValue> sPropValue { NULL };
+    ATL::CComPtr<IPropertyValue> iPropValue { NULL };
+    PropertyType sPropValueType { PropertyType::PropertyType_Empty };
 
     // Create the proper VARIANT
     propVarValue.vt = VARENUM::VT_BSTR;
     propVarValue.bstrVal = const_cast<BSTR>(settingDLL.c_str());
 
     // Create the corresponding IPropertyValue from the VARIANT contents
-    res = createPropertyValue(propVarValue, iPropValue);
+    res = createPropertyValue(propVarValue, sPropValue);
+    EXPECT_EQ(res, ERROR_SUCCESS);
+
+    // Convert the String IPropertyValue to TimeSpan
+    res = convertToDate(sPropValue, iPropValue);
     EXPECT_EQ(res, ERROR_SUCCESS);
 
     // Check the returned PropertyType
-    HSTRING iPropTimeSpan = NULL;
-    res = iPropValue->get_Type(&iPropValueType);
+    PropertyType iPropDateTime { PropertyType::PropertyType_Empty };
+    res = iPropValue->get_Type(&iPropDateTime);
     EXPECT_EQ(res, ERROR_SUCCESS);
-    EXPECT_EQ(iPropValueType, PropertyType::PropertyType_DateTime);
+    EXPECT_EQ(iPropDateTime, PropertyType::PropertyType_DateTime);
 
     DateTime abiRetTypeSpan { 0 };
     res = iPropValue->GetDateTime(&abiRetTypeSpan);
