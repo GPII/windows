@@ -548,7 +548,6 @@ jqUnit.test("expandEnvironmentStrings tests", function () {
     var result = windows.expandEnvironmentStrings(input);
     // the value should be expanded
     jqUnit.assertEquals("expandEnvironmentStrings should return expected result", "startVALUEend", result);
-    delete process.env._env_test1;
 
     // Test an unset value
     var input2 = "start%_env_unset%end";
@@ -565,9 +564,50 @@ jqUnit.test("expandEnvironmentStrings tests", function () {
     jqUnit.assertEquals("expandEnvironmentStrings (long value) should return the expected result",
         "start" + process.env._env_test2 + "end", result3);
 
-    // Call with empty string or null should return an empty string.
-    ["", null].forEach(function (input) {
-        var result = windows.expandEnvironmentStrings(input);
-        jqUnit.assertEquals("expandEnvironmentStrings (empty/null) should return empty string", "", result);
-    });
+
+    // Call with an object (also tests passing other value types)
+    var input4 = {
+        set: "start%_env_test1%end",
+        unset: "start%_env_unset%end",
+        plain: "nothing to expand",
+        number: 123,
+        bool: true,
+        nul: null,
+        undef: undefined,
+        array: [ "A1 start%_env_test1%end", "start%_env_unset%end", "", 5, [], [ "A2 start%_env_test1%end", 6 ] ],
+        empty: {},
+        regex: /a.*/g,
+        deep: {
+            set: "1 start%_env_test1%end",
+            unset: "1 start%_env_unset%end",
+            plain: "1 nothing to expand",
+            deeper: {
+                set: "2 start%_env_test1%end"
+            }
+        }
+    };
+    var expect4 = {
+        set: "startVALUEend",
+        unset: "start%_env_unset%end",
+        plain: "nothing to expand",
+        number: 123,
+        bool: true,
+        nul: null,
+        undef: undefined,
+        array: [ "A1 startVALUEend", "start%_env_unset%end", "", 5, [], [ "A2 startVALUEend", 6 ] ],
+        empty: {},
+        regex: /a.*/g,
+        deep: {
+            set: "1 startVALUEend",
+            unset: "1 start%_env_unset%end",
+            plain: "1 nothing to expand",
+            deeper: {
+                set: "2 startVALUEend"
+            }
+        }
+    };
+    var result4 = windows.expandEnvironmentStrings(input4);
+    jqUnit.assertDeepEq("expandEnvironmentStrings (object) should return the expected object", expect4, result4);
+
+    delete process.env._env_test1;
 });

@@ -60,6 +60,31 @@ service.logWarn = logging.warn;
 service.logDebug = logging.debug;
 
 /**
+ * @typedef {Object} Config
+ * @property {Object<String,ProcessConfig>} processes Child process.
+ * @property {Object} logging Logging settings
+ * @property {String} secretFile The file containing site-specific information.
+ * @property {String} package.json The package.json file for gpii-app.
+ * @property {String} siteConfigFile The site-config file.
+ * @property {AutoUpdateConfig} autoUpdate Auto update settings.
+ * @property {String} morphicVersion [generated] The version field from gpii-app's package.json.
+ */
+
+/**
+ * @type Config
+ */
+service.config = {
+    processes: {},
+    logging: {
+        level: "DEBUG"
+    },
+    autoUpdate: {
+        lastUpdatesFile: path.join(process.env.ProgramData, "Morphic/last-updates.json5")
+    },
+    "package.json": "resources/app/package.json"
+};
+
+/**
  * Loads the config file, which may be found in the first of the following locations:
  * - The file parameter.
  * - "--config" command line option.
@@ -68,6 +93,7 @@ service.logDebug = logging.debug;
  *
  * @param {String} dir The directory form which relative paths are used.
  * @param {String} file [optional] The config file.
+ * @return {Config} The loaded configuration.
  */
 service.loadConfig = function (dir, file) {
     // Load the config file.
@@ -84,6 +110,9 @@ service.loadConfig = function (dir, file) {
             if (service.isService) {
                 // Use the built-in config file.
                 configFile = path.join(__dirname, "../config/service.json5");
+            } else if (fluid) {
+                // fluid is only defined during testing
+                configFile = "config/service.testing.json5";
             } else {
                 configFile = "config/service.dev.json5";
             }
@@ -94,13 +123,54 @@ service.loadConfig = function (dir, file) {
     }
 
     service.log("Loading config file", configFile);
-    service.config = JSON5.parse(fs.readFileSync(configFile));
+    var config = JSON5.parse(fs.readFileSync(configFile));
+    // Expand all environment %variables% within the config.
+    config = windows.expandEnvironmentStrings(config);
 
     // Change to the configured log level (if it's not passed via command line)
-    if (!service.args.loglevel && service.config.logging && service.config.logging.level) {
-        logging.setLogLevel(service.config.logging.level);
+    if (!service.args.loglevel && config.logging && config.logging.level) {
+        logging.setLogLevel(config.logging.level);
     }
+
+    // Get the gpii-app version
+    var packageJson = service.loadJSON(config["package.json"], "package.json file");
+    config.morphicVersion = packageJson && packageJson.version;
+
+    return config;
 };
+
+/**
+ * Loads a JSON/JSON5 file, parsing the content.
+ *
+ * @param {String} file Path to the file.
+ * @param {String} description A descriptive name of the file, for logging.
+ * @return {Object|null} The de-serialised file, or null on error.
+ */
+service.loadJSON = function (file, description) {
+    var obj = null;
+
+    try {
+        file = file && path.resolve(file);
+        if (file) {
+            service.log("Reading", description, file);
+            obj = JSON5.parse(fs.readFileSync(file));
+        } else {
+            service.logError("The path for", description, "is not configured");
+        }
+    } catch (e) {
+        service.logWarn("Unable to read", description, file, e);
+    }
+
+    return obj ? obj : null;
+};
+
+/**
+ * The site-specific secrets file.
+ * @typedef {Object} SecretFile
+ * @property {String} site Site identifier ("domain").
+ * @property {Object} clientCredentials Client credentials (private).
+ * @property {String} signKey Signing key (private).
+ */
 
 /**
  * Gets the secrets, which is the data stored in the secrets file.
@@ -108,25 +178,30 @@ service.loadConfig = function (dir, file) {
  * The secret is installed in a separate installer, which could occur after Morphic was installed. Also, the secret
  * may be later updated. Because of this, the secret is read each time it is used.
  *
- * @return {Object} The secret, or null if the secret could not be read. This shouldn't be logged.
+ * @return {SecretFile} The secret, or null if the secret could not be read. This shouldn't be logged.
  */
 service.getSecrets = function () {
-    var secret = null;
+    return service.loadJSON(service.config.secretFile, "secrets file");
+};
 
-    try {
-        var file = service.config.secretFile
-            && path.resolve(windows.expandEnvironmentStrings(service.config.secretFile));
-        if (file) {
-            service.log("Reading secrets from " + file);
-            secret = JSON5.parse(fs.readFileSync(file));
-        } else {
-            service.logError("The secrets file is not configured");
-        }
-    } catch (e) {
-        service.logWarn("Unable to read the secrets file " + service.config.secretFile, e);
-    }
+/**
+ * Loads the site-config file, from `service.config.siteConfigFile`.
+ *
+ * siteConfigFile can be an array, where the first successful loaded file is returned.
+ *
+ * @return {Object} The de-serialised site-config file.
+ */
+service.getSiteConfig = function () {
+    var files = Array.isArray(service.config.siteConfigFile)
+        ? service.config.siteConfigFile
+        : [service.config.siteConfigFile];
+    var result = null;
 
-    return secret ? secret : null;
+    files.some(function (file) {
+        result = service.loadJSON(file, "site-config file");
+        return result;
+    });
+    return result;
 };
 
 /**
@@ -211,6 +286,20 @@ service.controlHandler = function (controlName, eventType) {
     service.emit("service." + controlName, eventType);
 };
 
+/**
+ * Returns a promise that resolves when the service is ready to start the child processes. That is, when all promises
+ * in `service.readyPromises` have resolved.
+ * @return {Promise} Resolves when the service is ready to start the child processes.
+ */
+service.isReady = function () {
+    return Promise.all(service.readyPromises);
+};
+
+service.readyWhen = function (promise) {
+    service.readyPromises.push(promise);
+};
+
+service.readyPromises = [];
 
 // Change directory to a sane location, allowing relative paths in the config file.
 var dir = null;
@@ -225,7 +314,6 @@ if (service.isExe) {
 process.chdir(dir);
 
 // Load the configuration
-service.loadConfig(dir);
-
+service.config = Object.assign(service.config, service.loadConfig(dir));
 
 module.exports = service;

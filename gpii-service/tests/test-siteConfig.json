@@ -1,0 +1,4 @@
+{
+    "this-is": "a test site config file",
+    "someValue": "value-from-site-config"
+}
