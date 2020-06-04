@@ -71,8 +71,32 @@ logging.doLog = function (level, args) {
         var timestamp = new Date().toISOString();
         args.unshift(timestamp, level.name);
         if (logging.logFile) {
-            var text = args.join(" ") + "\n";
-            fs.appendFileSync(logging.logFile, text);
+            // Serialise any objects in the arguments.
+            var text = args.map(function (arg) {
+                var argOut;
+                var type = typeof(arg);
+                var isPrimitive = !arg || type === "string" || type === "number" || type === "boolean";
+                if (isPrimitive) {
+                    argOut = arg;
+                } else {
+                    var obj;
+                    argOut = JSON.stringify(obj || arg, function (key, value) {
+                        if (value instanceof Error) {
+                            // Error doesn't serialise - make it a normal object.
+                            obj = {};
+                            Object.getOwnPropertyNames(value).forEach(function (a) {
+                                obj[a] = value[a];
+                            });
+                            return obj;
+                        } else {
+                            return value;
+                        }
+                    });
+                }
+                return argOut;
+            }).join(" ");
+
+            fs.appendFileSync(logging.logFile, text + "\n");
         } else {
             console.log.apply(console, args);
         }
@@ -164,5 +188,4 @@ logging.logLevel = logging.defaultLevel;
 /** @name logging.debug
  *  @function
  */
-
 module.exports = logging;

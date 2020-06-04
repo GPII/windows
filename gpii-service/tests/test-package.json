@@ -1,0 +1,5 @@
+{
+    "name": "test-package.json",
+    "version": "testing-1.2.3",
+    "description": "Only a test file"
+}
