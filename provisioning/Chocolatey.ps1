@@ -30,4 +30,7 @@ Invoke-Command $chocolatey "install python2 -y"
 Add-Path $python2Path $true
 refreshenv
 
+Invoke-Command $chocolatey "install nuget.commandline"
+refreshenv
+
 exit 0
