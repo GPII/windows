@@ -203,7 +203,7 @@ jqUnit.asyncTest("Test request handlers", function () {
     var tests = gpiiClientTests.requestTests;
     jqUnit.expect(tests.length * 3);
 
-    service.loadConfig();
+    service.config = service.loadConfig();
 
     var testIndex = -1;
     var nextTest = function () {
