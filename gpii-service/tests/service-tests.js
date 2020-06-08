@@ -20,8 +20,7 @@
 var jqUnit = require("node-jqunit"),
     os = require("os"),
     path = require("path"),
-    fs = require("fs"),
-    service = require("../src/service.js");
+    fs = require("fs");
 
 var teardowns = [];
 
@@ -34,8 +33,14 @@ jqUnit.module("GPII service tests", {
 });
 
 jqUnit.test("Test config loader", function () {
+    var service = require("../src/service.js");
     // service.js should already have called service.config.
     jqUnit.assertNotNull("service.config is called on startup", service.config);
+
+    // Check the package.json was read from
+    var packageJson = require("./test-package.json");
+    jqUnit.assertEquals("Version from package.json should be in the config",
+        packageJson.version, service.config.morphicVersion);
 
     // Create a temporary config file.
     var testDir = path.join(os.tmpdir(), "gpii-service-test" + Math.random());
@@ -53,31 +58,30 @@ jqUnit.test("Test config loader", function () {
     fs.writeFileSync(testFile, "{testLoaded: true}");
 
 
-    var origConfig = service.config;
     // Check a config file will be loaded if the process is running as a service
     try {
-        service.config = null;
         service.isService = true;
-        service.loadConfig(testDir);
+        var config = service.loadConfig(testDir);
         jqUnit.assertTrue("config should be loaded when running as a service",
-            service.config && service.config.testLoaded);
+            config && config.testLoaded);
     } finally {
-        service.isService = false;
-        service.config = origConfig;
+        // Ensure the next user of service.js gets a clean one
+        delete require.cache[require.resolve("../src/service.js")];
     }
 });
 
 jqUnit.test("Test secret loading", function () {
-    var secret = service.getSecrets();
-    jqUnit.assertTrue("Secret should have been loaded", !!secret);
-
-    var origFile = service.config.secretFile;
     try {
+        var service = require("../src/service.js");
+        var secret = service.getSecrets();
+        jqUnit.assertTrue("Secret should have been loaded", !!secret);
+
         // Try a secret file that does not exist
         service.config.secretFile = "does/not/exist";
         var secret2 = service.getSecrets();
         jqUnit.assertNull("No secret should have been loaded", secret2);
     } finally {
-        service.config.secretFile = origFile;
+        // Ensure the next user of service.js gets a clean one
+        delete require.cache[require.resolve("../src/service.js")];
     }
 });
