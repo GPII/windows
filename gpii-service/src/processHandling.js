@@ -34,6 +34,7 @@ module.exports = processHandling;
  * @property {String} ipc IPC channel name (optional).
  * @property {Object} env Environment variables to set (optional).
  * @property {String} currentDir The current dir (optional).
+ * @property {Boolean} disabled true to not start the process.
  */
 
 /**
@@ -63,7 +64,7 @@ processHandling.sessionChange = function (eventType) {
     switch (eventType) {
     case "session-logon":
         // User just logged on - start the processes.
-        processHandling.startChildProcesses();
+        service.isReady().then(processHandling.startChildProcesses);
         break;
     case "session-logoff":
         // User just logged off - stop the processes (windows should have done this already).
@@ -73,19 +74,58 @@ processHandling.sessionChange = function (eventType) {
 };
 
 /**
+ * Gets the list of child processes to start.
+ * @param {Object<String,ProcessConfig>} allProcesses [optional] Map of processes (default:`service.config.processes`)
+ * @return {Array<ProcessConfig>} Array of processes to start.
+ */
+processHandling.getProcessList = function (allProcesses) {
+    if (!allProcesses) {
+        allProcesses = service.config.processes;
+    }
+
+    var processesKeys = Object.keys(allProcesses);
+    var processes = [];
+
+    processesKeys.forEach(function (key) {
+        if (allProcesses[key].disabled) {
+            service.logWarn("startChildProcess not starting", key, "(disabled via config)");
+        } else {
+            var proc = Object.assign({
+                key: key
+            }, allProcesses[key]);
+
+            proc.env = Object.assign({}, allProcesses[key].env);
+            service.emit("process.starting", key, proc);
+
+            if (proc.disabled) {
+                service.logWarn("startChildProcess not starting", key, ": ", proc.disabled);
+            } else {
+                processes.push(proc);
+            }
+        }
+    });
+
+    return processes;
+};
+
+/**
  * Starts the configured processes.
  */
 processHandling.startChildProcesses = function () {
-    var processes = Object.keys(service.config.processes);
+
+    var processes = processHandling.getProcessList();
+
+    if (processes.length === 0) {
+        service.logWarn("No processes have been configured to start.");
+    }
+
     // Start each child process sequentially.
     var startNext = function () {
-        var key = processes.shift();
-        if (key && !service.config.processes[key].disabled) {
-            var proc = Object.assign({key: key}, service.config.processes[key]);
-            processHandling.startChildProcess(proc).then(startNext, function (err) {
-                service.logError("startChildProcess failed for " + key, err);
-                startNext();
-            });
+        var proc = processes.shift();
+        if (proc) {
+            processHandling.startChildProcess(proc)["catch"](function (err) {
+                service.logError("startChildProcess failed for " + proc, err);
+            }).then(startNext);
         }
     };
     startNext();
