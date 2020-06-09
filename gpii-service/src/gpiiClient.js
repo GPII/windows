@@ -19,9 +19,12 @@
 
 var child_process = require("child_process"),
     crypto = require("crypto"),
+    fs = require("fs"),
+    path = require("path"),
     service = require("./service.js"),
     ipc = require("./gpii-ipc.js"),
-    processHandling = require("./processHandling.js");
+    processHandling = require("./processHandling.js"),
+    windows = require("./windows.js");
 
 var gpiiClient = {};
 module.exports = gpiiClient;
@@ -128,27 +131,29 @@ gpiiClient.requestHandlers.getClientCredentials = function () {
  *
  * @param {Object} request The signing request
  * @param {String|Buffer} request.payload The thing to sign.
- * @param {String} request.keyName Field name in the secrets file whose value is used as a key.
+ * @param {String} request.siteSpecific [optional] Field name in the secrets file which is specific to the site (the
+ * site id). This will be appended to the payload.
  * @return {String} The HMAC digest of payload, as a hex string.
  */
 gpiiClient.requestHandlers.sign = function (request) {
     var result = null;
 
     var secrets = service.getSecrets();
-    var key = secrets && secrets[request.keyName];
+    if (secrets) {
+        var siteId = request.siteSpecific && secrets[request.siteSpecific];
 
-    if (key) {
-        var hmac = crypto.createHmac("sha256", key);
+        var key = secrets.signKey || secrets.clientCredentials.client_secret;
 
-        var payloads = Array.isArray(request.payload) ? request.payload : [request.payload];
-        payloads.forEach(function (item) {
-            hmac.update(item);
-        });
+        if (key) {
+            var hmac = crypto.createHmac("sha256", key);
 
-        result = hmac.digest("hex");
-    } else {
-        service.logError("Attempted to sign with a key named "
-            + request.keyName + ", but no such value exists in the secrets file");
+            var payload = siteId ? (request.payload + "@" + siteId) : request.payload;
+            hmac.update(payload);
+
+            result = hmac.digest("hex");
+        } else {
+            service.logError("Unable to find a suitable key in the secrets file");
+        }
     }
 
     return result;
@@ -172,6 +177,98 @@ gpiiClient.addRequestHandler = function (requestType, callback) {
  * @type {IpcConnection}
  */
 gpiiClient.ipcConnection = null;
+
+/**
+ * Called when the GPII client process is about to start.
+ *
+ * Determines if the process should be started (based on the metrics switch), and sets some environment variables.
+ *
+ * @param {ProcessConfig} processConfig The process config. Will be modified.
+ */
+gpiiClient.clientStarting = function (processConfig) {
+    var metrics = gpiiClient.getMetricsConfig();
+    if (metrics) {
+        // Get the NODE_ENV value ("the metrics switch")
+        if (metrics.value === "off:off") {
+            processConfig.disabled = "disabled via metrics switch";
+        } else if (metrics.config) {
+            processConfig.env[metrics.envName] = metrics.config;
+        }
+
+        if (windows.isService()) {
+            gpiiClient.toggleDesktopIcons(metrics.value.startsWith("on:"));
+        }
+    }
+};
+
+/**
+ * Gets the config for the GPII process (the metrics switch).
+ * @return {Object} Object containing the metricsSwitch (`value`), the config to use (`config`), and the name of the
+ * environment variable to set (`envName`)
+ */
+gpiiClient.getMetricsConfig = function () {
+    var togo;
+
+    if (service.config.gpiiConfig) {
+        var siteConfig = service.getSiteConfig();
+        if (siteConfig && siteConfig.metricsSwitch) {
+            togo = {
+                value: siteConfig.metricsSwitch.toLowerCase(),
+                envName: service.config.gpiiConfig.env || "NODE_ENV"
+            };
+            togo.config = service.config.gpiiConfig[togo.value];
+        }
+    }
+
+    return togo;
+};
+
+/**
+ * Hide or show the morphic desktop icon, depending on the value of the metrics switch.
+ * When hiding, they're moved from C:\Users\Public\Desktop to C:\ProgramData\Morphic\Icons. Showing will move them back.
+ * This needs to be performed by the service, because they're owned by administrator.
+ *
+ * @param {Boolean} showIcons true to show the icons on the desktop. false to remove them.
+ */
+gpiiClient.toggleDesktopIcons = function (showIcons) {
+
+    var iconFiles = [ "Morphic QuickStrip.lnk", "Reset to Standard.lnk" ];
+
+    var desktopPath = path.join(process.env.PUBLIC || "C:\\Users\\Public", "Desktop");
+    var stashPath = path.join(process.env.PROGRAMDATA || "C:\\ProgramData", "Morphic");
+
+
+    iconFiles.forEach(function (file) {
+
+        var desktop = path.join(desktopPath, file);
+        var stashed = path.join(stashPath, file);
+
+        service.logDebug("Setting desktop icon: ", desktop, stashed, showIcons ? "show" : "hide");
+
+        try {
+            // Ensure there's a copy in the stash location
+            if (!fs.existsSync(stashed)) {
+                fs.copyFileSync(desktop, stashed);
+            }
+
+            var iconExists = fs.existsSync(desktop);
+            if (showIcons) {
+                if (!iconExists) {
+                    // Copy it back from the stash
+                    fs.copyFileSync(stashed, desktop);
+                }
+            } else {
+                // Remove the desktop icon
+                if (iconExists) {
+                    fs.unlinkSync(desktop);
+                }
+            }
+
+        } catch (e) {
+            service.logError("Error setting desktop icon", e.message, e);
+        }
+    });
+};
 
 /**
  * Called when the GPII user process has connected to the service.
@@ -270,6 +367,12 @@ gpiiClient.shutdown = function () {
 
 service.on("ipc.connected:gpii", gpiiClient.connected);
 service.on("ipc.closed:gpii", gpiiClient.closed);
+
+service.on("process.starting", function (processKey, procConfig) {
+    if (procConfig.ipc === "gpii") {
+        gpiiClient.clientStarting(procConfig);
+    }
+});
 
 service.on("stopping", function (promises) {
     promises.push(gpiiClient.shutdown());
