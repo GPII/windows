@@ -24,7 +24,7 @@ Invoke-Command $msbuild "SettingsHelper.sln /p:Configuration=Release /p:Platform
 
 # Build the volumeControl solution
 $volumeControlDir = Join-Path $rootDir "gpii\node_modules\nativeSettingsHandler\nativeSolutions\VolumeControl"
-Invoke-Command $msbuild "VolumeControl.sln /p:Configuration=Release /p:Platform=`"x86`" /p:FrameworkPathOverride=`"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1`"" $volumeControlDir
+Invoke-Command $msbuild "VolumeControl.sln /p:Configuration=Release /p:Platform=`"x86`"" $volumeControlDir
 
 # Build the process test helper
 $testProcessHandlingDir = Join-Path $rootDir "gpii\node_modules\processHandling\test"
