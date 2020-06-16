@@ -21,9 +21,9 @@
         "ffi-napi": "2.4.5",
         "gpii-universal": "0.3.0-dev.20200604T131823Z.d6fed9a",
         "@pokusew/pcsclite": "0.6.0",
-        "ref": "javihernandez/ref#64b0509c2340d2151e261e20decfd1a8502fabe2",
-        "ref-struct": "javihernandez/ref-struct#GPII-4140",
-        "ref-array": "javihernandez/ref-array#GPII-4140",
+        "ref-napi": "2.0.2",
+        "ref-struct-di": "1.1.0",
+        "ref-array-di": "1.2.1",
         "string-argv": "0.0.2",
         "rimraf": "2.6.2",
         "win-ca": "3.1.1"
