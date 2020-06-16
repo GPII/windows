@@ -1,0 +1,19 @@
+// Unit test configuration, opens a pipe and waits for GPII to connect.
+{
+    "processes": {
+        "gpii": {
+            "ipc": "gpii",
+            // Allow any process to connect.
+            "noAuth": true
+        }
+    },
+    "logging": {
+        "level": "DEBUG"
+    },
+    "secretFile": "test-secret.json5",
+    "package.json": "tests/test-package.json",
+    "siteConfigFile": "tests/test-siteConfig.json",
+    "autoUpdate": {
+        "enabled": false
+    }
+}

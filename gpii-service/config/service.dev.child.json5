@@ -10,5 +10,32 @@
     "logging": {
         "level": "DEBUG"
     },
-    "secretFile": "test-secret.json5"
+    "secretFile": "test-secret.json5",
+    "autoUpdate": {
+        "enabled": false,
+        "lastUpdatesFile": "%ProgramData%\\Morphic\\last-updates.json5",
+        "files": [{
+            // Auto-update the site config.
+            path: "%ProgramData%\\Morphic\\siteConfig.json5",
+            // Get the URL from the secrets file
+            url: "${siteConfigUrl}"
+        }],
+    },
+    "siteConfigFile": [
+        "%ProgramData%\\Morphic\\siteConfig.json5",
+        "%ProgramFiles(x86)%\\Morphic\\windows\\resources\\app\\siteConfig.json5",
+        "%ProgramFiles%\\Morphic\\windows\\resources\\app\\siteConfig.json5"
+    ],
+
+    "gpiiConfig": {
+        "env": "NODE_ENV_EXAMPLE", // set to "NODE_ENV" when starting gpii-app
+        // Morphic + metrics:
+        "on:on": "app.testing.metrics",
+        // No metrics or morphic:
+        "off:off": "app.disable",
+        // Metrics only:
+        "off:on": "app.metrics",
+        // No metrics:
+        "on:off": "app.testing"
+    }
 }
