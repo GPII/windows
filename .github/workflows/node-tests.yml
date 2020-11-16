@@ -31,4 +31,9 @@ jobs:
       - run: npm config set python python2.7
 
       - run: npm install
-      - run: node tests/UnitTests.js
+
+      - name: Pass linter
+        run: $(npm bin)/grunt lint
+
+      - name: Run node unit tests
+        run: node tests/UnitTests.js
