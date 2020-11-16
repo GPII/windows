@@ -33,7 +33,7 @@ jobs:
       - run: npm install
 
       - name: Pass linter
-        run: $(npm bin)/grunt lint
+        run: npx grunt lint
 
       - name: Run node unit tests
         run: node tests/UnitTests.js
