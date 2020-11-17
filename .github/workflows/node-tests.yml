@@ -15,6 +15,7 @@ jobs:
           node-mirror: "https://nodejs.org/download/release/"
 
       - uses: actions/checkout@v2
+      - run: ./provisioning/CouchDB.ps1
       - uses: actions/setup-python@v2
         with:
           python-version: '2.7.17'
@@ -37,3 +38,8 @@ jobs:
 
       - name: Run node unit tests
         run: node tests/UnitTests.js
+
+      - name: Run Acceptance builtIn tests
+        env:
+          GPII_TEST_COUCH_USE_EXTERNAL: 1
+        run: node tests/AcceptanceTests.js builtIn
