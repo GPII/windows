@@ -1,0 +1,45 @@
+name: gpii-windows node tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      VCTargetsPath: 'C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\v140'
+    steps:
+      - uses: javihernandez/setup-node-nvm@input-arch-field
+        with:
+          node-version: "10.11.0"
+          node-arch: "32"
+          node-mirror: "https://nodejs.org/download/release/"
+
+      - uses: actions/checkout@v2
+      - run: ./provisioning/CouchDB.ps1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '2.7.17'
+
+      - name: Install vcbuildtools
+        run: choco install vcbuildtools -ia '/InstallSelectableItems VisualCppBuildTools_ATLMFC_SDK;VisualCppBuildTools_NETFX_SDK' -y
+      - name: Install Windows 10 SDK
+        run: choco install windows-sdk-10-version-1809-all --version=10.0.17763.1 -y
+      - name: Install MS Build Tools
+        run: choco install microsoft-build-tools -y
+      - name: Install VisualCppBuildTools
+        run: choco install visualcppbuildtools -y
+      - run: npm config set msvs_version 2015 --global
+      - run: npm config set python python2.7
+
+      - run: npm install
+
+      - name: Pass linter
+        run: npx grunt lint
+
+      - name: Run node unit tests
+        run: node tests/UnitTests.js
+
+      - name: Run Acceptance builtIn tests
+        env:
+          GPII_TEST_COUCH_USE_EXTERNAL: 1
+        run: node tests/AcceptanceTests.js builtIn
